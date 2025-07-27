@@ -24,7 +24,8 @@ FinTrack is a smart personal finance management application powered by AI especi
 1.  Clone the repository:
 
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/Y4NN777/FinTrack.git
+    
     ```
 2.  Install dependencies:
 
