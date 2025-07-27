@@ -28,33 +28,50 @@ export function ThemeProvider({
   storageKey = 'fintrack-ui-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>('system');
+  // Start with default theme (same on server and client)
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  
+  // Track if we're on the client side yet
+  const [isClient, setIsClient] = useState(false);
 
+  // This runs ONLY on the client side, after hydration
   useEffect(() => {
-    const storedTheme = (localStorage.getItem(storageKey) as Theme) || defaultTheme;
-    setTheme(storedTheme);
-  }, [storageKey, defaultTheme]);
+    setIsClient(true); // Now we know we're on the client
+    
+    // Safe to access localStorage now
+    const storedTheme = localStorage.getItem(storageKey) as Theme;
+    if (storedTheme) {
+      setTheme(storedTheme);
+    }
+  }, [storageKey]);
 
+  // Apply the theme to the page
   useEffect(() => {
-    const root = window.document.documentElement;
-
+    if (!isClient) return; // Don't run on server
+    
+    const root = document.documentElement;
     root.classList.remove('light', 'dark');
 
-    let effectiveTheme = theme;
+    let actualTheme = theme;
     if (theme === 'system') {
-      effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
+      // Check user's system preference
+      actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches 
+        ? 'dark' 
         : 'light';
     }
 
-    root.classList.add(effectiveTheme);
-  }, [theme]);
+    root.classList.add(actualTheme);
+  }, [theme, isClient]);
 
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {
-      localStorage.setItem(storageKey, newTheme);
       setTheme(newTheme);
+      
+      // Only save to localStorage if we're on the client
+      if (isClient) {
+        localStorage.setItem(storageKey, newTheme);
+      }
     },
   };
 
@@ -67,7 +84,8 @@ export function ThemeProvider({
 
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
-  if (context === undefined)
+  if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
+  }
   return context;
 };
