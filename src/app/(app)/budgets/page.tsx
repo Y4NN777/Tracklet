@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -9,6 +12,8 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { PlusCircle, Target, PiggyBank } from 'lucide-react';
+import { BudgetForm } from '@/components/budget-form';
+import { GoalForm } from '@/components/goal-form';
 
 const budgets = [
   { name: 'Groceries', spent: 350, total: 500, remaining: 150 },
@@ -26,15 +31,91 @@ const goals = [
 ]
 
 export default function BudgetsPage() {
+  const [openBudget, setOpenBudget] = useState(false);
+  const [openGoal, setOpenGoal] = useState(false);
+
+  const handleAddBudget = (values: any) => {
+    // TODO: Implement actual budget adding logic
+    console.log('Budget values:', values);
+  };
+
+  const handleAddGoal = (values: any) => {
+    // TODO: Implement actual goal adding logic
+    console.log('Goal values:', values);
+  };
+
+  // Check if there are any budgets or goals
+  const hasBudgets = budgets.length > 0;
+  const hasGoals = goals.length > 0;
+  const hasData = hasBudgets || hasGoals;
+
+  if (!hasData) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+              <Target className="h-6 w-6" />
+              Monthly Budgets
+            </h2>
+            <Button onClick={() => setOpenBudget(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" /> New Budget
+            </Button>
+          </div>
+          <Card>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center h-[300px] space-y-4">
+                <Target className="h-12 w-12 text-muted-foreground" />
+                <h3 className="text-xl font-semibold">No budgets yet</h3>
+                <p className="text-muted-foreground text-center max-w-md">
+                  Start managing your finances by creating your first budget.
+                </p>
+                <Button onClick={() => setOpenBudget(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Create Budget
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+              <PiggyBank className="h-6 w-6" />
+              Financial Goals
+            </h2>
+            <Button onClick={() => setOpenGoal(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" /> New Goal
+            </Button>
+          </div>
+          <Card>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center h-[300px] space-y-4">
+                <PiggyBank className="h-12 w-12 text-muted-foreground" />
+                <h3 className="text-xl font-semibold">No financial goals yet</h3>
+                <p className="text-muted-foreground text-center max-w-md">
+                  Set your financial goals to stay motivated and track your progress.
+                </p>
+                <Button onClick={() => setOpenGoal(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Create Goal
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8">
+    <>
+      <div className="space-y-8">
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Target className="h-6 w-6" />
             Monthly Budgets
           </h2>
-          <Button>
+          <Button onClick={() => setOpenBudget(true)}>
             <PlusCircle className="mr-2 h-4 w-4" /> New Budget
           </Button>
         </div>
@@ -68,7 +149,7 @@ export default function BudgetsPage() {
             <PiggyBank className="h-6 w-6" />
             Financial Goals
           </h2>
-          <Button>
+          <Button onClick={() => setOpenGoal(true)}>
             <PlusCircle className="mr-2 h-4 w-4" /> New Goal
           </Button>
         </div>
@@ -96,7 +177,10 @@ export default function BudgetsPage() {
             );
           })}
         </div>
+        </div>
       </div>
-    </div>
+      <BudgetForm open={openBudget} setOpen={setOpenBudget} onSubmit={handleAddBudget} />
+      <GoalForm open={openGoal} setOpen={setOpenGoal} onSubmit={handleAddGoal} />
+    </>
   );
 }
