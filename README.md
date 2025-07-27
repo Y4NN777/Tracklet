@@ -2,6 +2,12 @@
 
 FinTrack is a smart personal finance management application powered by AI especially the Google Gemini SDK, designed to help users track their spending, set budgets, and achieve their financial goals.
 
+<div style="display: inline;">
+    <img width="500" height="761" alt="image" src="https://github.com/user-attachments/assets/323b2569-4221-4299-9848-bb3746549a0e" />
+    <img width="500" height="761" alt="image" src="https://github.com/user-attachments/assets/94e008cf-579e-4bc3-8cf5-14f597aff336" />
+</div>
+
+
 ## Features
 
 * **Dashboard Overview:** Get a quick overview of your financial health with key metrics like net worth, spending trends, and budget status.
