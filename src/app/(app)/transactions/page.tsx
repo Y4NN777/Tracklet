@@ -1,3 +1,8 @@
+'use client';
+
+import { useState } from 'react';
+import { TransactionForm } from '@/components/transaction-form';
+
 import {
   Card,
   CardContent,
@@ -40,15 +45,49 @@ const transactions = [
 ];
 
 export default function TransactionsPage() {
+  const [open, setOpen] = useState(false);
+
+  const handleAddTransaction = (values: any) => {
+    // TODO: Implement actual transaction adding logic
+    console.log('Transaction values:', values);
+  };
+
+  // Check if there are any transactions
+  const hasTransactions = transactions.length > 0;
+
+  if (!hasTransactions) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Transactions</CardTitle>
+          <CardDescription>View and manage all your transactions.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center h-[400px] space-y-4">
+            <h3 className="text-xl font-semibold">No transactions yet</h3>
+            <p className="text-muted-foreground text-center max-w-md">
+              Start tracking your finances by adding your first transaction.
+            </p>
+            <Button onClick={() => setOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Transaction
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card>
+    <>
+      <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Transactions</CardTitle>
             <CardDescription>View and manage all your transactions.</CardDescription>
           </div>
-          <Button>
+          <Button onClick={() => setOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Transaction
           </Button>
@@ -111,6 +150,9 @@ export default function TransactionsPage() {
           </TableBody>
         </Table>
       </CardContent>
-    </Card>
-  );
+      </Card>
+      <TransactionForm open={open} setOpen={setOpen} onSubmit={handleAddTransaction} />
+    </>
+    );
 }
+
