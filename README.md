@@ -1,13 +1,13 @@
-# FinTrack AI
+# FinTrack
 
-FinTrack AI is a smart personal finance management application powered by AI, designed to help users track their spending, set budgets, and achieve their financial goals.
+FinTrack is a smart personal finance management application powered by AI especially the Google Gemini SDK, designed to help users track their spending, set budgets, and achieve their financial goals.
 
 ## Features
 
 *   **Dashboard Overview:** Get a quick overview of your financial health with key metrics like net worth, spending trends, and budget status.
 *   **Transaction Tracking:** Easily track your income and expenses with automated categorization and tagging.
 *   **Budgeting & Goal Setting:** Set financial goals and track your progress with intuitive budgeting tools.
-*   **AI-Powered Insights:** Generate insights on your spending patterns, potential savings, and investment opportunities with AI-powered analysis.
+*   **AI-Powered Insights:** Generate insights on your spending patterns, potential savings,  with AI-powered analysis.
 *   **Authentication:** Securely create and manage your account with email/password or Google OAuth.
 *   **Profile Management:** Personalize your profile with a profile picture and manage your account information.
 
@@ -37,9 +37,6 @@ FinTrack AI is a smart personal finance management application powered by AI, de
     npm run dev
     ```
 
-## Contributing
-
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) before submitting a pull request.
 
 ## License
 
