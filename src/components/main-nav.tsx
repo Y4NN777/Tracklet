@@ -38,10 +38,11 @@ export function MainNav() {
             asChild
             isActive={pathname === item.href}
             tooltip={item.label}
+            className="md:py-2"
           >
             <Link href={item.href}>
-              <item.icon />
-              <span>{item.label}</span>
+              <item.icon className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="text-sm md:text-base">{item.label}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

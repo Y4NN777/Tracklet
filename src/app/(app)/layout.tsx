@@ -10,8 +10,7 @@ import {
 import { Logo } from '@/components/logo';
 import { MainNav } from '@/components/main-nav';
 import { UserNav } from '@/components/user-nav';
-import { Button } from '@/components/ui/button';
-import { Bell } from 'lucide-react';
+import { NotificationBell } from '@/components/notification-bell';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -28,17 +27,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-          <SidebarTrigger className="md:hidden" />
-          <div className="flex flex-1 items-center justify-end gap-4">
-             <Button variant="ghost" size="icon">
-                <Bell className="h-4 w-4" />
-                <span className="sr-only">Notifications</span>
-              </Button>
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-2 border-b bg-background/80 px-2 backdrop-blur-sm sm:px-4">
+          <SidebarTrigger className="-ml-1 md:hidden" />
+          <div className="flex flex-1 items-center justify-end gap-2 sm:gap-4">
+             <NotificationBell />
             <UserNav />
           </div>
         </header>
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
+        <main className="flex-1 p-2 sm:p-4">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

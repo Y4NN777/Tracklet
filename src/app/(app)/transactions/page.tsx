@@ -1,7 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { TransactionForm } from '@/components/transaction-form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 import {
   Card,
@@ -46,16 +53,71 @@ const transactions = [
 
 export default function TransactionsPage() {
   const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined,
+  });
 
   const handleAddTransaction = (values: any) => {
     // TODO: Implement actual transaction adding logic
     console.log('Transaction values:', values);
   };
 
-  // Check if there are any transactions
-  const hasTransactions = transactions.length > 0;
+  const exportToCSV = () => {
+    // Create CSV content
+    const headers = ['Date', 'Description', 'Category', 'Amount', 'Status'];
+    const csvContent = [
+      headers.join(','),
+      ...filteredTransactions.map(txn =>
+        `"${txn.date}","${txn.description}","${txn.category}",${txn.amount},"${txn.status}"`
+      )
+    ].join('\n');
+    
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'transactions.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
-  if (!hasTransactions) {
+  // Get unique categories for filter dropdown
+  const categories = useMemo(() => {
+    const uniqueCategories = [...new Set(transactions.map(txn => txn.category))];
+    return ['all', ...uniqueCategories];
+  }, []);
+
+  // Filter transactions based on search and filters
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(txn => {
+      // Search filter
+      const matchesSearch =
+        txn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        txn.category.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Category filter
+      const matchesCategory = categoryFilter === 'all' || txn.category === categoryFilter;
+      
+      // Date range filter
+      const txnDate = new Date(txn.date);
+      const matchesDateRange =
+        (!dateRange.from || txnDate >= dateRange.from) &&
+        (!dateRange.to || txnDate <= dateRange.to);
+      
+      return matchesSearch && matchesCategory && matchesDateRange;
+    });
+  }, [searchTerm, categoryFilter, dateRange]);
+
+  // Check if there are any transactions
+  const hasTransactions = filteredTransactions.length > 0;
+
+  if (transactions.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -82,77 +144,157 @@ export default function TransactionsPage() {
     <>
       <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <CardTitle>Transactions</CardTitle>
             <CardDescription>View and manage all your transactions.</CardDescription>
           </div>
-          <Button onClick={() => setOpen(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Transaction
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setOpen(true)} className="w-full sm:w-auto">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Transaction
+            </Button>
+            <Button variant="outline" onClick={exportToCSV} className="w-full sm:w-auto">
+              Export Data
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead>
-                <span className="sr-only">Actions</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {transactions.map((txn) => (
-              <TableRow key={txn.id}>
-                <TableCell>{new Date(txn.date).toLocaleDateString()}</TableCell>
-                <TableCell className="font-medium">{txn.description}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{txn.category}</Badge>
-                </TableCell>
-                <TableCell>
-                   <Badge variant={txn.status === "Completed" ? "default" : "secondary"} className={txn.status === "Completed" ? "bg-accent text-accent-foreground" : ""}>{txn.status}</Badge>
-                </TableCell>
-                <TableCell
-                  className={`text-right font-medium ${
-                    txn.amount > 0 ? 'text-success' : ''
-                  }`}
+        {/* Search and filter controls */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex-1">
+            <Input
+              placeholder="Search transactions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <div className="w-full sm:w-48">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category === 'all' ? 'All Categories' : category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-full sm:w-48">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dateRange.from && "text-muted-foreground"
+                  )}
                 >
-                  {txn.amount.toLocaleString('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                  })}
-                </TableCell>
-                <TableCell className="text-right">
-                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Categorize</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateRange.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "LLL dd, y")} -{" "}
+                        {format(dateRange.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(dateRange.from, "LLL dd, y")
+                    )
+                  ) : (
+                    <span>Date Range</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange.from}
+                  selected={{ from: dateRange.from, to: dateRange.to }}
+                  onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        
+        {/* Transactions table */}
+        {hasTransactions ? (
+          <div className="border rounded-md">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredTransactions.map((txn) => (
+                  <TableRow key={txn.id}>
+                    <TableCell>{new Date(txn.date).toLocaleDateString()}</TableCell>
+                    <TableCell className="font-medium">{txn.description}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{txn.category}</Badge>
+                    </TableCell>
+                    <TableCell>
+                       <Badge variant={txn.status === "Completed" ? "default" : "secondary"} className={txn.status === "Completed" ? "bg-accent text-accent-foreground" : ""}>{txn.status}</Badge>
+                    </TableCell>
+                    <TableCell
+                      className={`text-right font-medium ${
+                        txn.amount > 0 ? 'text-success' : ''
+                      }`}
+                    >
+                      {txn.amount.toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                      })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                       <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Categorize</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-[300px] space-y-4">
+            <h3 className="text-xl font-semibold">No transactions found</h3>
+            <p className="text-muted-foreground text-center max-w-md">
+              Try adjusting your search or filter criteria.
+            </p>
+          </div>
+        )}
       </CardContent>
       </Card>
       <TransactionForm open={open} setOpen={setOpen} onSubmit={handleAddTransaction} />
     </>
-    );
+  );
 }
 

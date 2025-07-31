@@ -96,8 +96,8 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           {/* Loading skeletons for summary cards */}
           {[...Array(4)].map((_, i) => (
             <Card key={i}>
@@ -167,45 +167,45 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="grid gap-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+    <div className="grid gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
+            <div className="text-xl sm:text-2xl font-bold">$45,231.89</div>
             <p className="text-xs text-muted-foreground">+20.1% from last month</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$5,750.00</div>
+            <div className="text-xl sm:text-2xl font-bold">$5,750.00</div>
             <p className="text-xs text-muted-foreground">This month's earnings</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
             <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$3,241.50</div>
+            <div className="text-xl sm:text-2xl font-bold">$3,241.50</div>
             <p className="text-xs text-muted-foreground">-5% from last month</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Savings</CardTitle>
             <PiggyBank className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$12,874.00</div>
+            <div className="text-xl sm:text-2xl font-bold">$12,874.00</div>
             <p className="text-xs text-muted-foreground">Your financial cushion</p>
           </CardContent>
         </Card>
@@ -291,3 +291,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

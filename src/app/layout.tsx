@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 import ErrorBoundary from '@/components/error-boundary';
+import { NotificationProvider } from '@/contexts/notification-context';
 
 export const metadata: Metadata = {
   title: 'FinTrack',
@@ -24,9 +25,11 @@ export default function RootLayout({
       </head>
       <body className={cn('font-body antialiased')}  suppressHydrationWarning={true}>
         <ThemeProvider>
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
+          <NotificationProvider>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+          </NotificationProvider>
           <Toaster />
         </ThemeProvider>
       </body>

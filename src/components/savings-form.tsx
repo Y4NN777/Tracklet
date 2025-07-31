@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useFieldArray, useForm, Controller } from 'react-hook-form';
-import { getSavingsOpportunitiesAction } from '@/lib/actions/savings';
+import { getSavingsOpportunitiesAction, type SavingsState } from '@/lib/actions/savings';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -45,7 +45,7 @@ function SubmitButton() {
   );
 }
 
-const initialState = {
+const initialState: SavingsState = {
   form: {
     income: 5000,
     savings: 10000,
@@ -57,6 +57,8 @@ const initialState = {
       { category: "Car Payment", amount: 300 },
     ],
   },
+  error: undefined,
+  result: undefined,
 };
 
 export function SavingsForm() {
@@ -86,7 +88,7 @@ export function SavingsForm() {
 
   return (
     <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-      <Card>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>AI Savings Advisor</CardTitle>
           <CardDescription>

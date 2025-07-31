@@ -15,10 +15,10 @@ import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
         <h3 className="text-lg font-medium">Appearance</h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground mt-1">
           Customize the look and feel of the app.
         </p>
         <Separator className="mt-4" />
@@ -35,7 +35,7 @@ export default function SettingsPage() {
 
       <div>
         <h3 className="text-lg font-medium">Notifications</h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground mt-1">
           Manage how you receive alerts and updates.
         </p>
         <Separator className="mt-4" />

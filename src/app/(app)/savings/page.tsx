@@ -4,8 +4,8 @@ export default function SavingsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">AI Savings Advisor</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">AI Savings Advisor</h1>
+        <p className="text-muted-foreground mt-2">
           Leverage artificial intelligence to uncover hidden savings opportunities in your budget.
         </p>
       </div>
