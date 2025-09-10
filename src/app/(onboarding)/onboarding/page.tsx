@@ -6,33 +6,34 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Wallet, 
-  Target, 
-  PiggyBank, 
+import {
+  Wallet,
+  Target,
+  PiggyBank,
   TrendingUp,
   CheckCircle,
   ArrowRight,
-  Sparkles
+  ArrowLeft,
+  Landmark
 } from 'lucide-react';
 
 const onboardingSteps = [
   {
     title: "Welcome to FinTrack AI",
     description: "Your personal finance assistant powered by artificial intelligence",
-    icon: Sparkles,
+    icon: Landmark,
     content: (
       <div className="space-y-6">
         <div className="text-center">
           <div className="mx-auto bg-primary/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-            <Sparkles className="h-8 w-8 text-primary" />
+            <Landmark className="h-8 w-8 text-primary" />
           </div>
           <h3 className="text-xl font-bold">Smart Financial Management</h3>
           <p className="text-muted-foreground mt-2">
             FinTrack AI helps you take control of your finances with intelligent insights and automated tracking.
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
           <div className="border rounded-lg p-4 text-center">
             <TrendingUp className="h-6 w-6 text-primary mx-auto mb-2" />
@@ -70,7 +71,7 @@ const onboardingSteps = [
             <Wallet className="h-8 w-8 text-primary" />
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <div className="flex items-start space-x-3">
             <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
@@ -81,7 +82,7 @@ const onboardingSteps = [
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-start space-x-3">
             <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
             <div>
@@ -91,7 +92,7 @@ const onboardingSteps = [
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-start space-x-3">
             <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
             <div>
@@ -102,7 +103,7 @@ const onboardingSteps = [
             </div>
           </div>
         </div>
-        
+
         <div className="bg-muted rounded-lg p-4">
           <h4 className="font-medium mb-2">Example Transaction</h4>
           <div className="flex justify-between items-center py-2 border-b">
@@ -128,7 +129,7 @@ const onboardingSteps = [
             <Target className="h-8 w-8 text-primary" />
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <div className="bg-muted rounded-lg p-4">
             <div className="flex justify-between mb-2">
@@ -141,7 +142,7 @@ const onboardingSteps = [
               <span>$5,000 goal</span>
             </div>
           </div>
-          
+
           <div className="bg-muted rounded-lg p-4">
             <div className="flex justify-between mb-2">
               <span className="font-medium">Vacation to Japan</span>
@@ -154,7 +155,7 @@ const onboardingSteps = [
             </div>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <Button variant="outline">
             <PiggyBank className="h-4 w-4 mr-2" />
@@ -175,7 +176,7 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = onboardingSteps.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
-  
+
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
@@ -184,11 +185,17 @@ export default function OnboardingPage() {
       router.push('/');
     }
   };
-  
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const handleSkip = () => {
     router.push('/');
   };
-  
+
   const StepIcon = onboardingSteps[currentStep].icon;
 
   return (
@@ -211,19 +218,27 @@ export default function OnboardingPage() {
             </div>
             <Progress value={progress} className="h-2" />
           </div>
-          
+
           <div className="min-h-[300px]">
             {onboardingSteps[currentStep].content}
           </div>
-          
+
           <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8">
             <Button variant="ghost" onClick={handleSkip} className="w-full sm:w-auto">
               Skip Onboarding
             </Button>
-            <Button onClick={handleNext} className="w-full sm:w-auto">
-              {currentStep === totalSteps - 1 ? 'Get Started' : 'Next'}
-              {currentStep !== totalSteps - 1 && <ArrowRight className="ml-2 h-4 w-4" />}
-            </Button>
+            <div className="flex gap-2">
+              {currentStep > 0 && (
+                <Button variant="outline" onClick={handlePrevious} className="w-full sm:w-auto">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Previous
+                </Button>
+              )}
+              <Button onClick={handleNext} className="w-full sm:w-auto">
+                {currentStep === totalSteps - 1 ? 'Get Started' : 'Next'}
+                {currentStep !== totalSteps - 1 && <ArrowRight className="ml-2 h-4 w-4" />}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -5,7 +5,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.0-38B2AC.svg)](https://tailwindcss.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791.svg)](https://postgresql.org)
+[![Supabase](https://img.shields.io/badge/PostgreSQL-15-336791.svg)](https://postgresql.org)
 [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI-4285F4.svg)](https://ai.google)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg)](https://github.com/Y4NN777/FinTrack)
@@ -157,7 +157,7 @@ Create `.env` file with required API credentials:
 
 ```env
 # Database Configuration
-DATABASE_URL=postgresql://user:password@localhost:5432/fintrack
+SUPABASE_URL=postgresql://user:password@localhost:5432/fintrack
 
 # Google Genkit Configuration
 GOOGLE_API_KEY=your_google_api_key
