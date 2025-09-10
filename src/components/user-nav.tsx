@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -13,8 +14,47 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CreditCard, LogOut, Settings, User } from 'lucide-react';
+import { auth } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 export function UserNav() {
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await auth.signOut();
+
+      if (error) {
+        console.error('Logout error:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to log out. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Show success message
+      toast({
+        title: 'Logged out',
+        description: 'You have been successfully logged out.',
+      });
+
+      // Redirect to login page
+      router.push('/login');
+      router.refresh(); // Refresh to clear any cached data
+
+    } catch (error) {
+      console.error('Unexpected logout error:', error);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -38,7 +78,7 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href="/settings/profile">
-              <Button variant="ghost">
+              <Button variant="ghost" className="w-full justify-start">
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </Button>
@@ -50,7 +90,7 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/settings">
-              <Button variant="ghost">
+              <Button variant="ghost" className="w-full justify-start">
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
               </Button>
@@ -58,7 +98,7 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

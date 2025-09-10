@@ -9,8 +9,15 @@ type LogoProps = {
 };
 
 export function Logo({ className }: LogoProps) {
-  const { state } = useSidebar()
-  const isCollapsed = state === 'collapsed'
+  // Try to use sidebar context, but handle gracefully if not available
+  let isCollapsed = false;
+  try {
+    const { state } = useSidebar();
+    isCollapsed = state === 'collapsed';
+  } catch (error) {
+    // Sidebar context not available (e.g., in auth pages)
+    // Logo will show normally without collapse behavior
+  }
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
