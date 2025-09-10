@@ -17,7 +17,7 @@ import { UserNav } from '@/components/user-nav';
 import { NotificationBell } from '@/components/notification-bell';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export function ResponsiveAppLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile()
 
   if (isMobile) {
@@ -40,7 +40,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Desktop layout with sidebar
   return (
     <SidebarProvider>
-      <Sidebar collapsible="icon">
+      <Sidebar>
         <SidebarHeader>
           <Logo />
         </SidebarHeader>
@@ -53,7 +53,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-2 border-b bg-background/80 px-2 backdrop-blur-sm sm:px-4">
-          <SidebarTrigger className="-ml-1" />
+          <SidebarTrigger className="-ml-1 md:hidden" />
           <div className="flex flex-1 items-center justify-end gap-2 sm:gap-4">
              <NotificationBell />
             <UserNav />

@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { PlusCircle, Target, PiggyBank } from 'lucide-react';
 import { BudgetForm } from '@/components/budget-form';
 import { GoalForm } from '@/components/goal-form';
+import { MobileDataList } from '@/components/ui/mobile-data-list';
 
 const budgets = [
   { name: 'Groceries', spent: 350, total: 500, remaining: 150 },
@@ -119,29 +120,18 @@ export default function BudgetsPage() {
             <PlusCircle className="mr-2 h-4 w-4" /> New Budget
           </Button>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {budgets.map((budget) => {
-            const progress = (budget.spent / budget.total) * 100;
-            return (
-              <Card key={budget.name}>
-                <CardHeader>
-                  <CardTitle>{budget.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Progress value={Math.min(progress, 100)} className={progress > 100 ? '[&>div]:bg-destructive' : ''} />
-                </CardContent>
-                <CardFooter className="flex justify-between text-sm">
-                  <p>
-                    <span className="font-bold">${budget.spent.toFixed(2)}</span> spent
-                  </p>
-                  <p className="text-muted-foreground">
-                    {budget.remaining >= 0 ? `$${budget.remaining.toFixed(2)} left` : `$${Math.abs(budget.remaining).toFixed(2)} over`}
-                  </p>
-                </CardFooter>
-              </Card>
-            );
-          })}
-        </div>
+        <MobileDataList
+          items={budgets}
+          type="budgets"
+          emptyState={{
+            title: "No budgets yet",
+            description: "Start managing your finances by creating your first budget.",
+            action: {
+              label: "Create Budget",
+              onClick: () => setOpenBudget(true)
+            }
+          }}
+        />
       </div>
        <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">

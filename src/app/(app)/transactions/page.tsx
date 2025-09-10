@@ -17,26 +17,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { MobileDataList } from '@/components/ui/mobile-data-list';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from "lucide-react"
 
 const transactions = [
   { id: 'txn1', date: '2024-07-26', description: 'Monthly Rent', amount: -1500.00, category: 'Housing', status: 'Completed' },
@@ -224,73 +208,15 @@ export default function TransactionsPage() {
           </div>
         </div>
         
-        {/* Transactions table */}
-        {hasTransactions ? (
-          <div className="border rounded-md">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTransactions.map((txn) => (
-                  <TableRow key={txn.id}>
-                    <TableCell>{new Date(txn.date).toLocaleDateString()}</TableCell>
-                    <TableCell className="font-medium">{txn.description}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{txn.category}</Badge>
-                    </TableCell>
-                    <TableCell>
-                       <Badge variant={txn.status === "Completed" ? "default" : "secondary"} className={txn.status === "Completed" ? "bg-accent text-accent-foreground" : ""}>{txn.status}</Badge>
-                    </TableCell>
-                    <TableCell
-                      className={`text-right font-medium ${
-                        txn.amount > 0 ? 'text-success' : ''
-                      }`}
-                    >
-                      {txn.amount.toLocaleString('en-US', {
-                        style: 'currency',
-                        currency: 'USD',
-                      })}
-                    </TableCell>
-                    <TableCell className="text-right">
-                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>Categorize</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-[300px] space-y-4">
-            <h3 className="text-xl font-semibold">No transactions found</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              Try adjusting your search or filter criteria.
-            </p>
-          </div>
-        )}
+        {/* Transactions display - responsive table/cards */}
+        <MobileDataList
+          items={filteredTransactions}
+          type="transactions"
+          emptyState={{
+            title: "No transactions found",
+            description: "Try adjusting your search or filter criteria.",
+          }}
+        />
       </CardContent>
       </Card>
       <TransactionForm open={open} setOpen={setOpen} onSubmit={handleAddTransaction} />
