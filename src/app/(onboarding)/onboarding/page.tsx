@@ -15,10 +15,12 @@ import { useToast } from '@/hooks/use-toast';
 import { auth, db, supabase } from '@/lib/supabase';
 
 const ONBOARDING_STEPS = [
-  { id: 1, title: 'Welcome', description: 'Let\'s personalize your experience' },
-  { id: 2, title: 'Profile Picture', description: 'Add a profile picture (optional)' },
-  { id: 3, title: 'Preferences', description: 'Set your financial preferences' },
-  { id: 4, title: 'All Set!', description: 'You\'re ready to start tracking' }
+  { id: 1, title: 'Welcome to FinTrack', description: 'Your AI-powered finance companion awaits' },
+  { id: 2, title: 'Discover FinTrack', description: 'Learn what makes your financial journey smarter' },
+  { id: 3, title: 'Terms & Privacy', description: 'Review our terms and privacy policy' },
+  { id: 4, title: 'Profile Setup', description: 'Personalize your experience' },
+  { id: 5, title: 'Preferences', description: 'Customize your financial settings' },
+  { id: 6, title: 'You\'re All Set!', description: 'Ready to take control of your finances' }
 ];
 
 export default function OnboardingPage() {
@@ -28,6 +30,8 @@ export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [isOAuthUser, setIsOAuthUser] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Form data
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -52,12 +56,16 @@ export default function OnboardingPage() {
 
       setUser(user);
 
+      // Detect if user signed up via OAuth
+      setIsOAuthUser(user.app_metadata?.provider !== 'email');
+
       // Load existing profile
       const { data: profile } = await db.getUserProfile(user.id);
       if (profile) {
         setProfile(profile);
         setFullName(profile.full_name || '');
         setAvatarUrl(profile.avatar_url || '');
+        setTermsAccepted(profile.terms_accepted || false);
         if (profile.preferences) {
           setPreferences(profile.preferences);
         }
@@ -116,8 +124,14 @@ export default function OnboardingPage() {
   };
 
   const handleNext = async () => {
-    if (currentStep < 4) {
-      const nextStep = currentStep + 1;
+    if (currentStep < 6) {
+      let nextStep = currentStep + 1;
+
+      // Skip terms step for non-OAuth users
+      if (currentStep === 2 && !isOAuthUser) {
+        nextStep = 4; // Skip from app info (2) to profile setup (4)
+      }
+
       setCurrentStep(nextStep);
 
       // Save progress
@@ -127,8 +141,18 @@ export default function OnboardingPage() {
     } else {
       // Complete onboarding
       if (user) {
-        await db.updateOnboardingProgress(user.id, 4, true);
+        await db.updateOnboardingProgress(user.id, 6, true);
         await db.updateUserPreferences(user.id, preferences);
+        if (termsAccepted || !isOAuthUser) {
+          // Update terms acceptance for OAuth users or mark as accepted for email users
+          await supabase
+            .from('user_profiles')
+            .update({
+              terms_accepted: true,
+              terms_accepted_at: new Date().toISOString()
+            })
+            .eq('id', user.id);
+        }
       }
 
       toast({
@@ -142,7 +166,14 @@ export default function OnboardingPage() {
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      let prevStep = currentStep - 1;
+
+      // Skip terms step for non-OAuth users
+      if (currentStep === 4 && !isOAuthUser) {
+        prevStep = 2; // Skip from profile setup (4) back to app info (2)
+      }
+
+      setCurrentStep(prevStep);
     }
   };
 
@@ -153,7 +184,7 @@ export default function OnboardingPage() {
     handleNext();
   };
 
-  const progress = (currentStep / 4) * 100;
+  const progress = (currentStep / 6) * 100;
 
   if (!user) {
     return <div>Loading...</div>;
@@ -183,21 +214,112 @@ export default function OnboardingPage() {
                 <Check className="w-12 h-12 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">Account Created Successfully!</h3>
+                <h3 className="text-lg font-semibold">Welcome to FinTrack! 🎉</h3>
                 <p className="text-muted-foreground">
-                  Welcome to FinTrack, {user.email}. Let's personalize your experience.
+                  Hello {user.user_metadata?.display_name || user.user_metadata?.name || user.user_metadata?.full_name || 'there'}! Your account has been created successfully. Let's set up your personalized finance experience.
                 </p>
               </div>
             </div>
           )}
 
           {currentStep === 2 && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-4">Discover FinTrack</h3>
+                <p className="text-muted-foreground mb-6">Your AI-powered companion for smart financial management</p>
+              </div>
+
+              <div className="grid gap-4">
+                <div className="flex items-start space-x-4 p-4 border rounded-lg">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <span className="text-blue-600 text-xl">🤖</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">AI-Powered Insights</h4>
+                    <p className="text-sm text-muted-foreground">Get smart spending analysis and personalized recommendations to optimize your finances.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 border rounded-lg">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <span className="text-green-600 text-xl">🎯</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Goal Tracking</h4>
+                    <p className="text-sm text-muted-foreground">Set and monitor savings goals with visual progress tracking and milestone celebrations.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 border rounded-lg">
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <span className="text-purple-600 text-xl">📊</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Smart Budgeting</h4>
+                    <p className="text-sm text-muted-foreground">Create intelligent budgets with automatic alerts and spending pattern analysis.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 border rounded-lg">
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <span className="text-orange-600 text-xl">🔄</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Cross-Device Sync</h4>
+                    <p className="text-sm text-muted-foreground">Access your financial data seamlessly across all your devices with real-time synchronization.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && isOAuthUser && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-4">Terms & Privacy</h3>
+                <p className="text-muted-foreground mb-6">Please review and accept our terms to continue</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 border rounded-lg bg-muted/50">
+                  <h4 className="font-semibold mb-2">Terms of Service</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    By using FinTrack, you agree to our terms of service which govern how we collect, use, and protect your financial data.
+                  </p>
+                  <a href="/terms" className="text-sm text-primary hover:underline">Read full terms →</a>
+                </div>
+
+                <div className="p-4 border rounded-lg bg-muted/50">
+                  <h4 className="font-semibold mb-2">Privacy Policy</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Your privacy is our priority. We use bank-level security to protect your financial information and never share it without your consent.
+                  </p>
+                  <a href="/privacy" className="text-sm text-primary hover:underline">Read privacy policy →</a>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="terms-acceptance"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <label htmlFor="terms-acceptance" className="text-sm">
+                    I agree to the <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {(currentStep === 4 || (currentStep === 3 && !isOAuthUser)) && (
             <div className="space-y-4">
               <div className="flex flex-col items-center space-y-4">
                 <Avatar className="w-24 h-24">
                   <AvatarImage src={avatarUrl} />
                   <AvatarFallback>
-                    {fullName ? fullName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                    {fullName ? fullName.charAt(0).toUpperCase() : (user.user_metadata?.display_name || user.user_metadata?.name || user.email).charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
@@ -242,8 +364,13 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {currentStep === 3 && (
+          {currentStep === 5 && (
             <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-semibold">Customize Your Experience</h3>
+                <p className="text-muted-foreground">Set your preferences for the best financial tracking experience</p>
+              </div>
+
               <div className="grid gap-4">
                 <div className="space-y-2">
                   <Label>Theme</Label>
@@ -323,15 +450,15 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {currentStep === 4 && (
+          {currentStep === 6 && (
             <div className="text-center space-y-4">
               <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                 <Check className="w-12 h-12 text-green-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">You're All Set!</h3>
+                <h3 className="text-lg font-semibold">You're All Set! 🎉</h3>
                 <p className="text-muted-foreground">
-                  Your FinTrack account is ready. Start tracking your finances and reach your goals!
+                  Welcome to FinTrack, {user.user_metadata?.display_name || user.user_metadata?.name || user.user_metadata?.full_name || 'valued user'}! Your personalized finance tracking experience is ready. Start managing your money smarter today!
                 </p>
               </div>
             </div>
@@ -351,13 +478,21 @@ export default function OnboardingPage() {
         </Button>
 
         <div className="flex gap-2">
-          {currentStep === 2 && (
+          {(currentStep === 4 || (currentStep === 3 && !isOAuthUser)) && (
             <Button variant="ghost" onClick={handleSkip}>
               Skip for now
             </Button>
           )}
-          <Button onClick={handleNext} disabled={isLoading}>
-            {currentStep === 4 ? (
+          {currentStep === 3 && isOAuthUser && !termsAccepted && (
+            <Button variant="ghost" onClick={() => router.push('/login')}>
+              Decline & Sign Out
+            </Button>
+          )}
+          <Button
+            onClick={handleNext}
+            disabled={isLoading || (currentStep === 3 && isOAuthUser && !termsAccepted)}
+          >
+            {currentStep === 6 ? (
               <>Get Started</>
             ) : (
               <>
