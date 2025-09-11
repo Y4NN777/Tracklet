@@ -1,247 +1,373 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import {
-  Wallet,
-  Target,
-  PiggyBank,
-  TrendingUp,
-  CheckCircle,
-  ArrowRight,
-  ArrowLeft,
-  Landmark
-} from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Camera, Upload, Check, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { auth, db, supabase } from '@/lib/supabase';
 
-const onboardingSteps = [
-  {
-    title: "Welcome to FinTrack AI",
-    description: "Your personal finance assistant powered by artificial intelligence",
-    icon: Landmark,
-    content: (
-      <div className="space-y-6">
-        <div className="text-center">
-          <div className="mx-auto bg-primary/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-            <Landmark className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-xl font-bold">Smart Financial Management</h3>
-          <p className="text-muted-foreground mt-2">
-            FinTrack AI helps you take control of your finances with intelligent insights and automated tracking.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-          <div className="border rounded-lg p-4 text-center">
-            <TrendingUp className="h-6 w-6 text-primary mx-auto mb-2" />
-            <h4 className="font-semibold">AI Insights</h4>
-            <p className="text-sm text-muted-foreground mt-1">
-              Get personalized financial advice
-            </p>
-          </div>
-          <div className="border rounded-lg p-4 text-center">
-            <Target className="h-6 w-6 text-primary mx-auto mb-2" />
-            <h4 className="font-semibold">Smart Budgeting</h4>
-            <p className="text-sm text-muted-foreground mt-1">
-              Set and track financial goals
-            </p>
-          </div>
-          <div className="border rounded-lg p-4 text-center">
-            <PiggyBank className="h-6 w-6 text-primary mx-auto mb-2" />
-            <h4 className="font-semibold">Savings Tips</h4>
-            <p className="text-sm text-muted-foreground mt-1">
-              Discover ways to save more
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  },
-  {
-    title: "Track Your Transactions",
-    description: "Easily record and categorize your income and expenses",
-    icon: Wallet,
-    content: (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center">
-          <div className="bg-primary/10 p-3 rounded-full">
-            <Wallet className="h-8 w-8 text-primary" />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-start space-x-3">
-            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium">Automatic Categorization</h4>
-              <p className="text-sm text-muted-foreground">
-                Transactions are automatically categorized for easy tracking
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium">Import from Banks</h4>
-              <p className="text-sm text-muted-foreground">
-                Connect your bank accounts for automatic transaction imports
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium">Receipt Scanning</h4>
-              <p className="text-sm text-muted-foreground">
-                Upload receipts to automatically log expenses
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-muted rounded-lg p-4">
-          <h4 className="font-medium mb-2">Example Transaction</h4>
-          <div className="flex justify-between items-center py-2 border-b">
-            <span>Grocery Store</span>
-            <Badge variant="destructive">-$85.30</Badge>
-          </div>
-          <div className="flex justify-between items-center py-2">
-            <span>Salary Deposit</span>
-            <Badge variant="default">+$3,200.00</Badge>
-          </div>
-        </div>
-      </div>
-    )
-  },
-  {
-    title: "Set Financial Goals",
-    description: "Create budgets and savings targets to achieve your financial objectives",
-    icon: Target,
-    content: (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center">
-          <div className="bg-primary/10 p-3 rounded-full">
-            <Target className="h-8 w-8 text-primary" />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="bg-muted rounded-lg p-4">
-            <div className="flex justify-between mb-2">
-              <span className="font-medium">Emergency Fund</span>
-              <span className="text-sm">45%</span>
-            </div>
-            <Progress value={45} className="h-2" />
-            <div className="flex justify-between text-sm text-muted-foreground mt-1">
-              <span>$2,250 saved</span>
-              <span>$5,000 goal</span>
-            </div>
-          </div>
-
-          <div className="bg-muted rounded-lg p-4">
-            <div className="flex justify-between mb-2">
-              <span className="font-medium">Vacation to Japan</span>
-              <span className="text-sm">15%</span>
-            </div>
-            <Progress value={15} className="h-2" />
-            <div className="flex justify-between text-sm text-muted-foreground mt-1">
-              <span>$450 saved</span>
-              <span>$3,000 goal</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline">
-            <PiggyBank className="h-4 w-4 mr-2" />
-            Create Budget
-          </Button>
-          <Button variant="outline">
-            <Target className="h-4 w-4 mr-2" />
-            Set Goal
-          </Button>
-        </div>
-      </div>
-    )
-  }
+const ONBOARDING_STEPS = [
+  { id: 1, title: 'Welcome', description: 'Let\'s personalize your experience' },
+  { id: 2, title: 'Profile Picture', description: 'Add a profile picture (optional)' },
+  { id: 3, title: 'Preferences', description: 'Set your financial preferences' },
+  { id: 4, title: 'All Set!', description: 'You\'re ready to start tracking' }
 ];
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = onboardingSteps.length;
-  const progress = ((currentStep + 1) / totalSteps) * 100;
+  const { toast } = useToast();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
 
-  const handleNext = () => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(currentStep + 1);
+  // Form data
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [preferences, setPreferences] = useState({
+    theme: 'system',
+    currency: 'USD',
+    dateFormat: 'MM/DD/YYYY',
+    notifications: {
+      budgetAlerts: true,
+      goalReminders: true
+    }
+  });
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { user, error } = await auth.getUser();
+      if (error || !user) {
+        router.push('/login');
+        return;
+      }
+
+      setUser(user);
+
+      // Load existing profile
+      const { data: profile } = await db.getUserProfile(user.id);
+      if (profile) {
+        setProfile(profile);
+        setFullName(profile.full_name || '');
+        setAvatarUrl(profile.avatar_url || '');
+        if (profile.preferences) {
+          setPreferences(profile.preferences);
+        }
+        // Skip to appropriate step based on completion
+        if (profile.onboarding_step && profile.onboarding_step > 1) {
+          setCurrentStep(profile.onboarding_step);
+        }
+      }
+    };
+
+    checkUser();
+  }, [router]);
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    setIsLoading(true);
+    try {
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+
+      const { data, error } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      setAvatarUrl(publicUrl);
+
+      // Update profile
+      await db.updateUserProfile(user.id, { avatar_url: publicUrl });
+
+      toast({
+        title: 'Avatar uploaded!',
+        description: 'Your profile picture has been saved.'
+      });
+    } catch (error) {
+      toast({
+        title: 'Upload failed',
+        description: 'Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNext = async () => {
+    if (currentStep < 4) {
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+
+      // Save progress
+      if (user) {
+        await db.updateOnboardingProgress(user.id, nextStep);
+      }
     } else {
-      // Onboarding complete - redirect to dashboard
+      // Complete onboarding
+      if (user) {
+        await db.updateOnboardingProgress(user.id, 4, true);
+        await db.updateUserPreferences(user.id, preferences);
+      }
+
+      toast({
+        title: 'Welcome to FinTrack! 🎉',
+        description: 'Your account is ready to go.'
+      });
+
       router.push('/');
     }
   };
 
-  const handlePrevious = () => {
-    if (currentStep > 0) {
+  const handleBack = () => {
+    if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
 
-  const handleSkip = () => {
-    router.push('/');
+  const handleSkip = async () => {
+    if (user) {
+      await db.updateOnboardingProgress(user.id, currentStep);
+    }
+    handleNext();
   };
 
-  const StepIcon = onboardingSteps[currentStep].icon;
+  const progress = (currentStep / 4) * 100;
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4">
-            <div className="bg-primary/10 p-3 rounded-full inline-block">
-              <StepIcon className="h-6 w-6 text-primary" />
-            </div>
-          </div>
-          <CardTitle className="text-xl sm:text-2xl">{onboardingSteps[currentStep].title}</CardTitle>
-          <CardDescription className="mt-2">{onboardingSteps[currentStep].description}</CardDescription>
+    <div className="space-y-6">
+      {/* Progress */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>Step {currentStep} of 4</span>
+          <span>{Math.round(progress)}% complete</span>
+        </div>
+        <Progress value={progress} className="w-full" />
+      </div>
+
+      {/* Step Content */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{ONBOARDING_STEPS[currentStep - 1].title}</CardTitle>
+          <CardDescription>{ONBOARDING_STEPS[currentStep - 1].description}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="mb-6">
-            <div className="flex justify-between text-sm text-muted-foreground mb-2">
-              <span>Step {currentStep + 1} of {totalSteps}</span>
-              <span>{Math.round(progress)}% complete</span>
+        <CardContent className="space-y-6">
+          {currentStep === 1 && (
+            <div className="text-center space-y-4">
+              <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                <Check className="w-12 h-12 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Account Created Successfully!</h3>
+                <p className="text-muted-foreground">
+                  Welcome to FinTrack, {user.email}. Let's personalize your experience.
+                </p>
+              </div>
             </div>
-            <Progress value={progress} className="h-2" />
-          </div>
+          )}
 
-          <div className="min-h-[300px]">
-            {onboardingSteps[currentStep].content}
-          </div>
+          {currentStep === 2 && (
+            <div className="space-y-4">
+              <div className="flex flex-col items-center space-y-4">
+                <Avatar className="w-24 h-24">
+                  <AvatarImage src={avatarUrl} />
+                  <AvatarFallback>
+                    {fullName ? fullName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
 
-          <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8">
-            <Button variant="ghost" onClick={handleSkip} className="w-full sm:w-auto">
-              Skip Onboarding
-            </Button>
-            <div className="flex gap-2">
-              {currentStep > 0 && (
-                <Button variant="outline" onClick={handlePrevious} className="w-full sm:w-auto">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Previous
-                </Button>
-              )}
-              <Button onClick={handleNext} className="w-full sm:w-auto">
-                {currentStep === totalSteps - 1 ? 'Get Started' : 'Next'}
-                {currentStep !== totalSteps - 1 && <ArrowRight className="ml-2 h-4 w-4" />}
-              </Button>
+                <div className="space-y-2">
+                  <Label htmlFor="avatar-upload">Profile Picture (Optional)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => document.getElementById('avatar-upload')?.click()}
+                      disabled={isLoading}
+                      className="flex-1"
+                    >
+                      {isLoading ? (
+                        <>Uploading...</>
+                      ) : (
+                        <>
+                          <Camera className="w-4 h-4 mr-2" />
+                          Upload Photo
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="w-full space-y-2">
+                  <Label htmlFor="full-name">Full Name (Optional)</Label>
+                  <Input
+                    id="full-name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your full name"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {currentStep === 3 && (
+            <div className="space-y-6">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label>Theme</Label>
+                  <Select value={preferences.theme} onValueChange={(value) => setPreferences({...preferences, theme: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="dark">Dark</SelectItem>
+                      <SelectItem value="system">System</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Currency</Label>
+                  <Select value={preferences.currency} onValueChange={(value) => setPreferences({...preferences, currency: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="EUR">EUR (€)</SelectItem>
+                      <SelectItem value="GBP">GBP (£)</SelectItem>
+                      <SelectItem value="JPY">JPY (¥)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Date Format</Label>
+                  <Select value={preferences.dateFormat} onValueChange={(value) => setPreferences({...preferences, dateFormat: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                      <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                      <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-4">
+                  <Label>Notifications</Label>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="budget-alerts">Budget Alerts</Label>
+                      <Switch
+                        id="budget-alerts"
+                        checked={preferences.notifications.budgetAlerts}
+                        onCheckedChange={(checked) =>
+                          setPreferences({
+                            ...preferences,
+                            notifications: { ...preferences.notifications, budgetAlerts: checked }
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="goal-reminders">Goal Reminders</Label>
+                      <Switch
+                        id="goal-reminders"
+                        checked={preferences.notifications.goalReminders}
+                        onCheckedChange={(checked) =>
+                          setPreferences({
+                            ...preferences,
+                            notifications: { ...preferences.notifications, goalReminders: checked }
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 4 && (
+            <div className="text-center space-y-4">
+              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <Check className="w-12 h-12 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">You're All Set!</h3>
+                <p className="text-muted-foreground">
+                  Your FinTrack account is ready. Start tracking your finances and reach your goals!
+                </p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Navigation */}
+      <div className="flex justify-between">
+        <Button
+          variant="outline"
+          onClick={handleBack}
+          disabled={currentStep === 1}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+
+        <div className="flex gap-2">
+          {currentStep === 2 && (
+            <Button variant="ghost" onClick={handleSkip}>
+              Skip for now
+            </Button>
+          )}
+          <Button onClick={handleNext} disabled={isLoading}>
+            {currentStep === 4 ? (
+              <>Get Started</>
+            ) : (
+              <>
+                Continue
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
