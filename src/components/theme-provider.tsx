@@ -30,14 +30,14 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   // Start with default theme (same on server and client)
   const [theme, setTheme] = useState<Theme>(defaultTheme);
-  
+
   // Track if we're on the client side yet
   const [isClient, setIsClient] = useState(false);
 
   // This runs ONLY on the client side, after hydration
   useEffect(() => {
     setIsClient(true); // Now we know we're on the client
-    
+
     // Safe to access localStorage now
     const storedTheme = localStorage.getItem(storageKey) as Theme;
     if (storedTheme) {
@@ -48,15 +48,15 @@ export function ThemeProvider({
   // Apply the theme to the page
   useEffect(() => {
     if (!isClient) return; // Don't run on server
-    
+
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
 
     let actualTheme = theme;
     if (theme === 'system') {
       // Check user's system preference
-      actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches 
-        ? 'dark' 
+      actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
         : 'light';
     }
 
@@ -67,7 +67,7 @@ export function ThemeProvider({
     theme,
     setTheme: (newTheme: Theme) => {
       setTheme(newTheme);
-      
+
       // Only save to localStorage if we're on the client
       if (isClient) {
         localStorage.setItem(storageKey, newTheme);
