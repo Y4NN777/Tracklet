@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,6 @@ import { LogOut, Loader2 } from 'lucide-react';
 
 export default function LogoutPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isLoggingOut, setIsLoggingOut] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
