@@ -11,6 +11,20 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   email TEXT UNIQUE NOT NULL,
   full_name TEXT,
   avatar_url TEXT,
+  preferences JSONB DEFAULT '{
+    "theme": "system",
+    "currency": "USD",
+    "dateFormat": "MM/DD/YYYY",
+    "notifications": {
+      "budgetAlerts": true,
+      "goalReminders": true
+    }
+  }'::jsonb,
+  onboarding_step INTEGER DEFAULT 0,
+  onboarding_completed BOOLEAN DEFAULT false,
+  onboarding_completed_at TIMESTAMP WITH TIME ZONE,
+  terms_accepted BOOLEAN DEFAULT false,
+  terms_accepted_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -106,6 +120,9 @@ ALTER TABLE savings_goals ENABLE ROW LEVEL SECURITY;
 -- User Profiles Policies
 CREATE POLICY "Users can view own profile" ON user_profiles
   FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert own profile" ON user_profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users can update own profile" ON user_profiles
   FOR UPDATE USING (auth.uid() = id);
