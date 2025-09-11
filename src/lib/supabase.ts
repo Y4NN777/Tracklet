@@ -13,13 +13,40 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 
 // Auth helper functions
 export const auth = {
-  // Sign up with email and password
-  signUp: async (email: string, password: string) => {
+  // Sign up with email and password (single-call API)
+  signUp: async (userData: {
+    email: string
+    password: string
+    full_name?: string
+    agreeToTerms: boolean
+  }) => {
+    // Validate terms acceptance
+    if (!userData.agreeToTerms) {
+      return { error: { message: 'Terms must be accepted' } }
+    }
+
+    // Create auth user + profile atomically
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: userData.email,
+      password: userData.password,
     })
-    return { data, error }
+
+    if (error || !data.user) return { data, error }
+
+    // Create profile with full data
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .insert([{
+        id: data.user.id,
+        email: userData.email,
+        full_name: userData.full_name,
+        terms_accepted: true,
+        terms_accepted_at: new Date().toISOString()
+      }])
+      .select()
+      .single()
+
+    return { data: { ...data, profile }, error: profileError }
   },
 
   // Sign in with email and password
@@ -108,7 +135,44 @@ export const db = {
   updateUserProfile: async (userId: string, updates: {
     full_name?: string
     avatar_url?: string
+    preferences?: any
+    onboarding_step?: number
+    onboarding_completed?: boolean
+    onboarding_completed_at?: string
   }) => {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single()
+    return { data, error }
+  },
+
+  // Update user preferences
+  updateUserPreferences: async (userId: string, preferences: any) => {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update({
+        preferences: preferences
+      })
+      .eq('id', userId)
+      .select()
+      .single()
+    return { data, error }
+  },
+
+  // Update onboarding progress
+  updateOnboardingProgress: async (userId: string, step: number, completed: boolean = false) => {
+    const updates: any = {
+      onboarding_step: step,
+      onboarding_completed: completed
+    }
+
+    if (completed) {
+      updates.onboarding_completed_at = new Date().toISOString()
+    }
+
     const { data, error } = await supabase
       .from('user_profiles')
       .update(updates)

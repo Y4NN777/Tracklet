@@ -55,26 +55,19 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const { data, error } = await auth.signUp(formData.email, formData.password);
+      const { data, error } = await auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        full_name: formData.name,
+        agreeToTerms: formData.agreeToTerms,
+      });
 
       if (error) {
-        setError(error.message);
+        setError(error.message || 'An unexpected error occurred');
         return;
       }
 
-      if (data.user) {
-        // Create user profile
-        const { error: profileError } = await db.createUserProfile({
-          id: data.user.id,
-          email: formData.email,
-          full_name: formData.name,
-        });
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // Don't block signup if profile creation fails
-        }
-
+      if (data?.user) {
         toast({
           title: 'Account created!',
           description: 'Please check your email to verify your account.',

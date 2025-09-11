@@ -34,18 +34,42 @@ export default function AuthCallback() {
 
           if (profileError && profileError.code === 'PGRST116') {
             // Profile doesn't exist - this is a new user, create profile and go to onboarding
-            const { error: createError } = await supabase
+            console.log('Creating profile for user:', user.id, user.email)
+
+            const profileData = {
+              id: user.id,
+              email: user.email,
+              full_name: user.user_metadata?.full_name || user.user_metadata?.name,
+              avatar_url: user.user_metadata?.avatar_url,
+              preferences: {
+                theme: 'system',
+                currency: 'USD',
+                dateFormat: 'MM/DD/YYYY',
+                notifications: {
+                  budgetAlerts: true,
+                  goalReminders: true
+                }
+              },
+              onboarding_step: 0,
+              onboarding_completed: false,
+              terms_accepted: false
+            }
+
+            console.log('Profile data to insert:', profileData)
+
+            const { data: createdProfile, error: createError } = await supabase
               .from('user_profiles')
-              .insert([{
-                id: user.id,
-                email: user.email,
-                full_name: user.user_metadata?.full_name || user.user_metadata?.name,
-                avatar_url: user.user_metadata?.avatar_url
-              }])
+              .insert([profileData])
+              .select()
 
             if (createError) {
               console.error('Error creating profile:', createError)
+              console.error('Error details:', JSON.stringify(createError, null, 2))
+              setError(`Failed to create user profile: ${createError.message || 'Unknown error'}`)
+              return
             }
+
+            console.log('Profile created successfully:', createdProfile)
 
             // New user - go to onboarding
             router.push('/onboarding')
