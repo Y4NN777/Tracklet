@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Camera, Upload, Check, ArrowRight, ArrowLeft, Bot, Target, BarChart3, RefreshCw, PartyPopper } from 'lucide-react';
+import { Upload, Check, ArrowRight, ArrowLeft, Bot, Target, BarChart3, RefreshCw, PartyPopper } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { auth, db, supabase } from '@/lib/supabase';
 
@@ -482,14 +482,43 @@ export default function OnboardingPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD - US Dollar ($)</SelectItem>
-                      <SelectItem value="EUR">EUR - Euro (€)</SelectItem>
-                      <SelectItem value="GBP">GBP - British Pound (£)</SelectItem>
-                      <SelectItem value="JPY">JPY - Japanese Yen (¥)</SelectItem>
+                      {/* Major Global Reserve Currencies */}
+                      <SelectItem value="USD">USD - US Dollar</SelectItem>
+                      <SelectItem value="EUR">EUR - Euro</SelectItem>
+                      <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                      <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
                       <SelectItem value="CHF">CHF - Swiss Franc</SelectItem>
                       <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
                       <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>
                       <SelectItem value="CNY">CNY - Chinese Yuan</SelectItem>
+
+                      {/* European Currencies */}
+                      <SelectItem value="SEK">SEK - Swedish Krona</SelectItem>
+                      <SelectItem value="NOK">NOK - Norwegian Krone</SelectItem>
+                      <SelectItem value="DKK">DKK - Danish Krone</SelectItem>
+                      <SelectItem value="PLN">PLN - Polish Złoty</SelectItem>
+                      <SelectItem value="CZK">CZK - Czech Koruna</SelectItem>
+                      <SelectItem value="HUF">HUF - Hungarian Forint</SelectItem>
+                      <SelectItem value="RON">RON - Romanian Leu</SelectItem>
+                      <SelectItem value="BGN">BGN - Bulgarian Lev</SelectItem>
+                      <SelectItem value="HRK">HRK - Croatian Kuna</SelectItem>
+                      <SelectItem value="ISK">ISK - Icelandic Króna</SelectItem>
+
+                      {/* North American Currencies */}
+                      <SelectItem value="MXN">MXN - Mexican Peso</SelectItem>
+
+                      {/* South American Currencies */}
+                      <SelectItem value="BRL">BRL - Brazilian Real</SelectItem>
+                      <SelectItem value="ARS">ARS - Argentine Peso</SelectItem>
+                      <SelectItem value="CLP">CLP - Chilean Peso</SelectItem>
+                      <SelectItem value="COP">COP - Colombian Peso</SelectItem>
+                      <SelectItem value="PEN">PEN - Peruvian Sol</SelectItem>
+                      <SelectItem value="UYU">UYU - Uruguayan Peso</SelectItem>
+                      <SelectItem value="PYG">PYG - Paraguayan Guarani</SelectItem>
+                      <SelectItem value="BOB">BOB - Bolivian Boliviano</SelectItem>
+                      <SelectItem value="VES">VES - Venezuelan Bolívar</SelectItem>
+
+                      {/* Asian Currencies */}
                       <SelectItem value="INR">INR - Indian Rupee</SelectItem>
                       <SelectItem value="KRW">KRW - South Korean Won</SelectItem>
                       <SelectItem value="SGD">SGD - Singapore Dollar</SelectItem>
@@ -507,6 +536,8 @@ export default function OnboardingPage() {
                       <SelectItem value="MMK">MMK - Myanmar Kyat</SelectItem>
                       <SelectItem value="KHR">KHR - Cambodian Riel</SelectItem>
                       <SelectItem value="LAK">LAK - Lao Kip</SelectItem>
+
+                      {/* Middle East & Central Asian Currencies */}
                       <SelectItem value="SAR">SAR - Saudi Riyal</SelectItem>
                       <SelectItem value="AED">AED - UAE Dirham</SelectItem>
                       <SelectItem value="QAR">QAR - Qatari Riyal</SelectItem>
@@ -532,6 +563,8 @@ export default function OnboardingPage() {
                       <SelectItem value="TJS">TJS - Tajikistani Somoni</SelectItem>
                       <SelectItem value="TMT">TMT - Turkmenistani Manat</SelectItem>
                       <SelectItem value="AFN">AFN - Afghan Afghani</SelectItem>
+
+                      {/* African Currencies */}
                       <SelectItem value="ZAR">ZAR - South African Rand</SelectItem>
                       <SelectItem value="NGN">NGN - Nigerian Naira</SelectItem>
                       <SelectItem value="KES">KES - Kenyan Shilling</SelectItem>
@@ -560,26 +593,8 @@ export default function OnboardingPage() {
                       <SelectItem value="GMD">GMD - Gambian Dalasi</SelectItem>
                       <SelectItem value="SLL">SLL - Sierra Leonean Leone</SelectItem>
                       <SelectItem value="LRD">LRD - Liberian Dollar</SelectItem>
-                      <SelectItem value="SEK">SEK - Swedish Krona</SelectItem>
-                      <SelectItem value="NOK">NOK - Norwegian Krone</SelectItem>
-                      <SelectItem value="DKK">DKK - Danish Krone</SelectItem>
-                      <SelectItem value="PLN">PLN - Polish Złoty</SelectItem>
-                      <SelectItem value="CZK">CZK - Czech Koruna</SelectItem>
-                      <SelectItem value="HUF">HUF - Hungarian Forint</SelectItem>
-                      <SelectItem value="RON">RON - Romanian Leu</SelectItem>
-                      <SelectItem value="BGN">BGN - Bulgarian Lev</SelectItem>
-                      <SelectItem value="HRK">HRK - Croatian Kuna</SelectItem>
-                      <SelectItem value="ISK">ISK - Icelandic Króna</SelectItem>
-                      <SelectItem value="MXN">MXN - Mexican Peso</SelectItem>
-                      <SelectItem value="BRL">BRL - Brazilian Real</SelectItem>
-                      <SelectItem value="ARS">ARS - Argentine Peso</SelectItem>
-                      <SelectItem value="CLP">CLP - Chilean Peso</SelectItem>
-                      <SelectItem value="COP">COP - Colombian Peso</SelectItem>
-                      <SelectItem value="PEN">PEN - Peruvian Sol</SelectItem>
-                      <SelectItem value="UYU">UYU - Uruguayan Peso</SelectItem>
-                      <SelectItem value="PYG">PYG - Paraguayan Guarani</SelectItem>
-                      <SelectItem value="BOB">BOB - Bolivian Boliviano</SelectItem>
-                      <SelectItem value="VES">VES - Venezuelan Bolívar</SelectItem>
+
+                      {/* Oceania Currencies */}
                       <SelectItem value="NZD">NZD - New Zealand Dollar</SelectItem>
                       <SelectItem value="FJD">FJD - Fijian Dollar</SelectItem>
                       <SelectItem value="TOP">TOP - Tongan Paʻanga</SelectItem>
@@ -587,6 +602,8 @@ export default function OnboardingPage() {
                       <SelectItem value="VUV">VUV - Vanuatu Vatu</SelectItem>
                       <SelectItem value="SBD">SBD - Solomon Islands Dollar</SelectItem>
                       <SelectItem value="PGK">PGK - Papua New Guinean Kina</SelectItem>
+
+                      {/* Cryptocurrencies (for completeness) */}
                       <SelectItem value="BTC">BTC - Bitcoin</SelectItem>
                       <SelectItem value="ETH">ETH - Ethereum</SelectItem>
                       <SelectItem value="USDT">USDT - Tether</SelectItem>
