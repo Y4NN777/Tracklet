@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { adminDb } from './supabase-admin'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -33,18 +34,14 @@ export const auth = {
 
     if (error || !data.user) return { data, error }
 
-    // Create profile with full data
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .insert([{
-        id: data.user.id,
-        email: userData.email,
-        full_name: userData.full_name,
-        terms_accepted: true,
-        terms_accepted_at: new Date().toISOString()
-      }])
-      .select()
-      .single()
+    // Create profile with full data using admin client (bypasses RLS)
+    const { data: profile, error: profileError } = await adminDb.createUserProfile({
+      id: data.user.id,
+      email: userData.email,
+      full_name: userData.full_name,
+      terms_accepted: true,
+      terms_accepted_at: new Date().toISOString()
+    })
 
     return { data: { ...data, profile }, error: profileError }
   },
