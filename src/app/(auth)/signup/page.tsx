@@ -70,10 +70,10 @@ export default function SignupPage() {
       if (data?.user) {
         toast({
           title: 'Account created!',
-          description: 'Please check your email to verify your account.',
+          description: 'Welcome! Let\'s set up your profile.',
         });
 
-        router.push('/login');
+        router.push('/onboarding');
       }
     } catch (err) {
       setError('Failed to create account. Please try again.');
