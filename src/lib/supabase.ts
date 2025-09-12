@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-import { adminDb } from './supabase-admin'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -14,36 +13,34 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 
 // Auth helper functions
 export const auth = {
-  // Sign up with email and password (single-call API)
+  // Sign up with email and password (calls server-side API route)
   signUp: async (userData: {
     email: string
     password: string
     full_name?: string
     agreeToTerms: boolean
   }) => {
-    // Validate terms acceptance
-    if (!userData.agreeToTerms) {
-      return { error: { message: 'Terms must be accepted' } }
+    try {
+      // Call server-side API route for signup
+      const response = await fetch('/api/v1/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        return { data: null, error: result.error }
+      }
+
+      return { data: result.data, error: null }
+    } catch (error) {
+      console.error('Signup error:', error)
+      return { data: null, error: { message: 'Network error during signup' } }
     }
-
-    // Create auth user + profile atomically
-    const { data, error } = await supabase.auth.signUp({
-      email: userData.email,
-      password: userData.password,
-    })
-
-    if (error || !data.user) return { data, error }
-
-    // Create profile with full data using admin client (bypasses RLS)
-    const { data: profile, error: profileError } = await adminDb.createUserProfile({
-      id: data.user.id,
-      email: userData.email,
-      full_name: userData.full_name,
-      terms_accepted: true,
-      terms_accepted_at: new Date().toISOString()
-    })
-
-    return { data: { ...data, profile }, error: profileError }
   },
 
   // Sign in with email and password
