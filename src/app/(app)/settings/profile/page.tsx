@@ -156,10 +156,30 @@ export default function ProfilePage() {
       return;
     }
 
+    // Check if user is OAuth (no password to change)
+    if (user?.app_metadata?.provider !== 'email') {
+      toast({
+        title: 'Password Update Not Available',
+        description: 'You signed up with OAuth. Use your provider to change password.',
+        variant: 'default',
+      });
+      setIsPasswordLoading(false);
+      return;
+    }
+
     try {
-      // TODO: Implement actual password change with Supabase
-      // For now, simulate password change
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Update password with Supabase
+      const { error } = await auth.updatePassword(passwordData.newPassword);
+
+      if (error) {
+        console.error('Password update error:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to update password. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
       toast({
         title: 'Password updated!',
@@ -173,9 +193,10 @@ export default function ProfilePage() {
         confirmPassword: '',
       });
     } catch (err) {
+      console.error('Unexpected password update error:', err);
       toast({
         title: 'Error',
-        description: 'Failed to change password. Please try again.',
+        description: 'An unexpected error occurred. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -184,25 +205,12 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
-    try {
-      // TODO: Implement actual account deletion with Supabase
-      // For now, simulate account deletion
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      toast({
-        title: 'Account deleted',
-        description: 'Your account has been successfully deleted.',
-      });
-
-      // TODO: Implement actual sign out and redirect to login page
-      // For now, we'll just show a message
-    } catch (err) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete account. Please try again.',
-        variant: 'destructive',
-      });
-    }
+    // Account deletion is currently disabled
+    // This will be implemented in a future update
+    toast({
+      title: 'Feature Coming Soon',
+      description: 'Account deletion will be available in a future update.',
+    });
   };
 
   return (
@@ -487,7 +495,7 @@ export default function ProfilePage() {
             </p>
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">Delete Account</Button>
+                <Button variant="destructive" disabled>Delete Account</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -506,7 +514,7 @@ export default function ProfilePage() {
             </AlertDialog>
           </div>
         </CardContent>
-      </Card>
+      </Card>    
     </div>
   );
 }
