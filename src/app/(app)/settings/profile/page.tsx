@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { usePreferences } from '@/hooks/use-preferences';
+import { auth, db, supabase } from '@/lib/supabase';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,15 +31,15 @@ import {
 
 export default function ProfilePage() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { preferences, updatePreferences, isLoading: prefsLoading, isLoggedIn, user } = usePreferences();
   const [profile, setProfile] = useState({
-    name: 'Current User',
-    email: 'user@example.com',
-    avatarUrl: 'https://placehold.co/100x100.png', // Placeholder for avatar
-    currency: 'USD', // Default currency
+    name: '',
+    email: '',
+    avatarUrl: '',
   });
   const [newAvatarFile, setNewAvatarFile] = useState<File | null>(null);
   const [previewAvatarUrl, setPreviewAvatarUrl] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -45,6 +47,17 @@ export default function ProfilePage() {
     confirmPassword: '',
   });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  // Load user data on mount - only if user is available
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+        email: user.email || '',
+        avatarUrl: user.user_metadata?.avatar_url || '',
+      });
+    }
+  }, [user]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -56,19 +69,50 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (!user || !isLoggedIn) return;
+
+    setIsSaving(true);
 
     try {
-      // TODO: Implement actual profile update with Supabase
-      // For now, simulate update
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Update preferences using the working hook
+      await updatePreferences({
+        currency: preferences.currency,
+      });
 
+      // Update profile-specific data (name, avatar)
+      const profileUpdates: any = {
+        full_name: profile.name,
+      };
+
+      // Handle avatar upload if there's a new file
       if (newAvatarFile) {
-        // TODO: Upload newAvatarFile to Supabase Storage
-        // For now, simulate upload and update avatarUrl
-        setProfile(prev => ({ ...prev, avatarUrl: previewAvatarUrl || prev.avatarUrl }));
+        // Upload to Supabase Storage
+        const fileExt = newAvatarFile.name.split('.').pop();
+        const fileName = `${user.id}/avatar.${fileExt}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, newAvatarFile, {
+            cacheControl: '3600',
+            upsert: true
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
+
+        profileUpdates.avatar_url = publicUrl;
+        setProfile(prev => ({ ...prev, avatarUrl: publicUrl }));
         setNewAvatarFile(null);
         setPreviewAvatarUrl(null);
+      }
+
+      // Update profile in database
+      if (Object.keys(profileUpdates).length > 0) {
+        await db.updateUserProfile(user.id, profileUpdates);
       }
 
       toast({
@@ -76,13 +120,14 @@ export default function ProfilePage() {
         description: 'Your profile information has been saved.',
       });
     } catch (err) {
+      console.error('Profile update error:', err);
       toast({
         title: 'Error',
         description: 'Failed to update profile. Please try again.',
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -185,7 +230,7 @@ export default function ProfilePage() {
                   accept="image/*"
                   className="hidden"
                   onChange={handleFileChange}
-                  disabled={isLoading}
+                  disabled={isSaving || prefsLoading}
                 />
               </Label>
             </div>
@@ -202,7 +247,7 @@ export default function ProfilePage() {
                 id="name"
                 defaultValue={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                disabled={isLoading}
+                disabled={isSaving || prefsLoading}
               />
             </div>
             <div className="space-y-2">
@@ -212,7 +257,7 @@ export default function ProfilePage() {
                 type="email"
                 defaultValue={profile.email}
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                disabled={isLoading}
+                disabled={isSaving || prefsLoading}
               />
             </div>
             <div className="space-y-2">
@@ -220,9 +265,9 @@ export default function ProfilePage() {
               <select
                 id="currency"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={profile.currency}
-                onChange={(e) => setProfile({ ...profile, currency: e.target.value })}
-                disabled={isLoading}
+                value={preferences.currency}
+                onChange={(e) => updatePreferences({ currency: e.target.value })}
+                disabled={isSaving || prefsLoading}
               >
                 <option value="USD">USD - US Dollar</option>
                 <option value="EUR">EUR - Euro</option>
@@ -261,8 +306,8 @@ export default function ProfilePage() {
                 <option value="KES">KES - Kenyan Shilling</option>
               </select>
             </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" disabled={isSaving || prefsLoading}>
+              {isSaving || prefsLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...

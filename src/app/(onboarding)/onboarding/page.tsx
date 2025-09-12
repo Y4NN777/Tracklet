@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Camera, Upload, Check, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Camera, Upload, Check, ArrowRight, ArrowLeft, Bot, Target, BarChart3, RefreshCw, PartyPopper } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { auth, db, supabase } from '@/lib/supabase';
 
@@ -136,31 +136,116 @@ export default function OnboardingPage() {
 
       // Save progress
       if (user) {
-        await db.updateOnboardingProgress(user.id, nextStep);
-      }
-    } else {
-      // Complete onboarding
-      if (user) {
-        await db.updateOnboardingProgress(user.id, 6, true);
-        await db.updateUserPreferences(user.id, preferences);
-        if (termsAccepted || !isOAuthUser) {
-          // Update terms acceptance for OAuth users or mark as accepted for email users
-          await supabase
-            .from('user_profiles')
-            .update({
-              terms_accepted: true,
-              terms_accepted_at: new Date().toISOString()
-            })
-            .eq('id', user.id);
+        try {
+          await db.updateOnboardingProgress(user.id, nextStep);
+        } catch (error) {
+          console.error('Failed to save progress:', error);
+          // Continue anyway - don't block user progress
         }
       }
+    } else {
+      // Complete onboarding with proper error handling
+      setIsLoading(true);
+      try {
+        if (user) {
+          // Update onboarding progress
+          try {
+            await db.updateOnboardingProgress(user.id, 6, true);
+          } catch (error) {
+            console.error('Failed to update onboarding progress:', error);
+            // Continue with other operations
+          }
 
-      toast({
-        title: 'Welcome to FinTrack! 🎉',
-        description: 'Your account is ready to go.'
-      });
+          // Update user preferences
+          try {
+            await db.updateUserPreferences(user.id, preferences);
+          } catch (error) {
+            console.error('Failed to update preferences:', error);
+            // Continue with other operations
+          }
 
-      router.push('/');
+          // Update terms acceptance
+          if (termsAccepted || !isOAuthUser) {
+            try {
+              await supabase
+                .from('user_profiles')
+                .update({
+                  terms_accepted: true,
+                  terms_accepted_at: new Date().toISOString()
+                })
+                .eq('id', user.id);
+            } catch (error) {
+              console.error('Failed to update terms acceptance:', error);
+              // Continue anyway
+            }
+          }
+        }
+
+        // Small delay to allow database operations to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Verify profile update before redirect
+        const { data: verifiedProfile, error: verifyError } = await db.getUserProfile(user.id);
+
+        if (verifiedProfile?.onboarding_completed) {
+          toast({
+            title: 'Welcome to FinTrack!',
+            description: 'Your account is ready to go.'
+          });
+
+          // Add delay to let toast be visible before navigation
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          router.push('/');
+        } else {
+          // Profile update may not be visible yet, wait and retry
+          console.warn('Profile verification failed, retrying...', verifyError);
+
+          toast({
+            title: 'Almost there!',
+            description: 'Finalizing your account setup...'
+          });
+
+          // Wait a moment and retry verification
+          setTimeout(async () => {
+            const { data: retryProfile } = await db.getUserProfile(user.id);
+            if (retryProfile?.onboarding_completed) {
+              toast({
+                title: 'Welcome to FinTrack!',
+                description: 'Your account is ready to go.'
+              });
+
+              // Add delay before navigation
+              await new Promise(resolve => setTimeout(resolve, 1500));
+              router.push('/');
+            } else {
+              // If still not updated, show error but redirect anyway
+              console.error('Profile update verification failed after retry');
+              toast({
+                title: 'Setup completed',
+                description: 'Welcome to FinTrack! Some preferences may update shortly.',
+                variant: 'default'
+              });
+
+              // Add delay before navigation
+              await new Promise(resolve => setTimeout(resolve, 1500));
+              router.push('/');
+            }
+          }, 2000);
+        }
+      } catch (error) {
+        console.error('Onboarding completion failed:', error);
+        toast({
+          title: 'Setup completed with minor issues',
+          description: 'Welcome to FinTrack! Some preferences may need to be set later.',
+        });
+
+        // Add delay before navigation even on error
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Still redirect to dashboard
+        router.push('/');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -184,7 +269,9 @@ export default function OnboardingPage() {
     handleNext();
   };
 
-  const progress = (currentStep / 6) * 100;
+  // Calculate total steps based on user type
+  const totalSteps = isOAuthUser ? 4 : 6;
+  const progress = (currentStep / totalSteps) * 100;
 
   if (!user) {
     return <div>Loading...</div>;
@@ -195,7 +282,7 @@ export default function OnboardingPage() {
       {/* Progress */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Step {currentStep} of 4</span>
+          <span>Step {currentStep} of {totalSteps}</span>
           <span>{Math.round(progress)}% complete</span>
         </div>
         <Progress value={progress} className="w-full" />
@@ -214,7 +301,9 @@ export default function OnboardingPage() {
                 <Check className="w-12 h-12 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">Welcome to FinTrack! 🎉</h3>
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  Welcome to FinTrack! <PartyPopper className="w-5 h-5" />
+                </h3>
                 <p className="text-muted-foreground">
                   Hello {user.user_metadata?.display_name || user.user_metadata?.name || user.user_metadata?.full_name || 'there'}! Your account has been created successfully. Let's set up your personalized finance experience.
                 </p>
@@ -232,7 +321,7 @@ export default function OnboardingPage() {
               <div className="grid gap-4">
                 <div className="flex items-start space-x-4 p-4 border rounded-lg">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <span className="text-blue-600 text-xl">🤖</span>
+                    <Bot className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold">AI-Powered Insights</h4>
@@ -242,7 +331,7 @@ export default function OnboardingPage() {
 
                 <div className="flex items-start space-x-4 p-4 border rounded-lg">
                   <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <span className="text-green-600 text-xl">🎯</span>
+                    <Target className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold">Goal Tracking</h4>
@@ -252,7 +341,7 @@ export default function OnboardingPage() {
 
                 <div className="flex items-start space-x-4 p-4 border rounded-lg">
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <span className="text-purple-600 text-xl">📊</span>
+                    <BarChart3 className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold">Smart Budgeting</h4>
@@ -262,7 +351,7 @@ export default function OnboardingPage() {
 
                 <div className="flex items-start space-x-4 p-4 border rounded-lg">
                   <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <span className="text-orange-600 text-xl">🔄</span>
+                    <RefreshCw className="w-6 h-6 text-orange-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold">Cross-Device Sync</h4>
@@ -343,7 +432,7 @@ export default function OnboardingPage() {
                         <>Uploading...</>
                       ) : (
                         <>
-                          <Camera className="w-4 h-4 mr-2" />
+                          <Upload className="w-4 h-4 mr-2" />
                           Upload Photo
                         </>
                       )}
@@ -456,7 +545,9 @@ export default function OnboardingPage() {
                 <Check className="w-12 h-12 text-green-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">You're All Set! 🎉</h3>
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  You're All Set! <PartyPopper className="w-5 h-5" />
+                </h3>
                 <p className="text-muted-foreground">
                   Welcome to FinTrack, {user.user_metadata?.display_name || user.user_metadata?.name || user.user_metadata?.full_name || 'valued user'}! Your personalized finance tracking experience is ready. Start managing your money smarter today!
                 </p>
@@ -493,7 +584,11 @@ export default function OnboardingPage() {
             disabled={isLoading || (currentStep === 3 && isOAuthUser && !termsAccepted)}
           >
             {currentStep === 6 ? (
-              <>Get Started</>
+              isLoading ? (
+                <>Completing Setup...</>
+              ) : (
+                <>Get Started</>
+              )
             ) : (
               <>
                 Continue

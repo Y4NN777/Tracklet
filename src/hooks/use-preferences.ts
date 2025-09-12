@@ -108,27 +108,14 @@ export function usePreferences() {
     };
 
     initializePreferences();
-  }, [loadLocalPreferences, loadDatabasePreferences]);
+  }, []); // Empty dependency array - run only once on mount
 
-  // Listen for user changes
-  useEffect(() => {
-    const checkUser = async () => {
-      const { user: currentUser } = await auth.getUser();
-      if (currentUser !== user) {
-        setUser(currentUser);
-        if (currentUser) {
-          await loadDatabasePreferences();
-        }
-      }
-    };
-
-    checkUser();
-  }, [user, loadDatabasePreferences]);
 
   return {
     preferences,
     updatePreferences,
     isLoading,
-    isLoggedIn: !!user
+    isLoggedIn: !!user,
+    user
   };
 }

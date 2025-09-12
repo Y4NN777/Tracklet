@@ -50,30 +50,36 @@ export function AuthGuard({
               .single()
 
             if (profileError) {
-              console.error('Profile check error:', profileError)
-              // If profile doesn't exist, redirect to onboarding
-              if (pathname !== '/onboarding') {
-                router.push('/onboarding')
-                return
+              // Handle different types of errors appropriately
+              if (profileError.code === 'PGRST116') {
+                // Profile doesn't exist - redirect to onboarding
+                console.log('Profile not found, redirecting to onboarding')
+                if (pathname !== '/onboarding') {
+                  router.push('/onboarding')
+                  return
+                }
+              } else {
+                // Network/database error - allow access to prevent infinite loops
+                console.error('Profile check failed (allowing access):', profileError)
+                // Don't redirect, allow user access to prevent loops
               }
             } else if (profile && !profile.onboarding_completed) {
               // Profile exists but onboarding not completed
+              console.log('Profile found but onboarding incomplete, redirecting to onboarding')
               if (pathname !== '/onboarding') {
                 router.push('/onboarding')
                 return
               }
             } else if (profile && profile.onboarding_completed && pathname === '/onboarding') {
               // User completed onboarding but trying to access onboarding page
+              console.log('Onboarding completed, redirecting to dashboard')
               router.push('/')
               return
             }
           } catch (error) {
-            console.error('Onboarding check error:', error)
-            // On error, redirect to onboarding to be safe
-            if (pathname !== '/onboarding') {
-              router.push('/onboarding')
-              return
-            }
+            console.error('Onboarding check error (allowing access):', error)
+            // On unexpected error, allow access to prevent infinite loops
+            // Don't redirect to onboarding
           }
         }
 
@@ -105,7 +111,9 @@ export function AuthGuard({
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [router, pathname, requireAuth, requireOnboarding])
 
   if (loading) {
@@ -113,8 +121,15 @@ export function AuthGuard({
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <h2 className="text-xl font-semibold mb-2">Loading...</h2>
-          <p className="text-muted-foreground">Please wait while we set up your account.</p>
+          <h2 className="text-xl font-semibold mb-2">
+            {pathname === '/onboarding' ? 'Setting up your profile...' : 'Loading...'}
+          </h2>
+          <p className="text-muted-foreground">
+            {pathname === '/onboarding'
+              ? 'Please wait while we prepare your account.'
+              : 'Please wait while we verify your account.'
+            }
+          </p>
         </div>
       </div>
     )

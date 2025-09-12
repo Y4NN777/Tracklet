@@ -73,6 +73,8 @@ export default function SignupPage() {
           description: 'Welcome! Let\'s set up your profile.',
         });
 
+        // Add delay to let toast be visible before navigation
+        await new Promise(resolve => setTimeout(resolve, 1500));
         router.push('/onboarding');
       }
     } catch (err) {
