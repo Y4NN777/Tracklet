@@ -235,29 +235,3 @@ CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories FOR EACH
 CREATE TRIGGER update_transactions_updated_at BEFORE UPDATE ON transactions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_budgets_updated_at BEFORE UPDATE ON budgets FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_savings_goals_updated_at BEFORE UPDATE ON savings_goals FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- =========================================
--- DEFAULT CATEGORIES (OPTIONAL)
--- =========================================
-
--- Insert default categories for new users (you can run this separately)
--- INSERT INTO categories (user_id, name, type, color, icon) VALUES
--- ('user-uuid-here', 'Salary', 'income', '#10b981', '💰'),
--- ('user-uuid-here', 'Freelance', 'income', '#3b82f6', '💻'),
--- ('user-uuid-here', 'Food & Dining', 'expense', '#ef4444', '🍽️'),
--- ('user-uuid-here', 'Transportation', 'expense', '#f59e0b', '🚗'),
--- ('user-uuid-here', 'Entertainment', 'expense', '#8b5cf6', '🎬'),
--- ('user-uuid-here', 'Shopping', 'expense', '#ec4899', '🛍️'),
--- ('user-uuid-here', 'Bills & Utilities', 'expense', '#6b7280', '💡'),
--- ('user-uuid-here', 'Healthcare', 'expense', '#059669', '🏥');
-
--- =========================================
--- SUCCESS MESSAGE
--- =========================================
-
--- Schema created successfully!
--- Next steps:
--- 1. Execute this SQL in Supabase SQL Editor
--- 2. Test the authentication flow
--- 3. Create API endpoints for CRUD operations
--- 4. Implement business logic for financial calculations
