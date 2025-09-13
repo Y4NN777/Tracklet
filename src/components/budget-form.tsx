@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -34,9 +34,11 @@ const budgetSchema = z.object({
   }),
   amount: z.coerce.number()
     .gt(0, { message: "Amount must be greater than 0." }),
-  category: z.string().min(2, {
-    message: "Category must be at least 2 characters.",
+  period: z.enum(['monthly', 'weekly', 'yearly'], {
+    required_error: "Please select a budget period.",
   }),
+  category_id: z.string().optional(),
+  start_date: z.string().optional(),
   currency: z.string().min(3, {
     message: "Currency must be selected.",
   }),
@@ -44,35 +46,72 @@ const budgetSchema = z.object({
 
 type BudgetFormValues = z.infer<typeof budgetSchema>
 
+interface Budget {
+  id: string;
+  name: string;
+  amount: number;
+  period: string;
+  category_id?: string;
+  start_date?: string;
+  end_date?: string;
+  categories?: {
+    name: string;
+  };
+}
+
 interface BudgetFormProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   onSubmit: (values: BudgetFormValues) => void;
+  editingBudget?: Budget | null;
+  onClose?: () => void;
 }
 
-export function BudgetForm({ open, setOpen, onSubmit }: BudgetFormProps) {
+export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: BudgetFormProps) {
   const { toast } = useToast();
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
       name: "",
       amount: 0,
-      category: "",
+      period: undefined,
+      category_id: "",
+      start_date: "",
       currency: "USD", // Default currency
     },
   })
 
+  // Handle editing mode
+  useEffect(() => {
+    if (editingBudget) {
+      form.reset({
+        name: editingBudget.name,
+        amount: editingBudget.amount,
+        period: editingBudget.period as 'monthly' | 'weekly' | 'yearly',
+        category_id: editingBudget.category_id || "",
+        start_date: editingBudget.start_date || "",
+        currency: "USD", // Default for now, could be enhanced
+      });
+    } else {
+      form.reset({
+        name: "",
+        amount: 0,
+        period: undefined,
+        category_id: "",
+        start_date: undefined,
+        currency: "USD",
+      });
+    }
+  }, [editingBudget, form]);
+
   function handleClose() {
     form.reset();
     setOpen(false);
+    if (onClose) onClose();
   }
 
   function onSubmitHandler(values: BudgetFormValues) {
     onSubmit(values);
-    toast({
-      title: "Budget added.",
-      description: "Your budget has been added successfully.",
-    })
     handleClose();
   }
 
@@ -80,9 +119,12 @@ export function BudgetForm({ open, setOpen, onSubmit }: BudgetFormProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Budget</DialogTitle>
+          <DialogTitle>{editingBudget ? 'Edit Budget' : 'Add Budget'}</DialogTitle>
           <DialogDescription>
-            Add a new budget to track your finances.
+            {editingBudget
+              ? 'Update your budget information.'
+              : 'Add a new budget to track your finances.'
+            }
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -115,13 +157,40 @@ export function BudgetForm({ open, setOpen, onSubmit }: BudgetFormProps) {
             />
             <FormField
               control={form.control}
-              name="category"
+              name="period"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>Budget Period</FormLabel>
                   <FormControl>
-                    <Input placeholder="Category" {...field} />
+                    <select
+                      {...field}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Select period</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
                   </FormControl>
+                  <FormDescription>
+                    How often this budget resets.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="start_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    When this budget period starts.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -184,7 +253,7 @@ export function BudgetForm({ open, setOpen, onSubmit }: BudgetFormProps) {
               )}
             />
             <DialogFooter>
-              <Button type="submit">Add Budget</Button>
+              <Button type="submit">{editingBudget ? 'Update Budget' : 'Add Budget'}</Button>
             </DialogFooter>
           </form>
         </Form>

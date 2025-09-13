@@ -11,10 +11,22 @@ import {
 } from '@/components/ui/card';
 import { MobileDataList } from '@/components/ui/mobile-data-list';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, Wallet, PiggyBank, CreditCard, TrendingUp } from 'lucide-react';
+import { PlusCircle, Wallet, PiggyBank, CreditCard, TrendingUp, Edit, Trash2 } from 'lucide-react';
 import { AccountForm } from '@/components/account-form';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api-client';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface Account {
   id: string;
@@ -44,6 +56,8 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [userCurrency, setUserCurrency] = useState('USD');
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const { toast } = useToast();
 
   // Fetch accounts on component mount
   useEffect(() => {
@@ -91,14 +105,93 @@ export default function AccountsPage() {
 
       if (response.data) {
         setAccounts(prev => [response.data.account, ...prev]);
+        toast({
+          title: 'Account added!',
+          description: 'Your account has been created successfully.',
+        });
       } else if (response.error) {
         throw new Error(response.error);
       }
     } catch (error) {
       console.error('Error creating account:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add account. Please try again.',
+        variant: 'destructive',
+      });
       // Re-throw the error so the form can handle it
       throw error;
     }
+  };
+
+  const handleEditAccount = (account: Account) => {
+    setEditingAccount(account);
+    setOpen(true);
+  };
+
+  const handleUpdateAccount = async (values: any) => {
+    if (!editingAccount) return;
+
+    try {
+      const response = await api.updateAccount(editingAccount.id, values);
+
+      if (response.data) {
+        setAccounts(prev => prev.map(acc => acc.id === editingAccount.id ? response.data.account : acc));
+        setEditingAccount(null);
+        toast({
+          title: 'Account updated!',
+          description: 'Your account has been updated successfully.',
+        });
+      } else if (response.error) {
+        console.error('Failed to update account:', response.error);
+        toast({
+          title: 'Error',
+          description: 'Failed to update account. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error updating account:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update account. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteAccount = async (accountId: string) => {
+    try {
+      const response = await api.deleteAccount(accountId);
+
+      if (response.data || (!response.error && !response.data)) {
+        // DELETE returns 204 No Content, so no data but success
+        setAccounts(prev => prev.filter(acc => acc.id !== accountId));
+        toast({
+          title: 'Account deleted!',
+          description: 'Your account has been deleted successfully.',
+        });
+      } else if (response.error) {
+        console.error('Failed to delete account:', response.error);
+        toast({
+          title: 'Error',
+          description: 'Failed to delete account. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete account. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setEditingAccount(null);
   };
 
   // Calculate net worth
@@ -154,7 +247,13 @@ export default function AccountsPage() {
             </div>
           </CardContent>
         </Card>
-        <AccountForm open={open} setOpen={setOpen} onSubmit={handleAddAccount} />
+        <AccountForm
+          open={open}
+          setOpen={setOpen}
+          onSubmit={editingAccount ? handleUpdateAccount : handleAddAccount}
+          editingAccount={editingAccount}
+          onClose={handleClose}
+        />
       </>
     );
   }
@@ -228,15 +327,48 @@ export default function AccountsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className={`text-lg font-semibold ${account.balance < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {account.balance.toLocaleString('en-US', {
-                              style: 'currency',
-                              currency: account.currency
-                            })}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {account.currency}
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditAccount(account)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Account</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{account.name}"? This action cannot be undone and will affect all associated transactions.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteAccount(account.id)}
+                                  className="bg-destructive hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          <div className="text-right ml-4">
+                            <div className={`text-lg font-semibold ${account.balance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                              {account.balance.toLocaleString('en-US', {
+                                style: 'currency',
+                                currency: account.currency
+                              })}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {account.currency}
+                            </div>
                           </div>
                         </div>
                       </div>

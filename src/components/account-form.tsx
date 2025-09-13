@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -45,13 +45,23 @@ const accountSchema = z.object({
 
 type AccountFormValues = z.infer<typeof accountSchema>
 
+interface Account {
+  id: string;
+  name: string;
+  type: 'checking' | 'savings' | 'credit' | 'investment';
+  balance: number;
+  currency: string;
+}
+
 interface AccountFormProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   onSubmit: (values: AccountFormValues) => void;
+  editingAccount?: Account | null;
+  onClose?: () => void;
 }
 
-export function AccountForm({ open, setOpen, onSubmit }: AccountFormProps) {
+export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }: AccountFormProps) {
   const { toast } = useToast();
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
@@ -63,9 +73,29 @@ export function AccountForm({ open, setOpen, onSubmit }: AccountFormProps) {
     },
   })
 
+  // Handle editing mode
+  useEffect(() => {
+    if (editingAccount) {
+      form.reset({
+        name: editingAccount.name,
+        type: editingAccount.type,
+        balance: editingAccount.balance,
+        currency: editingAccount.currency,
+      });
+    } else {
+      form.reset({
+        name: "",
+        type: undefined,
+        balance: 0,
+        currency: "USD",
+      });
+    }
+  }, [editingAccount, form]);
+
   function handleClose() {
     form.reset();
     setOpen(false);
+    if (onClose) onClose();
   }
 
   async function onSubmitHandler(values: AccountFormValues) {
@@ -90,9 +120,12 @@ export function AccountForm({ open, setOpen, onSubmit }: AccountFormProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Account</DialogTitle>
+          <DialogTitle>{editingAccount ? 'Edit Account' : 'Add Account'}</DialogTitle>
           <DialogDescription>
-            Add a new financial account to track your money.
+            {editingAccount
+              ? 'Update your account information.'
+              : 'Add a new financial account to track your money.'
+            }
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -309,7 +342,7 @@ export function AccountForm({ open, setOpen, onSubmit }: AccountFormProps) {
               )}
             />
             <DialogFooter>
-              <Button type="submit">Add Account</Button>
+              <Button type="submit">{editingAccount ? 'Update Account' : 'Add Account'}</Button>
             </DialogFooter>
           </form>
         </Form>

@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Receipt } from 'lucide-react';
+import { CalendarIcon, Receipt, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api-client';
+import { useToast } from '@/hooks/use-toast';
 
 import {
   Card,
@@ -21,6 +22,17 @@ import {
 import { MobileDataList } from '@/components/ui/mobile-data-list';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface Transaction {
   id: string;
@@ -46,12 +58,14 @@ export default function TransactionsPage() {
   const [open, setOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined,
   });
+  const { toast } = useToast();
 
   // Fetch transactions on component mount
   useEffect(() => {
@@ -88,12 +102,103 @@ export default function TransactionsPage() {
         console.log('Transaction added:', response.data.transaction);
         // Refresh transactions list
         await fetchTransactions();
+        toast({
+          title: 'Transaction added!',
+          description: 'Your transaction has been recorded successfully.',
+        });
       } else if (response.error) {
         console.error('Failed to add transaction:', response.error);
+        toast({
+          title: 'Error',
+          description: 'Failed to add transaction. Please try again.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error adding transaction:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add transaction. Please try again.',
+        variant: 'destructive',
+      });
     }
+  };
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setOpen(true);
+  };
+
+  const handleUpdateTransaction = async (values: any) => {
+    if (!editingTransaction) return;
+
+    try {
+      // Convert date to YYYY-MM-DD format for API
+      const transactionData = {
+        ...values,
+        date: values.date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD
+      };
+
+      const response = await api.updateTransaction(editingTransaction.id, transactionData);
+
+      if (response.data) {
+        // Refresh transactions list
+        await fetchTransactions();
+        setEditingTransaction(null);
+        toast({
+          title: 'Transaction updated!',
+          description: 'Your transaction has been updated successfully.',
+        });
+      } else if (response.error) {
+        console.error('Failed to update transaction:', response.error);
+        toast({
+          title: 'Error',
+          description: 'Failed to update transaction. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update transaction. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteTransaction = async (transactionId: string) => {
+    try {
+      const response = await api.deleteTransaction(transactionId);
+
+      if (response.data || (!response.error && !response.data)) {
+        // DELETE returns 204 No Content, so no data but success
+        setTransactions(prev => prev.filter(transaction => transaction.id !== transactionId));
+        toast({
+          title: 'Transaction deleted!',
+          description: 'Your transaction has been deleted successfully.',
+        });
+      } else if (response.error) {
+        console.error('Failed to delete transaction:', response.error);
+        toast({
+          title: 'Error',
+          description: 'Failed to delete transaction. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete transaction. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCloseTransaction = () => {
+    setOpen(false);
+    setEditingTransaction(null);
   };
 
   const exportToCSV = () => {
@@ -182,7 +287,13 @@ export default function TransactionsPage() {
             </div>
           </CardContent>
         </Card>
-        <TransactionForm open={open} setOpen={setOpen} onSubmit={handleAddTransaction} />
+        <TransactionForm
+          open={open}
+          setOpen={setOpen}
+          onSubmit={editingTransaction ? handleUpdateTransaction : handleAddTransaction}
+          editingTransaction={editingTransaction}
+          onClose={handleCloseTransaction}
+        />
       </>
     );
   }
@@ -276,6 +387,81 @@ export default function TransactionsPage() {
           items={filteredTransactions}
           type="transactions"
           loading={loading}
+          renderCard={(transaction) => (
+            <div key={transaction.id} className="relative">
+              <div className="absolute top-2 right-2 flex gap-1 z-10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditTransaction(transaction)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this transaction? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteTransaction(transaction.id)}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+              <Card className="p-4 pr-20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Receipt className="h-8 w-8 text-primary" />
+                    <div>
+                      <h3 className="font-semibold">{transaction.description}</h3>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>{format(new Date(transaction.date), 'MMM dd, yyyy')}</span>
+                        {transaction.categories && (
+                          <>
+                            <span>•</span>
+                            <span>{transaction.categories.name}</span>
+                          </>
+                        )}
+                        {transaction.accounts && (
+                          <>
+                            <span>•</span>
+                            <span>{transaction.accounts.name}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-lg font-semibold ${
+                      transaction.type === 'income' ? 'text-green-600' :
+                      transaction.type === 'expense' ? 'text-red-600' : 'text-blue-600'
+                    }`}>
+                      {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''}
+                      ${transaction.amount.toFixed(2)}
+                    </div>
+                    <div className="text-xs text-muted-foreground capitalize">
+                      {transaction.type}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
           emptyState={{
             title: "No transactions found",
             description: "Try adjusting your search or filter criteria.",
