@@ -7,9 +7,17 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -28,7 +36,7 @@ export async function GET(
         )
       `)
       .eq('id', params.id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single()
 
     if (error) {
@@ -41,7 +49,7 @@ export async function GET(
 
     // Calculate progress if requested
     if (includeProgress) {
-      const progress = await calculateBudgetProgress(data, session.user.id)
+      const progress = await calculateBudgetProgress(data, user.id)
       return NextResponse.json({ budget: { ...data, ...progress } })
     }
 
@@ -59,9 +67,17 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -91,7 +107,7 @@ export async function PATCH(
       .from('budgets')
       .update(updateData)
       .eq('id', params.id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .select(`
         *,
         categories (
@@ -129,9 +145,17 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -161,7 +185,7 @@ export async function PUT(
         end_date
       })
       .eq('id', params.id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .select(`
         *,
         categories (
@@ -198,9 +222,17 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -208,7 +240,7 @@ export async function DELETE(
       .from('budgets')
       .delete()
       .eq('id', params.id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
 
     if (error) {
       console.error('Error deleting budget:', error)

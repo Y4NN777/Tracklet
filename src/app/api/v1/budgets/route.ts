@@ -4,9 +4,17 @@ import { supabase } from '@/lib/supabase'
 // GET /api/budgets - Get all budgets for the authenticated user
 export async function GET(request: NextRequest) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -24,7 +32,7 @@ export async function GET(request: NextRequest) {
           icon
         )
       `)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     const { data: budgets, error } = await query
@@ -38,7 +46,7 @@ export async function GET(request: NextRequest) {
     if (includeProgress && budgets) {
       const budgetsWithProgress = await Promise.all(
         budgets.map(async (budget) => {
-          const progress = await calculateBudgetProgress(budget, session.user.id)
+          const progress = await calculateBudgetProgress(budget, user.id)
           return { ...budget, ...progress }
         })
       )
@@ -56,9 +64,17 @@ export async function GET(request: NextRequest) {
 // POST /api/budgets - Create a new budget
 export async function POST(request: NextRequest) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -78,7 +94,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('budgets')
       .insert([{
-        user_id: session.user.id,
+        user_id: user.id,
         name,
         amount: parseFloat(amount),
         period,
