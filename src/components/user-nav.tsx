@@ -23,10 +23,21 @@ export function UserNav() {
 
   const handleLogout = async () => {
     try {
+      // Step 1: Call logout API for server-side cleanup
+      const response = await fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        console.warn('Logout API failed, proceeding with client logout');
+      }
+
+      // Step 2: Client-side logout (triggers AuthGuard redirect)
       const { error } = await auth.signOut();
 
       if (error) {
-        console.error('Logout error:', error);
+        console.error('Client logout error:', error);
         toast({
           title: 'Error',
           description: 'Failed to log out. Please try again.',
@@ -35,23 +46,31 @@ export function UserNav() {
         return;
       }
 
-      // Show success message
+      // Step 3: Success feedback (AuthGuard handles redirect)
       toast({
         title: 'Logged out',
         description: 'You have been successfully logged out.',
       });
 
-      // Redirect to login page
-      router.push('/login');
-      router.refresh(); // Refresh to clear any cached data
-
     } catch (error) {
-      console.error('Unexpected logout error:', error);
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred. Please try again.',
-        variant: 'destructive',
-      });
+      console.error('Logout error:', error);
+
+      // Fallback: Try client-only logout
+      try {
+        const { error: fallbackError } = await auth.signOut();
+        if (!fallbackError) {
+          toast({
+            title: 'Logged out',
+            description: 'You have been logged out.',
+          });
+        }
+      } catch (fallbackError) {
+        toast({
+          title: 'Error',
+          description: 'Failed to log out. Please refresh the page.',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
