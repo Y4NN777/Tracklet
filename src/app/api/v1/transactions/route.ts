@@ -5,9 +5,17 @@ import { auth } from '@/lib/supabase'
 // GET /api/transactions - Get all transactions for the authenticated user
 export async function GET(request: NextRequest) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -36,7 +44,7 @@ export async function GET(request: NextRequest) {
           type
         )
       `)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('date', { ascending: false })
       .range(offset, offset + limit - 1)
 
@@ -75,9 +83,17 @@ export async function GET(request: NextRequest) {
 // POST /api/transactions - Create a new transaction
 export async function POST(request: NextRequest) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -97,7 +113,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('transactions')
       .insert([{
-        user_id: session.user.id,
+        user_id: user.id,
         amount: parseFloat(amount),
         description,
         type,
