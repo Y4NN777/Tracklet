@@ -44,4 +44,4 @@ next-env.d.ts
 firebase-debug.log
 firestore-debug.log
 
-docs/*
+plan.md
