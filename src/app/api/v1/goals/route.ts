@@ -4,9 +4,17 @@ import { supabase } from '@/lib/supabase'
 // GET /api/goals - Get all savings goals for the authenticated user
 export async function GET(request: NextRequest) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -16,7 +24,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('savings_goals')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     const { data: goals, error } = await query
@@ -30,7 +38,7 @@ export async function GET(request: NextRequest) {
     if (includeProgress && goals) {
       const goalsWithProgress = await Promise.all(
         goals.map(async (goal) => {
-          const progress = await calculateGoalProgress(goal, session.user.id)
+          const progress = await calculateGoalProgress(goal, user.id)
           return { ...goal, ...progress }
         })
       )
@@ -48,9 +56,17 @@ export async function GET(request: NextRequest) {
 // POST /api/goals - Create a new savings goal
 export async function POST(request: NextRequest) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -65,7 +81,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('savings_goals')
       .insert([{
-        user_id: session.user.id,
+        user_id: user.id,
         name,
         target_amount: parseFloat(target_amount),
         current_amount: parseFloat(current_amount || 0),
