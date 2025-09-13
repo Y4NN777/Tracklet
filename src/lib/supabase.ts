@@ -2,12 +2,19 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const appUrl = process.env.NEXT_PUBLIC_APP_URL!
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL!
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+// Use service role key for server-side operations (API routes), regular key for client-side
+const isServerSide = typeof window === 'undefined'
+const keyToUse = isServerSide && supabaseServiceKey ? supabaseServiceKey : supabaseKey
+
+export const supabase = createClient(supabaseUrl, keyToUse, {
   auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
+    autoRefreshToken: !isServerSide, // Disable auto refresh for server-side
+    persistSession: !isServerSide,   // Disable session persistence for server-side
+    detectSessionInUrl: !isServerSide
   }
 })
 
@@ -22,7 +29,7 @@ export const auth = {
   }) => {
     try {
       // Call server-side API route for signup
-      const response = await fetch('/api/v1/auth/signup', {
+      const response = await fetch(`${apiBaseUrl}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +64,7 @@ export const auth = {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: `${appUrl}/auth/callback`
       }
     })
     return { data, error }
@@ -84,7 +91,7 @@ export const auth = {
   // Reset password
   resetPassword: async (email: string) => {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`
+      redirectTo: `${appUrl}/auth/reset-password`
     })
     return { data, error }
   },
