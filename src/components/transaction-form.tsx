@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Form,
   FormControl,
@@ -32,8 +31,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { useToast } from '@/hooks/use-toast';
-import { PopoverClose } from '@radix-ui/react-popover';
 import { Textarea } from '@/components/ui/textarea';
+import { api } from '@/lib/api-client';
 
 const transactionSchema = z.object({
   description: z.string().min(2, {
@@ -41,8 +40,11 @@ const transactionSchema = z.object({
   }),
   amount: z.coerce.number()
     .gt(0, { message: "Amount must be greater than 0." }),
-  category: z.string().min(2, {
-    message: "Category must be at least 2 characters.",
+  category_id: z.string().min(1, {
+    message: "Category must be selected.",
+  }),
+  account_id: z.string().min(1, {
+    message: "Account must be selected.",
   }),
   date: z.date(),
   currency: z.string().min(3, {
@@ -58,18 +60,72 @@ interface TransactionFormProps {
   onSubmit: (values: TransactionFormValues) => void;
 }
 
+interface Account {
+  id: string;
+  name: string;
+  type: string;
+  balance: number;
+  currency: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  type: string;
+  color: string;
+  icon: string;
+}
+
 export function TransactionForm({ open, setOpen, onSubmit }: TransactionFormProps) {
   const { toast } = useToast();
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
+
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       description: "",
       amount: 0,
-      category: "",
+      category_id: "",
+      account_id: "",
       date: new Date(),
       currency: "USD", // Default currency
     },
   })
+
+  // Fetch accounts and categories when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchAccountsAndCategories();
+    }
+  }, [open]);
+
+  const fetchAccountsAndCategories = async () => {
+    setLoading(true);
+    try {
+      const [accountsResponse, categoriesResponse] = await Promise.all([
+        api.getAccounts(),
+        api.getCategories()
+      ]);
+
+      if (accountsResponse.data) {
+        setAccounts(accountsResponse.data.accounts || []);
+      } else if (accountsResponse.error) {
+        console.error('Error fetching accounts:', accountsResponse.error);
+      }
+
+      if (categoriesResponse.data) {
+        setCategories(categoriesResponse.data.categories || []);
+      } else if (categoriesResponse.error) {
+        console.error('Error fetching categories:', categoriesResponse.error);
+      }
+    } catch (error) {
+      console.error('Error fetching accounts and categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   function handleClose() {
     form.reset();
@@ -124,73 +180,96 @@ export function TransactionForm({ open, setOpen, onSubmit }: TransactionFormProp
             />
             <FormField
               control={form.control}
-              name="category"
+              name="category_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
                   <FormControl>
-                    <Input placeholder="Category" {...field} />
+                    <select
+                      {...field}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={loading}
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.icon} {category.name} ({category.type})
+                        </option>
+                      ))}
+                    </select>
                   </FormControl>
+                  <FormDescription>
+                    Choose the category for this transaction.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="account_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Account</FormLabel>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={loading}
+                    >
+                      <option value="">Select an account</option>
+                      {accounts.map((account) => (
+                        <option key={account.id} value={account.id}>
+                          {account.name} ({account.type}) - {account.balance.toLocaleString('en-US', { style: 'currency', currency: account.currency })}
+                        </option>
+                      ))}
+                    </select>
+                  </FormControl>
+                  <FormDescription>
+                    Choose the account for this transaction.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
              <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start" side="bottom">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={false}
-                        initialFocus
-                      />
-                      <PopoverClose className="focus:shadow-outline absolute top-2 right-2 rounded-sm opacity-50 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring disabled:pointer-events-none data-[state=open]:bg-secondary">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="h-4 w-4"
-                        >
-                          <path d="M18 6 6 18" />
-                          <path d="M6 6 18 18" />
-                        </svg>
-                      </PopoverClose>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+               control={form.control}
+               name="date"
+               render={({ field }) => (
+                 <FormItem className="flex flex-col">
+                   <FormLabel>Date</FormLabel>
+                   <Popover>
+                     <PopoverTrigger asChild>
+                       <FormControl>
+                         <Button
+                           variant={"outline"}
+                           className={cn(
+                             "w-full pl-3 text-left font-normal",
+                             !field.value && "text-muted-foreground"
+                           )}
+                         >
+                           {field.value ? (
+                             format(field.value, "PPP")
+                           ) : (
+                             <span>Pick a date</span>
+                           )}
+                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                         </Button>
+                       </FormControl>
+                     </PopoverTrigger>
+                     <PopoverContent className="w-auto p-0" align="start">
+                       <Calendar
+                         mode="single"
+                         selected={field.value}
+                         onSelect={field.onChange}
+                         initialFocus
+                       />
+                     </PopoverContent>
+                   </Popover>
+                   <FormMessage />
+                 </FormItem>
+               )}
+             />
             <FormField
               control={form.control}
               name="currency"

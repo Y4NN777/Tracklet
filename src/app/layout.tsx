@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 import ErrorBoundary from '@/components/error-boundary';
 import { NotificationProvider } from '@/contexts/notification-context';
+import { PreferencesProvider } from '@/contexts/preferences-context';
+import { PreferencesThemeBridge } from '@/components/preferences-theme-bridge';
 
 export const metadata: Metadata = {
   title: 'FinTrack',
@@ -25,12 +27,15 @@ export default function RootLayout({
       </head>
       <body className={cn('font-body antialiased')}  suppressHydrationWarning={true}>
         <ThemeProvider>
-          <NotificationProvider>
-            <ErrorBoundary>
-              {children}
-            </ErrorBoundary>
-          </NotificationProvider>
-          <Toaster />
+          <PreferencesProvider>
+            <PreferencesThemeBridge />
+            <NotificationProvider>
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
+            </NotificationProvider>
+            <Toaster />
+          </PreferencesProvider>
         </ThemeProvider>
       </body>
     </html>

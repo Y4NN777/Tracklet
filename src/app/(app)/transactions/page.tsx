@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { TransactionForm } from '@/components/transaction-form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Receipt } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { api } from '@/lib/api-client';
 
 import {
   Card,
@@ -18,25 +19,33 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { MobileDataList } from '@/components/ui/mobile-data-list';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 
-const transactions = [
-  { id: 'txn1', date: '2024-07-26', description: 'Monthly Rent', amount: -1500.00, category: 'Housing', status: 'Completed' },
-  { id: 'txn2', date: '2024-07-25', description: 'Paycheck', amount: 2500.00, category: 'Income', status: 'Completed' },
-  { id: 'txn3', date: '2024-07-24', description: 'Groceries at Whole Foods', amount: -124.50, category: 'Food', status: 'Completed' },
-  { id: 'txn4', date: '2024-07-23', description: 'Dinner with friends', amount: -65.80, category: 'Social', status: 'Completed' },
-  { id: 'txn5', date: '2024-07-22', description: 'Gym Membership', amount: -40.00, category: 'Health', status: 'Completed' },
-  { id: 'txn6', date: '2024-07-21', description: 'Amazon Purchase', amount: -89.99, category: 'Shopping', status: 'Completed' },
-  { id: 'txn7', date: '2024-07-20', description: 'Utility Bill', amount: -75.00, category: 'Utilities', status: 'Completed' },
-  { id: 'txn8', date: '2024-07-19', description: 'Stock Dividend', amount: 50.25, category: 'Investment', status: 'Completed' },
-  { id: 'txn9', date: '2024-07-18', description: 'Coffee at Starbucks', amount: -5.75, category: 'Food', status: 'Completed' },
-  { id: 'txn10', date: '2024-07-17', description: 'Movie Tickets', amount: -32.00, category: 'Entertainment', status: 'Completed' },
-];
+interface Transaction {
+  id: string;
+  description: string;
+  amount: number;
+  type: 'income' | 'expense' | 'transfer';
+  date: string;
+  created_at: string;
+  categories?: {
+    id: string;
+    name: string;
+    color: string;
+    icon: string;
+  };
+  accounts?: {
+    id: string;
+    name: string;
+    type: string;
+  };
+}
 
 export default function TransactionsPage() {
   const [open, setOpen] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
@@ -44,21 +53,59 @@ export default function TransactionsPage() {
     to: undefined,
   });
 
-  const handleAddTransaction = (values: any) => {
-    // TODO: Implement actual transaction adding logic
-    console.log('Transaction values:', values);
+  // Fetch transactions on component mount
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await api.getTransactions();
+
+      if (response.data) {
+        setTransactions(response.data.transactions || []);
+      } else if (response.error) {
+        console.error('Error fetching transactions:', response.error);
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddTransaction = async (values: any) => {
+    try {
+      // Convert date to YYYY-MM-DD format for API
+      const transactionData = {
+        ...values,
+        date: values.date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD
+      };
+
+      const response = await api.createTransaction(transactionData);
+
+      if (response.data) {
+        console.log('Transaction added:', response.data.transaction);
+        // Refresh transactions list
+        await fetchTransactions();
+      } else if (response.error) {
+        console.error('Failed to add transaction:', response.error);
+      }
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+    }
   };
 
   const exportToCSV = () => {
     // Create CSV content
-    const headers = ['Date', 'Description', 'Category', 'Amount', 'Status'];
+    const headers = ['Date', 'Description', 'Category', 'Account', 'Amount', 'Type'];
     const csvContent = [
       headers.join(','),
       ...filteredTransactions.map(txn =>
-        `"${txn.date}","${txn.description}","${txn.category}",${txn.amount},"${txn.status}"`
+        `"${txn.date}","${txn.description}","${txn.categories?.name || 'Uncategorized'}","${txn.accounts?.name || 'No Account'}",${txn.amount},"${txn.type}"`
       )
     ].join('\n');
-    
+
     // Create blob and download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -73,9 +120,9 @@ export default function TransactionsPage() {
 
   // Get unique categories for filter dropdown
   const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(transactions.map(txn => txn.category))];
+    const uniqueCategories = [...new Set(transactions.map(txn => txn.categories?.name).filter((name): name is string => Boolean(name)))];
     return ['all', ...uniqueCategories];
-  }, []);
+  }, [transactions]);
 
   // Filter transactions based on search and filters
   const filteredTransactions = useMemo(() => {
@@ -83,44 +130,60 @@ export default function TransactionsPage() {
       // Search filter
       const matchesSearch =
         txn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        txn.category.toLowerCase().includes(searchTerm.toLowerCase());
-      
+        (txn.categories?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (txn.accounts?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+
       // Category filter
-      const matchesCategory = categoryFilter === 'all' || txn.category === categoryFilter;
-      
+      const matchesCategory = categoryFilter === 'all' || txn.categories?.name === categoryFilter;
+
       // Date range filter
       const txnDate = new Date(txn.date);
       const matchesDateRange =
         (!dateRange.from || txnDate >= dateRange.from) &&
         (!dateRange.to || txnDate <= dateRange.to);
-      
+
       return matchesSearch && matchesCategory && matchesDateRange;
     });
-  }, [searchTerm, categoryFilter, dateRange]);
+  }, [searchTerm, categoryFilter, dateRange, transactions]);
 
   // Check if there are any transactions
   const hasTransactions = filteredTransactions.length > 0;
 
-  if (transactions.length === 0) {
+  if (loading) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Transactions</CardTitle>
-          <CardDescription>View and manage all your transactions.</CardDescription>
+          <CardDescription>Loading your transactions...</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center h-[400px] space-y-4">
-            <h3 className="text-xl font-semibold">No transactions yet</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              Start tracking your finances by adding your first transaction.
-            </p>
-            <Button onClick={() => setOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Transaction
-            </Button>
-          </div>
-        </CardContent>
       </Card>
+    );
+  }
+
+  if (transactions.length === 0) {
+    return (
+      <>
+        <Card>
+          <CardHeader>
+            <CardTitle>Transactions</CardTitle>
+            <CardDescription>View and manage all your transactions.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center justify-center h-[400px] space-y-4">
+              <Receipt className="h-12 w-12 text-muted-foreground" />
+              <h3 className="text-xl font-semibold">No transactions yet</h3>
+              <p className="text-muted-foreground text-center max-w-md">
+                Start tracking your finances by adding your first transaction.
+              </p>
+              <Button onClick={() => setOpen(true)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Transaction
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        <TransactionForm open={open} setOpen={setOpen} onSubmit={handleAddTransaction} />
+      </>
     );
   }
 
@@ -207,11 +270,12 @@ export default function TransactionsPage() {
             </Popover>
           </div>
         </div>
-        
+
         {/* Transactions display - responsive table/cards */}
         <MobileDataList
           items={filteredTransactions}
           type="transactions"
+          loading={loading}
           emptyState={{
             title: "No transactions found",
             description: "Try adjusting your search or filter criteria.",

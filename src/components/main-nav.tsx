@@ -8,6 +8,8 @@ import {
   Lightbulb,
   Settings,
   User,
+  Wallet,
+  Tag,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -19,7 +21,9 @@ import {
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/accounts', label: 'Accounts', icon: Wallet },
   { href: '/transactions', label: 'Transactions', icon: ReceiptText },
+  { href: '/settings/categories', label: 'Categories', icon: Tag },
   { href: '/budgets', label: 'Budgets & Goals', icon: Target },
   { href: '/savings', label: 'Savings AI', icon: Sparkles },
   { href: '/insights', label: 'Financial Insights', icon: Lightbulb },

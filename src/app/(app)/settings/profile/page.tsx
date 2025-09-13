@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { usePreferences } from '@/hooks/use-preferences';
+import { auth, db, supabase } from '@/lib/supabase';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,15 +31,15 @@ import {
 
 export default function ProfilePage() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { preferences, updatePreferences, isLoading: prefsLoading, isLoggedIn, user } = usePreferences();
   const [profile, setProfile] = useState({
-    name: 'Current User',
-    email: 'user@example.com',
-    avatarUrl: 'https://placehold.co/100x100.png', // Placeholder for avatar
-    currency: 'USD', // Default currency
+    name: '',
+    email: '',
+    avatarUrl: '',
   });
   const [newAvatarFile, setNewAvatarFile] = useState<File | null>(null);
   const [previewAvatarUrl, setPreviewAvatarUrl] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -45,6 +47,17 @@ export default function ProfilePage() {
     confirmPassword: '',
   });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  // Load user data on mount - only if user is available
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+        email: user.email || '',
+        avatarUrl: user.user_metadata?.avatar_url || '',
+      });
+    }
+  }, [user]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -56,19 +69,50 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (!user || !isLoggedIn) return;
+
+    setIsSaving(true);
 
     try {
-      // TODO: Implement actual profile update with Supabase
-      // For now, simulate update
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Update preferences using the working hook
+      await updatePreferences({
+        currency: preferences.currency,
+      });
 
+      // Update profile-specific data (name, avatar)
+      const profileUpdates: any = {
+        full_name: profile.name,
+      };
+
+      // Handle avatar upload if there's a new file
       if (newAvatarFile) {
-        // TODO: Upload newAvatarFile to Supabase Storage
-        // For now, simulate upload and update avatarUrl
-        setProfile(prev => ({ ...prev, avatarUrl: previewAvatarUrl || prev.avatarUrl }));
+        // Upload to Supabase Storage
+        const fileExt = newAvatarFile.name.split('.').pop();
+        const fileName = `${user.id}/avatar.${fileExt}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, newAvatarFile, {
+            cacheControl: '3600',
+            upsert: true
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
+
+        profileUpdates.avatar_url = publicUrl;
+        setProfile(prev => ({ ...prev, avatarUrl: publicUrl }));
         setNewAvatarFile(null);
         setPreviewAvatarUrl(null);
+      }
+
+      // Update profile in database
+      if (Object.keys(profileUpdates).length > 0) {
+        await db.updateUserProfile(user.id, profileUpdates);
       }
 
       toast({
@@ -76,13 +120,14 @@ export default function ProfilePage() {
         description: 'Your profile information has been saved.',
       });
     } catch (err) {
+      console.error('Profile update error:', err);
       toast({
         title: 'Error',
         description: 'Failed to update profile. Please try again.',
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -111,10 +156,30 @@ export default function ProfilePage() {
       return;
     }
 
+    // Check if user is OAuth (no password to change)
+    if (user?.app_metadata?.provider !== 'email') {
+      toast({
+        title: 'Password Update Not Available',
+        description: 'You signed up with OAuth. Use your provider to change password.',
+        variant: 'default',
+      });
+      setIsPasswordLoading(false);
+      return;
+    }
+
     try {
-      // TODO: Implement actual password change with Supabase
-      // For now, simulate password change
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Update password with Supabase
+      const { error } = await auth.updatePassword(passwordData.newPassword);
+
+      if (error) {
+        console.error('Password update error:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to update password. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
       toast({
         title: 'Password updated!',
@@ -128,9 +193,10 @@ export default function ProfilePage() {
         confirmPassword: '',
       });
     } catch (err) {
+      console.error('Unexpected password update error:', err);
       toast({
         title: 'Error',
-        description: 'Failed to change password. Please try again.',
+        description: 'An unexpected error occurred. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -139,25 +205,12 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
-    try {
-      // TODO: Implement actual account deletion with Supabase
-      // For now, simulate account deletion
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      toast({
-        title: 'Account deleted',
-        description: 'Your account has been successfully deleted.',
-      });
-
-      // TODO: Implement actual sign out and redirect to login page
-      // For now, we'll just show a message
-    } catch (err) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete account. Please try again.',
-        variant: 'destructive',
-      });
-    }
+    // Account deletion is currently disabled
+    // This will be implemented in a future update
+    toast({
+      title: 'Feature Coming Soon',
+      description: 'Account deletion will be available in a future update.',
+    });
   };
 
   return (
@@ -185,7 +238,7 @@ export default function ProfilePage() {
                   accept="image/*"
                   className="hidden"
                   onChange={handleFileChange}
-                  disabled={isLoading}
+                  disabled={isSaving || prefsLoading}
                 />
               </Label>
             </div>
@@ -202,7 +255,7 @@ export default function ProfilePage() {
                 id="name"
                 defaultValue={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                disabled={isLoading}
+                disabled={isSaving || prefsLoading}
               />
             </div>
             <div className="space-y-2">
@@ -212,7 +265,7 @@ export default function ProfilePage() {
                 type="email"
                 defaultValue={profile.email}
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                disabled={isLoading}
+                disabled={isSaving || prefsLoading}
               />
             </div>
             <div className="space-y-2">
@@ -220,49 +273,146 @@ export default function ProfilePage() {
               <select
                 id="currency"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={profile.currency}
-                onChange={(e) => setProfile({ ...profile, currency: e.target.value })}
-                disabled={isLoading}
+                value={preferences.currency}
+                onChange={(e) => updatePreferences({ currency: e.target.value })}
+                disabled={isSaving || prefsLoading}
               >
+                {/* Major Global Reserve Currencies */}
                 <option value="USD">USD - US Dollar</option>
                 <option value="EUR">EUR - Euro</option>
                 <option value="GBP">GBP - British Pound</option>
                 <option value="JPY">JPY - Japanese Yen</option>
+                <option value="CHF">CHF - Swiss Franc</option>
                 <option value="CAD">CAD - Canadian Dollar</option>
                 <option value="AUD">AUD - Australian Dollar</option>
-                <option value="CHF">CHF - Swiss Franc</option>
                 <option value="CNY">CNY - Chinese Yuan</option>
-                <option value="INR">INR - Indian Rupee</option>
 
-                {/* Middle East High Value and Regional Currencies */}
+                {/* European Currencies */}
+                <option value="SEK">SEK - Swedish Krona</option>
+                <option value="NOK">NOK - Norwegian Krone</option>
+                <option value="DKK">DKK - Danish Krone</option>
+                <option value="PLN">PLN - Polish Złoty</option>
+                <option value="CZK">CZK - Czech Koruna</option>
+                <option value="HUF">HUF - Hungarian Forint</option>
+                <option value="RON">RON - Romanian Leu</option>
+                <option value="BGN">BGN - Bulgarian Lev</option>
+                <option value="HRK">HRK - Croatian Kuna</option>
+                <option value="ISK">ISK - Icelandic Króna</option>
+
+                {/* North American Currencies */}
+                <option value="MXN">MXN - Mexican Peso</option>
+
+                {/* South American Currencies */}
+                <option value="BRL">BRL - Brazilian Real</option>
+                <option value="ARS">ARS - Argentine Peso</option>
+                <option value="CLP">CLP - Chilean Peso</option>
+                <option value="COP">COP - Colombian Peso</option>
+                <option value="PEN">PEN - Peruvian Sol</option>
+                <option value="UYU">UYU - Uruguayan Peso</option>
+                <option value="PYG">PYG - Paraguayan Guarani</option>
+                <option value="BOB">BOB - Bolivian Boliviano</option>
+                <option value="VES">VES - Venezuelan Bolívar</option>
+
+                {/* Asian Currencies */}
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="KRW">KRW - South Korean Won</option>
+                <option value="SGD">SGD - Singapore Dollar</option>
+                <option value="HKD">HKD - Hong Kong Dollar</option>
+                <option value="TWD">TWD - New Taiwan Dollar</option>
+                <option value="THB">THB - Thai Baht</option>
+                <option value="MYR">MYR - Malaysian Ringgit</option>
+                <option value="IDR">IDR - Indonesian Rupiah</option>
+                <option value="PHP">PHP - Philippine Peso</option>
+                <option value="VND">VND - Vietnamese Dong</option>
+                <option value="PKR">PKR - Pakistani Rupee</option>
+                <option value="BDT">BDT - Bangladeshi Taka</option>
+                <option value="LKR">LKR - Sri Lankan Rupee</option>
+                <option value="NPR">NPR - Nepalese Rupee</option>
+                <option value="MMK">MMK - Myanmar Kyat</option>
+                <option value="KHR">KHR - Cambodian Riel</option>
+                <option value="LAK">LAK - Lao Kip</option>
+
+                {/* Middle East & Central Asian Currencies */}
+                <option value="SAR">SAR - Saudi Riyal</option>
+                <option value="AED">AED - UAE Dirham</option>
+                <option value="QAR">QAR - Qatari Riyal</option>
                 <option value="KWD">KWD - Kuwaiti Dinar</option>
                 <option value="BHD">BHD - Bahraini Dinar</option>
                 <option value="OMR">OMR - Omani Rial</option>
                 <option value="JOD">JOD - Jordanian Dinar</option>
-                <option value="SAR">SAR - Saudi Riyal</option>
-                <option value="AED">AED - UAE Dirham</option>
-
-                {/* Americas and Asia-Pacific */}
-                <option value="MXN">MXN - Mexican Peso</option>
-                <option value="BRL">BRL - Brazilian Real</option>
-                <option value="SGD">SGD - Singapore Dollar</option>
-                <option value="HKD">HKD - Hong Kong Dollar</option>
-                <option value="NZD">NZD - New Zealand Dollar</option>
-
-                {/* Europe Regional Currencies */}
-                <option value="NOK">NOK - Norwegian Krone</option>
-                <option value="SEK">SEK - Swedish Krona</option>
+                <option value="ILS">ILS - Israeli Shekel</option>
                 <option value="TRY">TRY - Turkish Lira</option>
-                <option value="RUB">RUB - Russian Ruble</option>
+                <option value="EGP">EGP - Egyptian Pound</option>
+                <option value="MAD">MAD - Moroccan Dirham</option>
+                <option value="TND">TND - Tunisian Dinar</option>
+                <option value="DZD">DZD - Algerian Dinar</option>
+                <option value="LYD">LYD - Libyan Dinar</option>
+                <option value="SDG">SDG - Sudanese Pound</option>
+                <option value="SYP">SYP - Syrian Pound</option>
+                <option value="IQD">IQD - Iraqi Dinar</option>
+                <option value="IRR">IRR - Iranian Rial</option>
+                <option value="YER">YER - Yemeni Rial</option>
+                <option value="AZN">AZN - Azerbaijani Manat</option>
+                <option value="KZT">KZT - Kazakhstani Tenge</option>
+                <option value="UZS">UZS - Uzbekistani Som</option>
+                <option value="TJS">TJS - Tajikistani Somoni</option>
+                <option value="TMT">TMT - Turkmenistani Manat</option>
+                <option value="AFN">AFN - Afghan Afghani</option>
 
                 {/* African Currencies */}
                 <option value="ZAR">ZAR - South African Rand</option>
-                <option value="XOF">XOF - West African CFA franc</option>
+                <option value="NGN">NGN - Nigerian Naira</option>
                 <option value="KES">KES - Kenyan Shilling</option>
+                <option value="TZS">TZS - Tanzanian Shilling</option>
+                <option value="UGX">UGX - Ugandan Shilling</option>
+                <option value="RWF">RWF - Rwandan Franc</option>
+                <option value="BIF">BIF - Burundian Franc</option>
+                <option value="ETB">ETB - Ethiopian Birr</option>
+                <option value="GHS">GHS - Ghanaian Cedi</option>
+                <option value="XOF">XOF - West African CFA Franc</option>
+                <option value="XAF">XAF - Central African CFA Franc</option>
+                <option value="CDF">CDF - Congolese Franc</option>
+                <option value="MGA">MGA - Malagasy Ariary</option>
+                <option value="MUR">MUR - Mauritian Rupee</option>
+                <option value="SCR">SCR - Seychellois Rupee</option>
+                <option value="MWK">MWK - Malawian Kwacha</option>
+                <option value="ZMW">ZMW - Zambian Kwacha</option>
+                <option value="BWP">BWP - Botswana Pula</option>
+                <option value="SZL">SZL - Swazi Lilangeni</option>
+                <option value="LSL">LSL - Lesotho Loti</option>
+                <option value="NAD">NAD - Namibian Dollar</option>
+                <option value="MZN">MZN - Mozambican Metical</option>
+                <option value="AOA">AOA - Angolan Kwanza</option>
+                <option value="CVE">CVE - Cape Verdean Escudo</option>
+                <option value="STN">STN - São Tomé and Príncipe Dobra</option>
+                <option value="GMD">GMD - Gambian Dalasi</option>
+                <option value="SLL">SLL - Sierra Leonean Leone</option>
+                <option value="LRD">LRD - Liberian Dollar</option>
+
+                {/* Oceania Currencies */}
+                <option value="NZD">NZD - New Zealand Dollar</option>
+                <option value="FJD">FJD - Fijian Dollar</option>
+                <option value="TOP">TOP - Tongan Paʻanga</option>
+                <option value="WST">WST - Samoan Tala</option>
+                <option value="VUV">VUV - Vanuatu Vatu</option>
+                <option value="SBD">SBD - Solomon Islands Dollar</option>
+                <option value="PGK">PGK - Papua New Guinean Kina</option>
+
+                {/* Cryptocurrencies (for completeness) */}
+                <option value="BTC">BTC - Bitcoin</option>
+                <option value="ETH">ETH - Ethereum</option>
+                <option value="USDT">USDT - Tether</option>
+                <option value="BNB">BNB - Binance Coin</option>
+                <option value="ADA">ADA - Cardano</option>
+                <option value="SOL">SOL - Solana</option>
+                <option value="DOT">DOT - Polkadot</option>
+                <option value="DOGE">DOGE - Dogecoin</option>
+                <option value="AVAX">AVAX - Avalanche</option>
+                <option value="MATIC">MATIC - Polygon</option>
               </select>
             </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" disabled={isSaving || prefsLoading}>
+              {isSaving || prefsLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
@@ -345,7 +495,7 @@ export default function ProfilePage() {
             </p>
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">Delete Account</Button>
+                <Button variant="destructive" disabled>Delete Account</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -364,7 +514,7 @@ export default function ProfilePage() {
             </AlertDialog>
           </div>
         </CardContent>
-      </Card>
+      </Card>    
     </div>
   );
 }
