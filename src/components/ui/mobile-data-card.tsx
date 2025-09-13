@@ -173,28 +173,35 @@ export function TransactionCard({
 export function BudgetCard({
   budget,
   onEdit,
+  onDelete,
   onClick
 }: {
   budget: any
   onEdit?: () => void
+  onDelete?: () => void
   onClick?: () => void
 }) {
-  const progress = (budget.spent / budget.total) * 100
-  const remaining = budget.total - budget.spent
+  const progress = (budget.spent / budget.amount) * 100
+  const remaining = budget.amount - budget.spent
+
+  const actions = []
+  if (onEdit) actions.push({ label: "Edit", onClick: onEdit })
+  if (onDelete) actions.push({ label: "Delete", onClick: onDelete, variant: "destructive" as const })
 
   return (
     <MobileDataCard
       title={budget.name}
-      subtitle={`${budget.spent.toFixed(2)} / ${budget.total.toFixed(2)} spent`}
+      subtitle={`${budget.spent?.toFixed(2) || '0.00'} / ${budget.amount?.toFixed(2) || '0.00'} spent`}
       badge={{
         text: `${progress.toFixed(0)}%`,
         variant: progress > 90 ? "destructive" : "default"
       }}
       metadata={[
         { label: "Remaining", value: `$${remaining.toFixed(2)}` },
-        { label: "Category", value: budget.category || "General" }
+        { label: "Category", value: budget.categories?.name || budget.category || "General" },
+        { label: "Period", value: budget.period || "monthly" }
       ]}
-      actions={onEdit ? [{ label: "Edit", onClick: onEdit }] : []}
+      actions={actions}
       onClick={onClick}
     >
       <div className="mt-3">

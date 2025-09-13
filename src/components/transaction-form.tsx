@@ -33,10 +33,42 @@ import { format } from "date-fns"
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/lib/api-client';
+import {
+  DollarSign,
+  CreditCard,
+  Home,
+  Car,
+  UtensilsCrossed,
+  Film,
+  ShoppingBag,
+  Lightbulb,
+  Stethoscope,
+  BookOpen,
+  Plane,
+  Music,
+  Gamepad2,
+  Monitor,
+  Smartphone,
+  Dumbbell,
+  Circle,
+  Palette,
+  Theater,
+  Pizza,
+  Coffee,
+  Beer,
+  Umbrella,
+  Snowflake,
+  TreePine,
+  Gift,
+  Briefcase,
+  Building,
+  Store,
+  Tag
+} from 'lucide-react';
 
 const transactionSchema = z.object({
   description: z.string().min(2, {
-    message: "Description must be at least 2 characters.",
+    message: "Description must be at least 5 characters.",
   }),
   amount: z.coerce.number()
     .gt(0, { message: "Amount must be greater than 0." }),
@@ -54,10 +86,32 @@ const transactionSchema = z.object({
 
 type TransactionFormValues = z.infer<typeof transactionSchema>
 
+interface Transaction {
+  id: string;
+  description: string;
+  amount: number;
+  type: 'income' | 'expense' | 'transfer';
+  date: string;
+  created_at: string;
+  categories?: {
+    id: string;
+    name: string;
+    color: string;
+    icon: string;
+  };
+  accounts?: {
+    id: string;
+    name: string;
+    type: string;
+  };
+}
+
 interface TransactionFormProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   onSubmit: (values: TransactionFormValues) => void;
+  editingTransaction?: Transaction | null;
+  onClose?: () => void;
 }
 
 interface Account {
@@ -76,7 +130,39 @@ interface Category {
   icon: string;
 }
 
-export function TransactionForm({ open, setOpen, onSubmit }: TransactionFormProps) {
+const iconComponents = {
+  DollarSign,
+  CreditCard,
+  Home,
+  Car,
+  UtensilsCrossed,
+  Film,
+  ShoppingBag,
+  Lightbulb,
+  Stethoscope,
+  BookOpen,
+  Plane,
+  Music,
+  Gamepad2,
+  Monitor,
+  Smartphone,
+  Dumbbell,
+  Circle,
+  Palette,
+  Theater,
+  Pizza,
+  Coffee,
+  Beer,
+  Umbrella,
+  Snowflake,
+  TreePine,
+  Gift,
+  Briefcase,
+  Building,
+  Store
+};
+
+export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, onClose }: TransactionFormProps) {
   const { toast } = useToast();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -100,6 +186,29 @@ export function TransactionForm({ open, setOpen, onSubmit }: TransactionFormProp
       fetchAccountsAndCategories();
     }
   }, [open]);
+
+  // Handle editing mode
+  useEffect(() => {
+    if (editingTransaction) {
+      form.reset({
+        description: editingTransaction.description,
+        amount: editingTransaction.amount,
+        category_id: editingTransaction.categories?.id || "",
+        account_id: editingTransaction.accounts?.id || "",
+        date: new Date(editingTransaction.date),
+        currency: "USD", // Default for now, could be enhanced
+      });
+    } else {
+      form.reset({
+        description: "",
+        amount: 0,
+        category_id: "",
+        account_id: "",
+        date: new Date(),
+        currency: "USD",
+      });
+    }
+  }, [editingTransaction, form]);
 
   const fetchAccountsAndCategories = async () => {
     setLoading(true);
@@ -130,14 +239,11 @@ export function TransactionForm({ open, setOpen, onSubmit }: TransactionFormProp
   function handleClose() {
     form.reset();
     setOpen(false);
+    if (onClose) onClose();
   }
 
   function onSubmitHandler(values: TransactionFormValues) {
     onSubmit(values);
-    toast({
-      title: "Transaction added.",
-      description: "Your transaction has been added successfully.",
-    })
     handleClose();
   }
 
@@ -145,9 +251,12 @@ export function TransactionForm({ open, setOpen, onSubmit }: TransactionFormProp
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Transaction</DialogTitle>
+          <DialogTitle>{editingTransaction ? 'Edit Transaction' : 'Add Transaction'}</DialogTitle>
           <DialogDescription>
-            Add a new transaction to track your finances.
+            {editingTransaction
+              ? 'Update your transaction information.'
+              : 'Add a new transaction to track your finances.'
+            }
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -193,7 +302,7 @@ export function TransactionForm({ open, setOpen, onSubmit }: TransactionFormProp
                       <option value="">Select a category</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
-                          {category.icon} {category.name} ({category.type})
+                          {category.name} ({category.type})
                         </option>
                       ))}
                     </select>
@@ -297,7 +406,7 @@ export function TransactionForm({ open, setOpen, onSubmit }: TransactionFormProp
               )}
             />
             <DialogFooter>
-              <Button type="submit">Add Transaction</Button>
+              <Button type="submit">{editingTransaction ? 'Update Transaction' : 'Add Transaction'}</Button>
             </DialogFooter>
           </form>
         </Form>

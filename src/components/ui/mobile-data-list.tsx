@@ -62,6 +62,7 @@ export function MobileDataList({
             key={item.id || item.name}
             budget={item}
             onEdit={() => console.log("Edit budget", item.id || item.name)}
+            onDelete={() => console.log("Delete budget", item.id || item.name)}
           />
         )
       default:
