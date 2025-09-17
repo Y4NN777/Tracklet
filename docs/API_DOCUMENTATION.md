@@ -72,6 +72,9 @@ if (transactions.error) {
 | Categories | `GET/POST /api/v1/categories` | `GET/PATCH/PUT/DELETE /api/v1/categories/[id]` |
 | Budgets | `GET/POST /api/v1/budgets` | `GET/PATCH/PUT/DELETE /api/v1/budgets/[id]` |
 | Goals | `GET/POST /api/v1/goals` | `GET/PATCH/PUT/DELETE /api/v1/goals/[id]` |
+| Notifications | `GET/POST /api/v1/notifications` | `PATCH/DELETE /api/v1/notifications/[id]` |
+| Notification Preferences | `GET/PATCH /api/v1/notification-preferences` | N/A |
+| Profile | `GET/PATCH /api/v1/profile` | N/A |
 
 ## API Client Methods
 
@@ -123,6 +126,33 @@ api.createGoal(data)
 api.getGoal(id, { include_progress: true })
 api.updateGoal(id, data)
 api.deleteGoal(id)
+```
+
+### Notifications
+```typescript
+// List notifications with filtering and pagination
+api.getNotifications({ limit: 10, read: 'false', type: 'budget_alert' })
+
+// CRUD operations
+api.createNotification(data)
+api.updateNotification(id, data)
+api.deleteNotification(id)
+
+// Bulk operations
+api.markAllNotificationsRead()
+api.clearAllNotifications()
+```
+
+### Notification Preferences
+```typescript
+api.getNotificationPreferences()
+api.updateNotificationPreferences(data)
+```
+
+### Profile
+```typescript
+api.getProfile()
+api.updateProfile(data)
 ```
 
 ## Authentication
@@ -536,6 +566,276 @@ Replace entire goal (ADMIN/BULK)
 }
 ```
 
+### Notifications
+
+#### GET /api/v1/notifications
+Get all notifications for authenticated user with filtering and pagination.
+
+**Query Parameters:**
+```typescript
+{
+  limit?: number,        // Default: 50, Max: 100
+  offset?: number,       // Default: 0
+  read?: 'true' | 'false',  // Filter by read status
+  type?: string          // Filter by notification type (e.g., 'budget_alert')
+}
+```
+
+**Response:**
+```json
+{
+  "notifications": [
+    {
+      "id": "uuid",
+      "title": "Budget Alert",
+      "message": "You have exceeded your monthly food budget",
+      "data": { "budget_id": "uuid", "amount": 150.00 },
+      "read_at": null,
+      "action_url": "/budgets/uuid",
+      "expires_at": "2024-02-01T00:00:00Z",
+      "created_at": "2024-01-15T10:30:00Z",
+      "notification_types": {
+        "name": "budget_alert",
+        "display_name": "Budget Alert",
+        "description": "Alerts when budget limits are approached or exceeded",
+        "icon": "alert-triangle",
+        "color": "#ef4444",
+        "priority": "high"
+      }
+    }
+  ],
+  "pagination": {
+    "total": 25,
+    "limit": 10,
+    "offset": 0,
+    "hasMore": true
+  }
+}
+```
+
+#### POST /api/v1/notifications
+Create a new notification.
+
+**Request:**
+```json
+{
+  "type": "budget_alert",
+  "title": "Budget Alert",
+  "message": "You have exceeded your monthly food budget",
+  "data": { "budget_id": "uuid", "amount": 150.00 },
+  "action_url": "/budgets/uuid",
+  "expires_at": "2024-02-01T00:00:00Z"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "notification": {
+    "id": "uuid",
+    "title": "Budget Alert",
+    "message": "You have exceeded your monthly food budget",
+    "data": { "budget_id": "uuid", "amount": 150.00 },
+    "action_url": "/budgets/uuid",
+    "expires_at": "2024-02-01T00:00:00Z",
+    "created_at": "2024-01-15T10:30:00Z",
+    "notification_types": {
+      "name": "budget_alert",
+      "display_name": "Budget Alert",
+      "description": "Alerts when budget limits are approached or exceeded",
+      "icon": "alert-triangle",
+      "color": "#ef4444",
+      "priority": "high"
+    }
+  }
+}
+```
+
+#### PATCH /api/v1/notifications/[id]
+Update a notification. Only send fields you want to change.
+
+**Request:**
+```json
+{
+  "read": true,
+  "title": "Updated Budget Alert"
+}
+```
+
+**Response:**
+```json
+{
+  "notification": { ... },
+  "message": "Notification updated successfully",
+  "updatedFields": ["read", "title"]
+}
+```
+
+#### DELETE /api/v1/notifications/[id]
+Delete a notification.
+
+**Response (204 No Content):**
+```json
+{
+  "message": "Notification deleted successfully"
+}
+```
+
+#### POST /api/v1/notifications/mark-all-read
+Mark all unread notifications as read.
+
+**Response:**
+```json
+{
+  "message": "Marked 5 notifications as read",
+  "markedCount": 5,
+  "readAt": "2024-01-15T10:30:00Z"
+}
+```
+
+#### DELETE /api/v1/notifications/clear-all
+Delete all notifications for the user.
+
+**Response:**
+```json
+{
+  "message": "Cleared 25 notifications",
+  "clearedCount": 25
+}
+```
+
+### Notification Preferences
+
+#### GET /api/v1/notification-preferences
+Get notification preferences for the authenticated user.
+
+**Response:**
+```json
+{
+  "notificationPreferences": {
+    "budgetAlerts": {
+      "enabled": true,
+      "thresholds": [80, 90, 100]
+    },
+    "goalReminders": {
+      "enabled": true,
+      "frequency": "weekly",
+      "daysBeforeDeadline": 7
+    },
+    "transactionAlerts": {
+      "enabled": true,
+      "minAmount": 100.00,
+      "unusualSpending": true
+    },
+    "emailNotifications": {
+      "enabled": false,
+      "digest": "daily"
+    }
+  }
+}
+```
+
+#### PATCH /api/v1/notification-preferences
+Update notification preferences. Only send fields you want to change.
+
+**Request:**
+```json
+{
+  "budgetAlerts": {
+    "enabled": false,
+    "thresholds": [90, 100]
+  },
+  "emailNotifications": {
+    "enabled": true,
+    "digest": "weekly"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "notificationPreferences": { ... },
+  "message": "Notification preferences updated successfully",
+  "updatedFields": ["budgetAlerts", "emailNotifications"]
+}
+```
+
+### Profile
+
+#### GET /api/v1/profile
+Get current user profile with preferences and settings.
+
+**Response:**
+```json
+{
+  "profile": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "full_name": "John Doe",
+    "avatar_url": "https://...",
+    "preferences": {
+      "theme": "system",
+      "currency": "USD",
+      "dateFormat": "MM/DD/YYYY",
+      "notifications": {
+        "budgetAlerts": true,
+        "goalReminders": true
+      }
+    },
+    "terms_accepted": true,
+    "terms_accepted_at": "2024-01-15T10:30:00Z",
+    "onboarding_step": 3,
+    "onboarding_completed": true,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+#### PATCH /api/v1/profile
+Update user profile and preferences. Only send fields you want to change.
+
+**Request:**
+```json
+{
+  "full_name": "Jane Doe",
+  "preferences": {
+    "theme": "dark",
+    "currency": "EUR",
+    "notifications": {
+      "budgetAlerts": false
+    }
+  },
+  "terms_accepted": true,
+  "terms_accepted_at": "2024-01-15T10:30:00Z"
+}
+```
+
+**Response:**
+```json
+{
+  "profile": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "full_name": "Jane Doe",
+    "preferences": {
+      "theme": "dark",
+      "currency": "EUR",
+      "dateFormat": "MM/DD/YYYY",
+      "notifications": {
+        "budgetAlerts": false,
+        "goalReminders": true
+      }
+    },
+    "terms_accepted": true,
+    "terms_accepted_at": "2024-01-15T10:30:00Z"
+  },
+  "message": "Profile updated successfully",
+  "updatedFields": ["full_name", "preferences", "terms_accepted", "terms_accepted_at"]
+}
+```
+
 ### Accounts
 
 #### GET /api/accounts
@@ -783,6 +1083,45 @@ interface Account {
 }
 ```
 
+### Notification
+```typescript
+interface Notification {
+  id: string
+  user_id: string
+  type_id: string
+  title: string
+  message?: string
+  data: Record<string, any>
+  read_at?: string
+  action_url?: string
+  expires_at?: string
+  created_at: string
+  updated_at: string
+  notification_types?: {
+    name: string
+    display_name: string
+    description?: string
+    icon: string
+    color: string
+    priority: 'low' | 'normal' | 'high' | 'critical'
+  }
+}
+```
+
+### NotificationType
+```typescript
+interface NotificationType {
+  id: string
+  name: string
+  display_name: string
+  description?: string
+  icon: string
+  color: string
+  priority: 'low' | 'normal' | 'high' | 'critical'
+  created_at: string
+}
+```
+
 ### Category
 ```typescript
 interface Category {
@@ -998,6 +1337,18 @@ fetch('/api/v1/budgets/456', {
 - ✅ Rate limiting (100 req/15min)
 - ✅ TypeScript interfaces for all entities
 
+### v1.0.0 (Current)
+- ✅ Profile management endpoints (`GET/PATCH /api/v1/profile`)
+- ✅ User preferences persistence in database
+- ✅ OAuth terms acceptance flow
+- ✅ Settings database integration
+- ✅ GDPR-compliant user data handling
+- ✅ Notification system with full CRUD operations
+- ✅ Notification preferences management
+- ✅ Bulk notification operations (mark all read, clear all)
+- ✅ Notification filtering and pagination
+- ✅ Real-time notification type system
+
 ### Planned Features
 - 🔄 WebSocket real-time updates
 - 📊 Advanced analytics endpoints
@@ -1030,5 +1381,5 @@ fetch('/api/v1/budgets/456', {
 
 ---
 
-**Last Updated:** January 2024
+**Last Updated:** September 2025
 **API Version:** v1.0.0

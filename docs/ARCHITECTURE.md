@@ -40,6 +40,19 @@ FinTrack follows a modern client-server architecture using Next.js with API Rout
 5. Database Queries → Filtered by User ID (RLS)
 ```
 
+### 1.5 OAuth Terms Acceptance Flow
+
+```
+1. User clicks "Sign in with Google"
+2. Google OAuth consent screen
+3. Redirect to /auth/callback
+4. Check user profile in database
+5. If new user → Redirect to /onboarding/terms
+6. User accepts terms → Store acceptance → Continue to /onboarding
+7. If existing user with accepted terms → Direct to main app
+8. If existing user without accepted terms → Redirect to /onboarding/terms
+```
+
 ### 2. CRUD Operations Flow (Direct fetch)
 
 #### Create (POST)
@@ -87,6 +100,33 @@ if (response.error) {
 - ✅ TypeScript support
 - ✅ Centralized configuration
 
+### 4. User Preferences & Settings Flow
+
+User preferences are stored in the database and synchronized across devices:
+
+```typescript
+// Settings page loads preferences from database
+const response = await api.getProfile();
+const preferences = response.data.profile.preferences;
+
+// User updates settings
+await api.updateProfile({
+  preferences: {
+    theme: 'dark',
+    currency: 'EUR',
+    notifications: { budgetAlerts: false }
+  }
+});
+
+// Preferences persist across sessions and devices
+```
+
+**Features:**
+- ✅ Database-backed settings persistence
+- ✅ Cross-device synchronization
+- ✅ Real-time preference updates
+- ✅ GDPR-compliant data handling
+
 ## 📁 API Route Structure
 
 ### Collection Routes (`/route`)
@@ -127,7 +167,12 @@ DELETE /api/v1/accounts/[id]      → Delete one account
 user_profiles (extends auth.users)
 ├── id (UUID, references auth.users)
 ├── email, full_name, avatar_url
-└── preferences (JSONB)
+├── preferences (JSONB) - theme, currency, dateFormat, notifications
+├── terms_accepted (BOOLEAN)
+├── terms_accepted_at (TIMESTAMP)
+├── onboarding_step (INTEGER)
+├── onboarding_completed (BOOLEAN)
+└── created_at, updated_at
 
 accounts
 ├── id (UUID, primary key)
