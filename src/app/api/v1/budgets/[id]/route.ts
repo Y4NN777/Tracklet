@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 // GET /api/budgets/[id] - Get a specific budget
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -21,6 +21,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const includeProgress = searchParams.get('include_progress') === 'true'
 
@@ -35,7 +36,7 @@ export async function GET(
           icon
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
@@ -64,7 +65,7 @@ export async function GET(
 // PATCH /api/budgets/[id] - Partially update a budget (RECOMMENDED)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -81,6 +82,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const { name, amount, period, category_id, start_date, end_date } = body
 
@@ -106,7 +108,7 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('budgets')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select(`
         *,
@@ -142,7 +144,7 @@ export async function PATCH(
 // PUT /api/budgets/[id] - Replace entire budget (ADMIN/BULK)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -159,6 +161,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const { name, amount, period, category_id, start_date, end_date } = body
 
@@ -184,7 +187,7 @@ export async function PUT(
         start_date,
         end_date
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select(`
         *,
@@ -219,7 +222,7 @@ export async function PUT(
 // DELETE /api/budgets/[id] - Delete a budget
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -236,10 +239,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const { error } = await supabase
       .from('budgets')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
 
     if (error) {

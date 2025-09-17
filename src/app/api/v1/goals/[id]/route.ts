@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 // GET /api/goals/[id] - Get a specific savings goal
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -21,13 +21,14 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const includeProgress = searchParams.get('include_progress') === 'true'
 
     const { data, error } = await supabase
       .from('savings_goals')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
@@ -56,7 +57,7 @@ export async function GET(
 // PATCH /api/goals/[id] - Partially update a savings goal (RECOMMENDED)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -73,6 +74,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const { name, target_amount, current_amount, target_date, description } = body
 
@@ -92,7 +94,7 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('savings_goals')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single()
@@ -120,7 +122,7 @@ export async function PATCH(
 // PUT /api/goals/[id] - Replace entire savings goal (ADMIN/BULK)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -137,6 +139,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const { name, target_amount, current_amount, target_date, description } = body
 
@@ -156,7 +159,7 @@ export async function PUT(
         target_date,
         description
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single()
@@ -183,7 +186,7 @@ export async function PUT(
 // DELETE /api/goals/[id] - Delete a savings goal
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -200,10 +203,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const { error } = await supabase
       .from('savings_goals')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
 
     if (error) {

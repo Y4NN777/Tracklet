@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 // GET /api/accounts/[id] - Get a specific account
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -21,10 +21,11 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const { data, error } = await supabase
       .from('accounts')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
@@ -47,7 +48,7 @@ export async function GET(
 // PATCH /api/accounts/[id] - Partially update an account (RECOMMENDED)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -64,6 +65,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const { name, type, balance, currency } = body
 
@@ -87,7 +89,7 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('accounts')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single()
@@ -115,7 +117,7 @@ export async function PATCH(
 // PUT /api/accounts/[id] - Replace entire account (ADMIN/BULK)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -132,6 +134,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
     const { name, type, balance, currency } = body
 
@@ -155,7 +158,7 @@ export async function PUT(
         balance: parseFloat(balance || 0),
         currency: currency || 'USD'
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single()
@@ -182,7 +185,7 @@ export async function PUT(
 // DELETE /api/accounts/[id] - Delete an account
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -199,10 +202,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const { error } = await supabase
       .from('accounts')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
 
     if (error) {
