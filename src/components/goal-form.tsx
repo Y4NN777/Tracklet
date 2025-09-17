@@ -27,6 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast';
+import { useCurrency } from '@/contexts/preferences-context';
 
 const goalSchema = z.object({
   name: z.string().min(2, {
@@ -51,13 +52,14 @@ interface GoalFormProps {
 
 export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
   const { toast } = useToast();
+  const { currency } = useCurrency();
   const form = useForm<GoalFormValues>({
     resolver: zodResolver(goalSchema),
     defaultValues: {
       name: "",
       targetAmount: 0,
       currentAmount: 0,
-      currency: "USD", // Default currency
+      currency: currency, // Use user's selected currency
     },
   })
 

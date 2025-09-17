@@ -33,6 +33,7 @@ import { format } from "date-fns"
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/lib/api-client';
+import { useCurrency } from '@/contexts/preferences-context';
 import {
   DollarSign,
   CreditCard,
@@ -164,6 +165,7 @@ const iconComponents = {
 
 export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, onClose }: TransactionFormProps) {
   const { toast } = useToast();
+  const { currency } = useCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -176,7 +178,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
       category_id: "",
       account_id: "",
       date: new Date(),
-      currency: "USD", // Default currency
+      currency: currency, // Use user's selected currency
     },
   })
 
@@ -196,7 +198,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
         category_id: editingTransaction.categories?.id || "",
         account_id: editingTransaction.accounts?.id || "",
         date: new Date(editingTransaction.date),
-        currency: "USD", // Default for now, could be enhanced
+        currency: currency, // Use user's selected currency for editing
       });
     } else {
       form.reset({
@@ -205,10 +207,10 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
         category_id: "",
         account_id: "",
         date: new Date(),
-        currency: "USD",
+        currency: currency,
       });
     }
-  }, [editingTransaction, form]);
+  }, [editingTransaction, form, currency]);
 
   const fetchAccountsAndCategories = async () => {
     setLoading(true);

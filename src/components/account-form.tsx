@@ -27,6 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast';
+import { useCurrency } from '@/contexts/preferences-context';
 
 const accountSchema = z.object({
   name: z.string().min(2, {
@@ -63,13 +64,14 @@ interface AccountFormProps {
 
 export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }: AccountFormProps) {
   const { toast } = useToast();
+  const { currency } = useCurrency();
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
     defaultValues: {
       name: "",
       type: undefined,
       balance: 0,
-      currency: "USD",
+      currency: currency,
     },
   })
 
@@ -87,10 +89,10 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
         name: "",
         type: undefined,
         balance: 0,
-        currency: "USD",
+        currency: currency,
       });
     }
-  }, [editingAccount, form]);
+  }, [editingAccount, form, currency]);
 
   function handleClose() {
     form.reset();

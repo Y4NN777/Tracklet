@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrency } from '@/contexts/preferences-context';
 
 import {
   Card,
@@ -66,6 +67,7 @@ export default function TransactionsPage() {
     to: undefined,
   });
   const { toast } = useToast();
+  const { formatCurrency } = useCurrency();
 
   // Fetch transactions on component mount
   useEffect(() => {
@@ -452,7 +454,7 @@ export default function TransactionsPage() {
                       transaction.type === 'expense' ? 'text-red-600' : 'text-blue-600'
                     }`}>
                       {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''}
-                      ${transaction.amount.toFixed(2)}
+                      {formatCurrency(Math.abs(transaction.amount))}
                     </div>
                     <div className="text-xs text-muted-foreground capitalize">
                       {transaction.type}

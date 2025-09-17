@@ -27,6 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast';
+import { useCurrency } from '@/contexts/preferences-context';
 
 const budgetSchema = z.object({
   name: z.string().min(2, {
@@ -69,6 +70,7 @@ interface BudgetFormProps {
 
 export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: BudgetFormProps) {
   const { toast } = useToast();
+  const { currency } = useCurrency();
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
@@ -77,7 +79,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
       period: undefined,
       category_id: "",
       start_date: "",
-      currency: "USD", // Default currency
+      currency: currency, // Use user's selected currency
     },
   })
 
@@ -90,7 +92,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
         period: editingBudget.period as 'monthly' | 'weekly' | 'yearly',
         category_id: editingBudget.category_id || "",
         start_date: editingBudget.start_date || "",
-        currency: "USD", // Default for now, could be enhanced
+        currency: currency, // Use user's selected currency for editing
       });
     } else {
       form.reset({
@@ -99,10 +101,10 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
         period: undefined,
         category_id: "",
         start_date: undefined,
-        currency: "USD",
+        currency: currency,
       });
     }
-  }, [editingBudget, form]);
+  }, [editingBudget, form, currency]);
 
   function handleClose() {
     form.reset();

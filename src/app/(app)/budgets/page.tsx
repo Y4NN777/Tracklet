@@ -18,6 +18,7 @@ import { MobileDataList } from '@/components/ui/mobile-data-list';
 import { BudgetCard } from '@/components/ui/mobile-data-card';
 import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrency } from '@/contexts/preferences-context';
 
 interface Budget {
   id: string;
@@ -50,6 +51,7 @@ export default function BudgetsPage() {
   const [loading, setLoading] = useState(true);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const { toast } = useToast();
+  const { formatCurrency } = useCurrency();
 
   // Fetch budgets and goals on component mount
   useEffect(() => {
@@ -286,7 +288,7 @@ export default function BudgetsPage() {
                   <CardHeader>
                     <CardTitle>{goal.name}</CardTitle>
                     <CardDescription>
-                      Target: {goal.target_amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                      Target: {formatCurrency(goal.target_amount)}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -295,7 +297,7 @@ export default function BudgetsPage() {
                   </CardContent>
                    <CardFooter className="flex justify-end text-sm">
                     <p>
-                      <span className="font-bold">${goal.current_amount.toLocaleString()}</span> saved
+                      <span className="font-bold">{formatCurrency(goal.current_amount)}</span> saved
                     </p>
                   </CardFooter>
                 </Card>
