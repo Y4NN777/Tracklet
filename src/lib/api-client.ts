@@ -191,4 +191,8 @@ export const api = {
   },
   updateGoal: (id: string, data: any) => apiClient.patch(`/goals/${id}`, data),
   deleteGoal: (id: string) => apiClient.delete(`/goals/${id}`),
+
+  // Profile
+  getProfile: () => apiClient.get('/profile'),
+  updateProfile: (data: any) => apiClient.patch('/profile', data),
 };
