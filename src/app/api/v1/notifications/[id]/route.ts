@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 // PATCH /api/v1/notifications/[id] - Update a notification
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -21,7 +21,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
     const { read, title, message, data: notificationData, action_url, expires_at } = body
 
@@ -97,7 +97,7 @@ export async function PATCH(
 // DELETE /api/v1/notifications/[id] - Delete a notification
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Extract JWT token from Authorization header
@@ -114,7 +114,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     // Check if notification exists and belongs to user
     const { data: existingNotification, error: fetchError } = await supabase
