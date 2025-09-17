@@ -37,9 +37,6 @@ const goalSchema = z.object({
     .gt(0, { message: "Target amount must be greater than 0." }),
   currentAmount: z.coerce.number()
     .min(0, { message: "Current amount must be 0 or greater." }),
-  currency: z.string().min(3, {
-    message: "Currency must be selected.",
-  }),
 });
 
 type GoalFormValues = z.infer<typeof goalSchema>
@@ -59,7 +56,6 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
       name: "",
       targetAmount: 0,
       currentAmount: 0,
-      currency: currency, // Use user's selected currency
     },
   })
 
@@ -69,7 +65,12 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
   }
 
   function onSubmitHandler(values: GoalFormValues) {
-    onSubmit(values);
+    // Add user's currency to the form data
+    const dataWithCurrency = {
+      ...values,
+      currency: currency,
+    };
+    onSubmit(dataWithCurrency);
     toast({
       title: "Goal added.",
       description: "Your goal has been added successfully.",
@@ -122,32 +123,6 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
                   <FormLabel>Current Amount</FormLabel>
                   <FormControl>
                     <Input placeholder="Current Amount" type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Currency</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <option value="USD">USD - US Dollar</option>
-                      <option value="EUR">EUR - Euro</option>
-                      <option value="GBP">GBP - British Pound</option>
-                      <option value="JPY">JPY - Japanese Yen</option>
-                      <option value="CAD">CAD - Canadian Dollar</option>
-                      <option value="AUD">AUD - Australian Dollar</option>
-                      <option value="CHF">CHF - Swiss Franc</option>
-                      <option value="CNY">CNY - Chinese Yuan</option>
-                      <option value="INR">INR - Indian Rupee</option>
-                    </select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

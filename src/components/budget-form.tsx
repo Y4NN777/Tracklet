@@ -40,9 +40,6 @@ const budgetSchema = z.object({
   }),
   category_id: z.string().optional(),
   start_date: z.string().optional(),
-  currency: z.string().min(3, {
-    message: "Currency must be selected.",
-  }),
 });
 
 type BudgetFormValues = z.infer<typeof budgetSchema>
@@ -79,7 +76,6 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
       period: undefined,
       category_id: "",
       start_date: "",
-      currency: currency, // Use user's selected currency
     },
   })
 
@@ -92,7 +88,6 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
         period: editingBudget.period as 'monthly' | 'weekly' | 'yearly',
         category_id: editingBudget.category_id || "",
         start_date: editingBudget.start_date || "",
-        currency: currency, // Use user's selected currency for editing
       });
     } else {
       form.reset({
@@ -101,10 +96,9 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
         period: undefined,
         category_id: "",
         start_date: undefined,
-        currency: currency,
       });
     }
-  }, [editingBudget, form, currency]);
+  }, [editingBudget, form]);
 
   function handleClose() {
     form.reset();
@@ -113,7 +107,12 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
   }
 
   function onSubmitHandler(values: BudgetFormValues) {
-    onSubmit(values);
+    // Add user's currency to the form data
+    const dataWithCurrency = {
+      ...values,
+      currency: currency,
+    };
+    onSubmit(dataWithCurrency);
     handleClose();
   }
 
@@ -193,63 +192,6 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
                   <FormDescription>
                     When this budget period starts.
                   </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Currency</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {/* Major Global Currencies */}
-                      <option value="USD">USD - US Dollar</option>
-                      <option value="EUR">EUR - Euro</option>
-                      <option value="GBP">GBP - British Pound</option>
-                      <option value="JPY">JPY - Japanese Yen</option>
-                      <option value="CAD">CAD - Canadian Dollar</option>
-                      <option value="AUD">AUD - Australian Dollar</option>
-                      <option value="CHF">CHF - Swiss Franc</option>
-                      <option value="CNY">CNY - Chinese Yuan</option>
-                      <option value="INR">INR - Indian Rupee</option>
-
-                      {/* Middle East High Value and Regional Currencies */}
-                      <option value="KWD">KWD - Kuwaiti Dinar</option>
-                      <option value="BHD">BHD - Bahraini Dinar</option>
-                      <option value="OMR">OMR - Omani Rial</option>
-                      <option value="JOD">JOD - Jordanian Dinar</option>
-                      <option value="SAR">SAR - Saudi Riyal</option>
-                      <option value="AED">AED - UAE Dirham</option>
-
-                      {/* Americas and Asia-Pacific */}
-                      <option value="MXN">MXN - Mexican Peso</option>
-                      <option value="BRL">BRL - Brazilian Real</option>
-                      <option value="SGD">SGD - Singapore Dollar</option>
-                      <option value="HKD">HKD - Hong Kong Dollar</option>
-                      <option value="NZD">NZD - New Zealand Dollar</option>
-
-                      {/* Europe Regional Currencies */}
-                      <option value="NOK">NOK - Norwegian Krone</option>
-                      <option value="SEK">SEK - Swedish Krona</option>
-                      <option value="TRY">TRY - Turkish Lira</option>
-                      <option value="RUB">RUB - Russian Ruble</option>
-
-                      {/* African Currencies */}
-                      <option value="ZAR">ZAR - South African Rand</option>
-                      <option value="XOF">XOF - West African CFA franc</option>
-                      <option value="XAF">XAF - Central African CFA franc</option>
-                      <option value="NGN">NGN - Nigerian Naira</option>
-                      <option value="GHS">GHS - Ghanaian Cedi</option>
-                      <option value="KES">KES - Kenyan Shilling</option>
-                    </select>
-
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

@@ -80,9 +80,6 @@ const transactionSchema = z.object({
     message: "Account must be selected.",
   }),
   date: z.date(),
-  currency: z.string().min(3, {
-    message: "Currency must be selected.",
-  }),
 });
 
 type TransactionFormValues = z.infer<typeof transactionSchema>
@@ -178,7 +175,6 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
       category_id: "",
       account_id: "",
       date: new Date(),
-      currency: currency, // Use user's selected currency
     },
   })
 
@@ -198,7 +194,6 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
         category_id: editingTransaction.categories?.id || "",
         account_id: editingTransaction.accounts?.id || "",
         date: new Date(editingTransaction.date),
-        currency: currency, // Use user's selected currency for editing
       });
     } else {
       form.reset({
@@ -207,10 +202,9 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
         category_id: "",
         account_id: "",
         date: new Date(),
-        currency: currency,
       });
     }
-  }, [editingTransaction, form, currency]);
+  }, [editingTransaction, form]);
 
   const fetchAccountsAndCategories = async () => {
     setLoading(true);
@@ -245,7 +239,12 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
   }
 
   function onSubmitHandler(values: TransactionFormValues) {
-    onSubmit(values);
+    // Add user's currency to the form data
+    const dataWithCurrency = {
+      ...values,
+      currency: currency,
+    };
+    onSubmit(dataWithCurrency);
     handleClose();
   }
 
@@ -381,32 +380,6 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                  </FormItem>
                )}
              />
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Currency</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <option value="USD">USD - US Dollar</option>
-                      <option value="EUR">EUR - Euro</option>
-                      <option value="GBP">GBP - British Pound</option>
-                      <option value="JPY">JPY - Japanese Yen</option>
-                      <option value="CAD">CAD - Canadian Dollar</option>
-                      <option value="AUD">AUD - Australian Dollar</option>
-                      <option value="CHF">CHF - Swiss Franc</option>
-                      <option value="CNY">CNY - Chinese Yuan</option>
-                      <option value="INR">INR - Indian Rupee</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <DialogFooter>
               <Button type="submit">{editingTransaction ? 'Update Transaction' : 'Add Transaction'}</Button>
             </DialogFooter>
