@@ -17,6 +17,10 @@
 /.next/
 /out/
 
+docs/FINTRACK_FEATURE_ROADMAP.md
+docs/NEXTJS_API_ARCHITECTURE.md
+docs/NOTIFICATION_SYSTEM_AUDIT.md
+
 # production
 /build
 
