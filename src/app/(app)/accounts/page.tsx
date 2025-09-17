@@ -45,7 +45,7 @@ const accountTypeIcons = {
 };
 
 const accountTypeColors = {
-  checking: 'text-blue-600',
+  checking: 'text-blue-500',
   savings: 'text-green-600',
   credit: 'text-red-600',
   investment: 'text-purple-600',
