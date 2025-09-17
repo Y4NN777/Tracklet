@@ -426,37 +426,37 @@ export default function TransactionsPage() {
                 </AlertDialog>
               </div>
               <Card className="p-4 pr-20">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Receipt className="h-8 w-8 text-primary" />
-                    <div>
-                      <h3 className="font-semibold">{transaction.description}</h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>{format(new Date(transaction.date), 'MMM dd, yyyy')}</span>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <Receipt className="h-8 w-8 text-primary flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold truncate">{transaction.description}</h3>
+                      <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                        <span className="whitespace-nowrap">{format(new Date(transaction.date), 'MMM dd')}</span>
                         {transaction.categories && (
                           <>
-                            <span>•</span>
-                            <span>{transaction.categories.name}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="truncate max-w-[80px] sm:max-w-none">{transaction.categories.name}</span>
                           </>
                         )}
                         {transaction.accounts && (
                           <>
-                            <span>•</span>
-                            <span>{transaction.accounts.name}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="truncate max-w-[80px] sm:max-w-none">{transaction.accounts.name}</span>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className={`text-lg font-semibold ${
+                  <div className="text-right flex-shrink-0">
+                    <div className={`text-base sm:text-lg font-semibold ${
                       transaction.type === 'income' ? 'text-green-600' :
                       transaction.type === 'expense' ? 'text-red-600' : 'text-blue-600'
                     }`}>
                       {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''}
                       {formatCurrency(Math.abs(transaction.amount))}
                     </div>
-                    <div className="text-xs text-muted-foreground capitalize">
+                    <div className="text-xs text-muted-foreground capitalize hidden sm:block">
                       {transaction.type}
                     </div>
                   </div>
