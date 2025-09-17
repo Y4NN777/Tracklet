@@ -328,7 +328,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                       <option value="">Select a category</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
-                          {category.name} ({category.type})
+                          {category.name}
                         </option>
                       ))}
                     </select>
@@ -410,7 +410,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                  Currency
                </label>
                <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
-                 {currency} - {currency === 'USD' ? 'US Dollar' : currency === 'EUR' ? 'Euro' : currency === 'GBP' ? 'British Pound' : currency === 'JPY' ? 'Japanese Yen' : currency === 'CAD' ? 'Canadian Dollar' : currency === 'AUD' ? 'Australian Dollar' : currency === 'CHF' ? 'Swiss Franc' : currency === 'CNY' ? 'Chinese Yuan' : currency === 'INR' ? 'Indian Rupee' : currency}
+                 {currency}
                </div>
                <p className="text-xs text-muted-foreground">
                  Currency is set based on your preferences and cannot be changed here.

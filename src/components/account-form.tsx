@@ -206,7 +206,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                       className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm cursor-not-allowed"
                       style={{ pointerEvents: 'none' }}
                     >
-                      <option value={currency}>{currency} - {currency === 'USD' ? 'US Dollar' : currency === 'EUR' ? 'Euro' : currency === 'GBP' ? 'British Pound' : currency === 'JPY' ? 'Japanese Yen' : currency === 'CAD' ? 'Canadian Dollar' : currency === 'AUD' ? 'Australian Dollar' : currency === 'CHF' ? 'Swiss Franc' : currency === 'CNY' ? 'Chinese Yuan' : currency === 'INR' ? 'Indian Rupee' : currency}</option>
+                      <option value={currency}>{currency}</option>
                     </select>
                   </FormControl>
                   <FormDescription>
