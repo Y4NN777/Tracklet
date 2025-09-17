@@ -1,4 +1,4 @@
-'use client';
+ 'use client';
 
 import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -107,12 +107,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
   }
 
   function onSubmitHandler(values: BudgetFormValues) {
-    // Add user's currency to the form data
-    const dataWithCurrency = {
-      ...values,
-      currency: currency,
-    };
-    onSubmit(dataWithCurrency);
+    onSubmit(values);
     handleClose();
   }
 
@@ -196,6 +191,17 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
                 </FormItem>
               )}
             />
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Currency
+              </label>
+              <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
+                {currency} - {currency === 'USD' ? 'US Dollar' : currency === 'EUR' ? 'Euro' : currency === 'GBP' ? 'British Pound' : currency === 'JPY' ? 'Japanese Yen' : currency === 'CAD' ? 'Canadian Dollar' : currency === 'AUD' ? 'Australian Dollar' : currency === 'CHF' ? 'Swiss Franc' : currency === 'CNY' ? 'Chinese Yuan' : currency === 'INR' ? 'Indian Rupee' : currency}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Currency is set based on your preferences and cannot be changed here.
+              </p>
+            </div>
             <DialogFooter>
               <Button type="submit">{editingBudget ? 'Update Budget' : 'Add Budget'}</Button>
             </DialogFooter>

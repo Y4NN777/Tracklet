@@ -39,6 +39,9 @@ const accountSchema = z.object({
   balance: z.coerce.number({
     required_error: "Balance is required.",
   }),
+  currency: z.string().min(3, {
+    message: "Currency must be selected.",
+  }),
 });
 
 type AccountFormValues = z.infer<typeof accountSchema>
@@ -66,8 +69,9 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
     resolver: zodResolver(accountSchema),
     defaultValues: {
       name: "",
-      type: undefined,
+      type: "checking",
       balance: 0,
+      currency: currency,
     },
   })
 
@@ -78,15 +82,17 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
         name: editingAccount.name,
         type: editingAccount.type,
         balance: editingAccount.balance,
+        currency: currency,
       });
     } else {
       form.reset({
         name: "",
-        type: undefined,
+        type: "checking",
         balance: 0,
+        currency: currency,
       });
     }
-  }, [editingAccount, form]);
+  }, [editingAccount, form, currency]);
 
   function handleClose() {
     form.reset();
@@ -96,12 +102,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
 
   async function onSubmitHandler(values: AccountFormValues) {
     try {
-      // Add user's currency to the form data
-      const dataWithCurrency = {
-        ...values,
-        currency: currency,
-      };
-      await onSubmit(dataWithCurrency);
+      await onSubmit(values);
       toast({
         title: "Account added.",
         description: "Your account has been added successfully.",
@@ -188,6 +189,28 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                   </FormControl>
                   <FormDescription>
                     Your current account balance. Use negative values for debt.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="currency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Currency</FormLabel>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm cursor-not-allowed"
+                      style={{ pointerEvents: 'none' }}
+                    >
+                      <option value={currency}>{currency} - {currency === 'USD' ? 'US Dollar' : currency === 'EUR' ? 'Euro' : currency === 'GBP' ? 'British Pound' : currency === 'JPY' ? 'Japanese Yen' : currency === 'CAD' ? 'Canadian Dollar' : currency === 'AUD' ? 'Australian Dollar' : currency === 'CHF' ? 'Swiss Franc' : currency === 'CNY' ? 'Chinese Yuan' : currency === 'INR' ? 'Indian Rupee' : currency}</option>
+                    </select>
+                  </FormControl>
+                  <FormDescription>
+                    Currency is set based on your preferences and cannot be changed here.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

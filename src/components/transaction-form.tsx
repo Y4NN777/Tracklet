@@ -73,6 +73,9 @@ const transactionSchema = z.object({
   }),
   amount: z.coerce.number()
     .gt(0, { message: "Amount must be greater than 0." }),
+  type: z.enum(['income', 'expense', 'transfer'], {
+    required_error: "Please select a transaction type.",
+  }),
   category_id: z.string().min(1, {
     message: "Category must be selected.",
   }),
@@ -172,6 +175,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
     defaultValues: {
       description: "",
       amount: 0,
+      type: undefined,
       category_id: "",
       account_id: "",
       date: new Date(),
@@ -191,6 +195,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
       form.reset({
         description: editingTransaction.description,
         amount: editingTransaction.amount,
+        type: editingTransaction.type,
         category_id: editingTransaction.categories?.id || "",
         account_id: editingTransaction.accounts?.id || "",
         date: new Date(editingTransaction.date),
@@ -199,6 +204,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
       form.reset({
         description: "",
         amount: 0,
+        type: undefined,
         category_id: "",
         account_id: "",
         date: new Date(),
@@ -239,12 +245,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
   }
 
   function onSubmitHandler(values: TransactionFormValues) {
-    // Add user's currency to the form data
-    const dataWithCurrency = {
-      ...values,
-      currency: currency,
-    };
-    onSubmit(dataWithCurrency);
+    onSubmit(values);
     handleClose();
   }
 
@@ -284,6 +285,30 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                   <FormControl>
                     <Input placeholder="Amount" type="number" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Transaction Type</FormLabel>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Select transaction type</option>
+                      <option value="income">Income</option>
+                      <option value="expense">Expense</option>
+                      <option value="transfer">Transfer</option>
+                    </select>
+                  </FormControl>
+                  <FormDescription>
+                    Choose whether this is income, expense, or transfer.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -380,6 +405,17 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                  </FormItem>
                )}
              />
+             <div className="space-y-2">
+               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                 Currency
+               </label>
+               <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
+                 {currency} - {currency === 'USD' ? 'US Dollar' : currency === 'EUR' ? 'Euro' : currency === 'GBP' ? 'British Pound' : currency === 'JPY' ? 'Japanese Yen' : currency === 'CAD' ? 'Canadian Dollar' : currency === 'AUD' ? 'Australian Dollar' : currency === 'CHF' ? 'Swiss Franc' : currency === 'CNY' ? 'Chinese Yuan' : currency === 'INR' ? 'Indian Rupee' : currency}
+               </div>
+               <p className="text-xs text-muted-foreground">
+                 Currency is set based on your preferences and cannot be changed here.
+               </p>
+             </div>
             <DialogFooter>
               <Button type="submit">{editingTransaction ? 'Update Transaction' : 'Add Transaction'}</Button>
             </DialogFooter>
