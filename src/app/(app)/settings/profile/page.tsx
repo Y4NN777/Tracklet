@@ -74,19 +74,18 @@ export default function ProfilePage() {
     setIsSaving(true);
 
     try {
-      // Update preferences using the working hook
-      await updatePreferences({
-        currency: preferences.currency,
-      });
+      // Prepare profile updates
+      const profileUpdates: any = {};
 
-      // Update profile-specific data (name, avatar)
-      const profileUpdates: any = {
-        full_name: profile.name,
-      };
+      // Only update name if it changed
+      if (profile.name && profile.name !== user.user_metadata?.full_name) {
+        profileUpdates.full_name = profile.name;
+      }
 
       // Handle avatar upload if there's a new file
       if (newAvatarFile) {
-        // Upload to Supabase Storage
+        console.log('Starting avatar upload...');
+
         const fileExt = newAvatarFile.name.split('.').pop();
         const fileName = `${user.id}/avatar.${fileExt}`;
 
@@ -97,9 +96,13 @@ export default function ProfilePage() {
             upsert: true
           });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error(`Upload failed: ${uploadError.message}`);
+        }
 
-        // Get public URL
+        console.log('Upload successful, getting public URL...');
+
         const { data: { publicUrl } } = supabase.storage
           .from('fintrack-avatars')
           .getPublicUrl(fileName);
@@ -110,8 +113,9 @@ export default function ProfilePage() {
         setPreviewAvatarUrl(null);
       }
 
-      // Update profile in database
+      // Update profile in database only if there are changes
       if (Object.keys(profileUpdates).length > 0) {
+        console.log('Updating profile in database...');
         await db.updateUserProfile(user.id, profileUpdates);
       }
 
@@ -123,7 +127,7 @@ export default function ProfilePage() {
       console.error('Profile update error:', err);
       toast({
         title: 'Error',
-        description: 'Failed to update profile. Please try again.',
+        description: err instanceof Error ? err.message : 'Failed to update profile. Please try again.',
         variant: 'destructive',
       });
     } finally {

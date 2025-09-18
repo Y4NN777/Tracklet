@@ -15,20 +15,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CreditCard, LogOut, Settings, User } from 'lucide-react';
-import { auth, supabase } from '@/lib/supabase';
+import { auth, supabase, db } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 export function UserNav() {
   const router = useRouter();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial user session
+    // Get initial user session and profile
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
+
+      if (session?.user) {
+        // Fetch profile data for avatar
+        try {
+          const profileData = await db.getUserProfile(session.user.id);
+          setProfile(profileData.data);
+        } catch (error) {
+          console.warn('Failed to load profile:', error);
+        }
+      }
+
       setLoading(false);
     };
 
@@ -36,17 +48,30 @@ export function UserNav() {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setUser(session?.user || null);
+
+        if (session?.user) {
+          // Fetch profile data when user signs in
+          try {
+            const profileData = await db.getUserProfile(session.user.id);
+            setProfile(profileData.data);
+          } catch (error) {
+            console.warn('Failed to load profile:', error);
+          }
+        } else {
+          setProfile(null);
+        }
       }
     );
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const displayName = user?.user_metadata?.full_name || profile?.full_name || user?.email?.split('@')[0] || 'User';
   const displayEmail = user?.email || 'user@example.com';
-  const avatarUrl = user?.user_metadata?.avatar_url;
+  // Use profile avatar_url first, then fall back to user metadata
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
   const initials = displayName.charAt(0).toUpperCase();
 
   const handleLogout = async () => {

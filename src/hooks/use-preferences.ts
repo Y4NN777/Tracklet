@@ -8,8 +8,24 @@ export interface UserPreferences {
   currency: string;
   dateFormat: string;
   notifications: {
-    budgetAlerts: boolean;
-    goalReminders: boolean;
+    budgetAlerts: {
+      enabled: boolean;
+      thresholds: number[];
+    };
+    goalReminders: {
+      enabled: boolean;
+      frequency: string;
+      daysBeforeDeadline: number;
+    };
+    transactionAlerts: {
+      enabled: boolean;
+      minAmount: number;
+      unusualSpending: boolean;
+    };
+    emailNotifications: {
+      enabled: boolean;
+      digest: string;
+    };
   };
 }
 
@@ -18,8 +34,24 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   currency: 'USD',
   dateFormat: 'MM/DD/YYYY',
   notifications: {
-    budgetAlerts: true,
-    goalReminders: true
+    budgetAlerts: {
+      enabled: true,
+      thresholds: [80, 90, 100]
+    },
+    goalReminders: {
+      enabled: true,
+      frequency: 'weekly',
+      daysBeforeDeadline: 7
+    },
+    transactionAlerts: {
+      enabled: true,
+      minAmount: 100,
+      unusualSpending: true
+    },
+    emailNotifications: {
+      enabled: false,
+      digest: 'daily'
+    }
   }
 };
 
@@ -91,20 +123,47 @@ export function usePreferences() {
     const initializePreferences = async () => {
       setIsLoading(true);
 
-      // Load from localStorage first
-      const localPrefs = loadLocalPreferences();
-      setPreferences(localPrefs);
+      try {
+        // Load from localStorage first
+        const localPrefs = loadLocalPreferences();
+        setPreferences(localPrefs);
 
-      // Check if user is logged in
-      const { user: currentUser } = await auth.getUser();
-      setUser(currentUser);
+        // Check if user is logged in with timeout
+        const authTimeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Auth timeout')), 5000)
+        );
 
-      if (currentUser) {
-        // Load from database and merge
-        await loadDatabasePreferences();
+        const authPromise = auth.getUser();
+
+        let currentUser = null;
+        try {
+          const result = await Promise.race([authPromise, authTimeout]);
+          currentUser = result.user;
+        } catch (authError) {
+          console.warn('Auth check failed or timed out:', authError);
+          // Continue with null user (unauthenticated)
+        }
+
+        setUser(currentUser);
+
+        if (currentUser) {
+          // Load from database and merge
+          try {
+            await loadDatabasePreferences();
+          } catch (dbError) {
+            console.warn('Failed to load database preferences:', dbError);
+            // Continue with local preferences only
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing preferences:', error);
+        // Ensure we have default preferences loaded
+        const localPrefs = loadLocalPreferences();
+        setPreferences(localPrefs);
+      } finally {
+        // Always set loading to false, even if errors occurred
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     initializePreferences();
