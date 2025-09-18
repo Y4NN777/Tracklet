@@ -48,15 +48,32 @@ export default function ProfilePage() {
   });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // Load user data on mount - only if user is available
+  // Load user data on mount - get from both auth user and database profile
   useEffect(() => {
-    if (user) {
-      setProfile({
-        name: user.user_metadata?.full_name || user.user_metadata?.name || '',
-        email: user.email || '',
-        avatarUrl: user.user_metadata?.avatar_url || '',
-      });
-    }
+    const loadProfileData = async () => {
+      if (user) {
+        try {
+          // Get profile data from database (includes avatar_url)
+          const { data: dbProfile, error } = await db.getUserProfile(user.id);
+
+          setProfile({
+            name: dbProfile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || '',
+            email: user.email || '',
+            avatarUrl: dbProfile?.avatar_url || user.user_metadata?.avatar_url || '',
+          });
+        } catch (error) {
+          console.error('Error loading profile:', error);
+          // Fallback to auth user data
+          setProfile({
+            name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+            email: user.email || '',
+            avatarUrl: user.user_metadata?.avatar_url || '',
+          });
+        }
+      }
+    };
+
+    loadProfileData();
   }, [user]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
