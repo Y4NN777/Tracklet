@@ -71,14 +71,14 @@ export function NotificationBell() {
           ) : (
             <div className="space-y-1 p-1">
               {notifications.map((notification) => (
-                <div 
-                  key={notification.id} 
-                  className={`p-3 rounded-md border ${!notification.read ? 'bg-accent' : ''}`}
+                <div
+                  key={notification.id}
+                  className={`p-3 rounded-md border ${!notification.read_at ? 'bg-accent' : ''}`}
                 >
                   <div className="flex justify-between">
                     <div className="font-medium text-sm">{notification.title}</div>
                     <div className="flex space-x-1">
-                      {!notification.read && (
+                      {!notification.read_at && (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -98,14 +98,27 @@ export function NotificationBell() {
                       </Button>
                     </div>
                   </div>
-                  {notification.description && (
+                  {notification.message && (
                     <p className="text-sm text-muted-foreground mt-1">
-                      {notification.description}
+                      {notification.message}
                     </p>
                   )}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {formatDistanceToNow(notification.timestamp, { addSuffix: true })}
-                  </p>
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                    </p>
+                    {notification.notification_types && (
+                      <span
+                        className="text-xs px-2 py-1 rounded-full"
+                        style={{
+                          backgroundColor: notification.notification_types.color + '20',
+                          color: notification.notification_types.color
+                        }}
+                      >
+                        {notification.notification_types.display_name}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
