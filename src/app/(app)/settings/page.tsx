@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Separator } from "@/components/ui/separator"
 import {
   Card,
@@ -16,100 +16,21 @@ import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from '@/hooks/use-toast';
-import { apiClient } from '@/lib/api-client';
+import { usePreferencesContext } from '@/contexts/preferences-context';
 import { Loader2 } from 'lucide-react';
-
-interface UserPreferences {
-  theme: 'light' | 'dark' | 'system';
-  currency: string;
-  dateFormat: string;
-  notifications: {
-    budgetAlerts: {
-      enabled: boolean;
-      thresholds: number[];
-    };
-    goalReminders: {
-      enabled: boolean;
-      frequency: string;
-      daysBeforeDeadline: number;
-    };
-    transactionAlerts: {
-      enabled: boolean;
-      minAmount: number;
-      unusualSpending: boolean;
-    };
-    emailNotifications: {
-      enabled: boolean;
-      digest: string;
-    };
-  };
-}
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
+  const { preferences, updatePreferences, isLoading } = usePreferencesContext();
   const [saving, setSaving] = useState(false);
-  const [preferences, setPreferences] = useState<UserPreferences>({
-    theme: 'system',
-    currency: 'USD',
-    dateFormat: 'MM/DD/YYYY',
-    notifications: {
-      budgetAlerts: {
-        enabled: true,
-        thresholds: [80, 90, 100],
-      },
-      goalReminders: {
-        enabled: true,
-        frequency: 'weekly',
-        daysBeforeDeadline: 7,
-      },
-      transactionAlerts: {
-        enabled: true,
-        minAmount: 100,
-        unusualSpending: true,
-      },
-      emailNotifications: {
-        enabled: false,
-        digest: 'daily',
-      },
-    },
-  });
 
-  // Load user preferences on mount
-  useEffect(() => {
-    loadPreferences();
-  }, []);
-
-  const loadPreferences = async () => {
-    try {
-      const response = await apiClient.get('/profile');
-      if (response.data?.profile?.preferences) {
-        setPreferences(response.data.profile.preferences);
-      }
-    } catch (error) {
-      console.error('Failed to load preferences:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load your preferences.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updatePreference = async (key: keyof UserPreferences, value: any) => {
-    const updatedPreferences = { ...preferences, [key]: value };
-    setPreferences(updatedPreferences);
-
+  const updatePreference = async (key: string, value: any) => {
     setSaving(true);
     try {
-      const response = await apiClient.patch('/profile', {
-        preferences: updatedPreferences
-      });
-
-      if (response.error) {
-        throw new Error(response.error);
+      if (key === 'notifications') {
+        await updatePreferences({ notifications: value });
+      } else {
+        await updatePreferences({ [key]: value });
       }
 
       toast({
@@ -123,15 +44,13 @@ export default function SettingsPage() {
         description: 'Failed to save your preferences.',
         variant: 'destructive',
       });
-      // Revert on error
-      setPreferences(preferences);
     } finally {
       setSaving(false);
     }
   };
 
   const updateNotificationPreference = (
-    category: keyof UserPreferences['notifications'],
+    category: string,
     field: string,
     value: any
   ) => {
@@ -140,7 +59,7 @@ export default function SettingsPage() {
     updatePreference('notifications', updatedNotifications);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
