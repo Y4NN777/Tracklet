@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, AlertTriangle } from 'lucide-react';
 import {
@@ -36,6 +37,7 @@ import { formatCurrency } from '@/lib/financial-calculations';
 import { useCurrency } from '@/contexts/preferences-context';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [budgetAlerts, setBudgetAlerts] = useState<Array<{budgetId: string, message: string, severity: 'warning' | 'error'}>>([]);
@@ -95,7 +97,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground text-center max-w-md">
           Start tracking your finances by adding your first account. Once you have an account set up, you can begin recording transactions.
         </p>
-        <Button>
+        <Button onClick={() => router.push('/accounts')}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Account
         </Button>
