@@ -78,9 +78,7 @@ const transactionSchema = z.object({
   type: z.enum(['income', 'expense', 'transfer'], {
     required_error: "Please select a transaction type.",
   }),
-  category_id: z.string().min(1, {
-    message: "Category must be selected.",
-  }),
+  category_id: z.string().optional(),
   account_id: z.string().min(1, {
     message: "Account must be selected.",
   }),
@@ -380,7 +378,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
               name="category_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>Category (optional)</FormLabel>
                   <FormControl>
                     <select
                       {...field}
@@ -396,7 +394,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                     </select>
                   </FormControl>
                   <FormDescription>
-                    Choose the category for this transaction.
+                    Choose the category for this transaction (optional).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
