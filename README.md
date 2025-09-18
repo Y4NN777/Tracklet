@@ -77,7 +77,6 @@ The system includes AI-powered forms where users can input their financial infor
 
 ### Infrastructure & Deployment
 
-- Docker: Containerization for consistent development environments
 - Environment Management: dotenv for configuration management
 - Version Control: Git-based development workflow
 - CI/CD Pipeline: Automated testing and deployment workflows
@@ -96,33 +95,96 @@ User Interaction → Frontend Processing → API Requests → Database Operation
 ```text
 FinTrack/
 ├── src/
-│   ├── app/                    # Next.js App Router structure
-│   │   ├── (app)/              # Main application pages
-│   │   │   ├── budgets/        # Budget management interface
-│   │   │   ├── insights/       # AI insights dashboard
-│   │   │   ├── savings/        # Savings recommendations
-│   │   │   ├── settings/       # User profile and settings
-│   │   │   ├── transactions/   # Transaction tracking
-│   │   │   └── layout.tsx      # Application layout
-│   │   └── (auth)/             # Authentication pages
-│   ├── ai/                     # AI integration components
-│   │   ├── flows/              # Genkit AI workflows
-│   │   ├── dev.ts              # Development configuration
-│   │   └── genkit.ts           # Genkit initialization
-│   ├── components/             # Reusable UI components
-│   ├── lib/                    # Utility functions and services
-│   │   ├── actions/            # Server actions
-│   │   └── utils.ts            # Helper functions
-│   └── hooks/                  # Custom React hooks
-├── docs/                       # Project documentation
-├── public/                     # Static assets
-├── styles/                     # Global CSS files
-├── .env                        # Environment variables
-├── .gitignore                 # Version control exclusions
-├── package.json               # Project dependencies
-├── tsconfig.json              # TypeScript configuration
-├── tailwind.config.ts         # Tailwind CSS configuration
-└── README.md                  # Project documentation
+│   ├── app/                          # Next.js App Router structure
+│   │   ├── (app)/                    # Main application pages
+│   │   │   ├── accounts/             # Account management interface
+│   │   │   ├── budgets/              # Budget management interface
+│   │   │   ├── insights/             # AI insights dashboard
+│   │   │   ├── page.tsx              # Dashboard page
+│   │   │   ├── responsive-layout.tsx # Responsive layout component
+│   │   │   ├── savings/              # Savings recommendations
+│   │   │   ├── settings/             # User profile and settings
+│   │   │   │   ├── categories/       # Category management
+│   │   │   │   └── profile/          # Profile settings
+│   │   │   ├── transactions/         # Transaction tracking
+│   │   │   └── layout.tsx            # Application layout
+│   │   ├── (auth)/                   # Authentication pages
+│   │   │   ├── forgot-password/      # Password reset
+│   │   │   ├── login/                # Login page
+│   │   │   ├── signup/               # Signup page
+│   │   │   └── layout.tsx            # Auth layout
+│   │   ├── (onboarding)/             # Onboarding flow
+│   │   │   ├── onboarding/           # Main onboarding
+│   │   │   ├── terms/                # Terms acceptance
+│   │   │   └── layout.tsx            # Onboarding layout
+│   │   ├── api/v1/                   # REST API endpoints
+│   │   │   ├── accounts/             # Account CRUD operations
+│   │   │   ├── auth/                 # Authentication endpoints
+│   │   │   ├── budgets/              # Budget CRUD operations
+│   │   │   ├── categories/           # Category CRUD operations
+│   │   │   ├── goals/                # Savings goals CRUD
+│   │   │   ├── notifications/        # Notification system
+│   │   │   ├── notification-preferences/ # User preferences
+│   │   │   ├── profile/              # Profile management
+│   │   │   ├── transactions/         # Transaction CRUD
+│   │   │   └── diagnostic/           # System diagnostics
+│   │   ├── auth/                     # Auth callback handling
+│   │   ├── logout/                   # Logout handling
+│   │   ├── globals.css               # Global styles
+│   │   ├── icon.ico                  # App icon
+│   │   └── layout.tsx                # Root layout
+│   ├── ai/                           # AI integration components
+│   │   ├── flows/                    # Genkit AI workflows
+│   │   │   ├── financial-insights.ts # Financial analysis
+│   │   │   └── savings-opportunities.ts # Savings recommendations
+│   │   ├── dev.ts                    # Development configuration
+│   │   └── genkit.ts                 # Genkit initialization
+│   ├── components/                   # Reusable UI components
+│   │   ├── ui/                       # shadcn/ui components
+│   │   └── *.tsx                     # Custom components
+│   ├── contexts/                     # React contexts
+│   │   ├── notification-context.tsx  # Notification state
+│   │   └── preferences-context.tsx   # User preferences
+│   ├── db_migrations/                # Database schema files
+│   │   ├── database-notification-migration.sql
+│   │   ├── database-schema.sql
+│   │   └── database-user-preference-migration.sql
+│   ├── hooks/                        # Custom React hooks
+│   │   ├── use-mobile.tsx            # Mobile detection
+│   │   ├── use-preferences.ts        # Preferences management
+│   │   └── use-toast.ts              # Toast notifications
+│   ├── lib/                          # Utility functions and services
+│   │   ├── actions/                  # Server actions
+│   │   │   ├── insights.ts           # AI insights
+│   │   │   ├── notifications.ts      # Notification logic
+│   │   │   └── savings.ts            # Savings calculations
+│   │   ├── api-client.ts             # API client
+│   │   ├── dashboard-service.ts      # Dashboard data service
+│   │   ├── financial-calculations.ts # Financial utilities
+│   │   ├── supabase.ts               # Supabase client
+│   │   ├── supabase-admin.ts         # Admin Supabase client
+│   │   └── utils.ts                  # Helper functions
+│   ├── middleware.ts                 # Next.js middleware
+│   └── scripts/                      # Utility scripts
+│       ├── notification-job.ts       # Background notification job
+│       └── trigger-notification.sh   # Notification trigger script
+├── docs/                             # Project documentation
+│   ├── API_DOCUMENTATION.md          # Complete API reference
+│   ├── ARCHITECTURE.md               # System architecture
+├── .env.local                        # Environment variables (local)
+├── .env.local.example                # Environment template
+├── .gitignore                        # Version control exclusions
+├── components.json                   # shadcn/ui configuration
+├── LICENSE                           # MIT License
+├── next-env.d.ts                     # Next.js TypeScript types
+├── next.config.mjs                   # Next.js configuration
+├── package-lock.json                 # NPM lock file
+├── package.json                      # Project dependencies
+├── postcss.config.mjs                # PostCSS configuration
+├── tailwind.config.ts                # Tailwind CSS configuration
+├── tsconfig.json                     # TypeScript configuration
+├── tsconfig.tsbuildinfo              # TypeScript build info
+└── README.md                         # Project documentation
 ```
 
 ## Installation & Configuration
