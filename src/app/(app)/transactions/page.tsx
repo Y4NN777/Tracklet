@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Receipt, Edit, Trash2 } from 'lucide-react';
+import { CalendarIcon, Receipt, Edit, Trash2, Download, FileText, FileSpreadsheet } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { exportToXLSX, exportToPDF, exportToCSV } from '@/lib/export-utils';
 
 import {
   Card,
@@ -34,6 +35,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Transaction {
   id: string;
@@ -224,26 +231,52 @@ export default function TransactionsPage() {
     setEditingTransaction(null);
   };
 
-  const exportToCSV = () => {
-    // Create CSV content
-    const headers = ['Date', 'Description', 'Category', 'Account', 'Amount', 'Type'];
-    const csvContent = [
-      headers.join(','),
-      ...filteredTransactions.map(txn =>
-        `"${txn.date}","${txn.description}","${txn.categories?.name || 'Uncategorized'}","${txn.accounts?.name || 'No Account'}",${txn.amount},"${txn.type}"`
-      )
-    ].join('\n');
+  const handleExportCSV = () => {
+    try {
+      exportToCSV(filteredTransactions, 'transactions', userCurrency);
+      toast({
+        title: 'Export successful!',
+        description: 'Your transactions have been exported to CSV.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Export failed',
+        description: 'Failed to export transactions. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
-    // Create blob and download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'transactions.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExportXLSX = async () => {
+    try {
+      await exportToXLSX(filteredTransactions, 'transactions', userCurrency);
+      toast({
+        title: 'Export successful!',
+        description: 'Your transactions have been exported to Excel.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Export failed',
+        description: 'Failed to export transactions. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleExportPDF = () => {
+    try {
+      exportToPDF(filteredTransactions, 'transactions', userCurrency);
+      toast({
+        title: 'Export successful!',
+        description: 'Your transactions have been exported to PDF.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Export failed',
+        description: 'Failed to export transactions. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   // Get unique categories for filter dropdown
@@ -335,9 +368,28 @@ export default function TransactionsPage() {
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Transaction
             </Button>
-            <Button variant="outline" onClick={exportToCSV} className="w-full sm:w-auto">
-              Export Data
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Download className="mr-2 h-4 w-4" />
+                  Export Data
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportCSV}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Export as CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportXLSX}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  Export as Excel
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportPDF}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export as PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </CardHeader>
