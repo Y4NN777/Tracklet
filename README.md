@@ -74,7 +74,7 @@ The system includes AI-powered forms where users can input their financial infor
 
 - **Supabase**: PostgreSQL-compatible database with real-time capabilities
 
-- **Prisma**: Next-generation ORM for database operations
+- **Supabase Client**: Direct database operations with PostgreSQL
 
 - **JWT**: Secure token-based authentication
 
@@ -259,13 +259,19 @@ NODE_ENV=development
 
 ##### 4. Database Setup
 
-```bash
-# Run database migrations
-npx prisma migrate dev --name init
+The database schema is managed through Supabase directly. The project includes SQL migration files in the `src/db_migrations/` directory:
 
-# Seed initial data (optional)
-npx prisma db seed
-```
+- `database-schema.sql` - Main database schema
+- `database-notification-migration.sql` - Notification system tables
+- `database-user-preference-migration.sql` - User preferences tables
+
+To set up the database:
+1. Create a new Supabase project at https://supabase.com
+2. Run the SQL files in your Supabase SQL editor in the following order:
+   - `database-schema.sql`
+   - `database-notification-migration.sql`
+   - `database-user-preference-migration.sql`
+3. Configure your environment variables as shown in step 3
 
 ##### 5. AI Services Initialization (Optional)
 
@@ -438,7 +444,7 @@ API Reference: Complete endpoint documentation
 #### Backend Optimization
 
 - **Database Indexing**: Strategic indexing for financial queries
-- **Query Optimization**: Efficient database queries with Prisma
+- **Query Optimization**: Efficient database queries with Supabase
 - **Connection Pooling**: Database connection management
 - **API Caching**: Response caching for frequently accessed data
 
@@ -465,15 +471,14 @@ API Reference: Complete endpoint documentation
 
 If the application encounters issues during development, consider the following:
 
-1. **Database Connection**: Ensure PostgreSQL is running and credentials are correct.
+1. **Database Connection**: Ensure your Supabase project is properly configured and accessible.
 
-   ```bash
-   # Check PostgreSQL service status
-   sudo systemctl status postgresql
-   
-   # Verify database connection
-   psql -U fintrack_user -d fintrack -c "SELECT version();"
-   ```
+    ```bash
+    # Check Supabase connection by visiting your project dashboard
+    # Verify environment variables are correctly set
+    echo $NEXT_PUBLIC_SUPABASE_URL
+    echo $NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ```
 
 2. **Environment Variables**: Verify that all required environment variables are correctly set.
 
