@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { usePreferences, UserPreferences } from '@/hooks/use-preferences';
+import { useTheme as useThemeProviderTheme } from '@/components/theme-provider';
 
 interface PreferencesContextType {
   preferences: UserPreferences;
@@ -33,37 +34,28 @@ export function usePreferencesContext() {
 // Helper hook for theme management
 export function useTheme() {
   const { preferences, updatePreferences } = usePreferencesContext();
+  const { theme: themeProviderTheme, setTheme: setThemeProviderTheme } = useThemeProviderTheme();
 
+  // Use the resolved theme from preferences (handles system theme logic)
   const theme = preferences.theme === 'system'
     ? (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
     : preferences.theme;
 
   const setTheme = async (newTheme: 'light' | 'dark' | 'system') => {
+    // Update database preferences first
     await updatePreferences({ theme: newTheme });
 
-    // Apply theme to document
-    const root = document.documentElement;
-    if (newTheme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      root.classList.toggle('dark', systemTheme === 'dark');
-    } else {
-      root.classList.toggle('dark', newTheme === 'dark');
-    }
+    // Then sync with ThemeProvider (which handles localStorage and DOM)
+    setThemeProviderTheme(newTheme);
   };
 
-  // Listen for system theme changes when theme is 'system'
+  // Sync ThemeProvider with database preferences on load
   React.useEffect(() => {
-    if (preferences.theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = () => {
-        const root = document.documentElement;
-        root.classList.toggle('dark', mediaQuery.matches);
-      };
-
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
+    if (preferences.theme && preferences.theme !== themeProviderTheme) {
+      // If database theme differs from ThemeProvider, sync it
+      setThemeProviderTheme(preferences.theme);
     }
-  }, [preferences.theme]);
+  }, [preferences.theme, themeProviderTheme, setThemeProviderTheme]);
 
   return { theme, setTheme };
 }
