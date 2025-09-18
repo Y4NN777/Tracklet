@@ -68,6 +68,12 @@ export default function TermsAcceptancePage() {
     }));
   };
 
+  const handleDecline = () => {
+    // For authenticated users, declining terms means they can't use the app
+    // Redirect them back to login or show an explanation
+    router.push('/auth/login?message=terms_required');
+  };
+
   const handleAcceptAll = async () => {
     // For authenticated users (OAuth flow), require all checkboxes
     if (isAuthenticated && (!acceptances.terms || !acceptances.privacy || !acceptances.dataProcessing)) {
@@ -161,11 +167,6 @@ export default function TermsAcceptancePage() {
     }
   };
 
-  const handleDecline = () => {
-    // For OAuth users, declining terms means they can't use the app
-    // Redirect them back to login or show an explanation
-    router.push('/auth/login?message=terms_required');
-  };
 
   // Show loading state while checking authentication
   if (isAuthenticated === null) {
@@ -368,7 +369,7 @@ export default function TermsAcceptancePage() {
               <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
                 <Button
                   variant="outline"
-                  onClick={() => router.push(returnTo || '/signup')}
+                  onClick={isAuthenticated ? handleDecline : () => router.push(returnTo || '/signup')}
                   className="w-full sm:w-auto"
                   disabled={loading}
                 >
