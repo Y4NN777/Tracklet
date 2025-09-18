@@ -91,13 +91,13 @@ export default function DashboardPage() {
   if (!hasData && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
-        <h2 className="text-2xl font-bold">Welcome to FinTrack AI</h2>
+        <h2 className="text-2xl font-bold">Welcome to FinTrack</h2>
         <p className="text-muted-foreground text-center max-w-md">
-          Start tracking your finances by adding your first transaction or account.
+          Start tracking your finances by adding your first account. Once you have an account set up, you can begin recording transactions.
         </p>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Add Transaction
+          Add Account
         </Button>
       </div>
     );

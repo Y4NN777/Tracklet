@@ -50,7 +50,7 @@ export default function SettingsPage() {
   };
 
   const updateNotificationPreference = (
-    category: string,
+    category: keyof typeof preferences.notifications,
     field: string,
     value: any
   ) => {
@@ -122,30 +122,13 @@ export default function SettingsPage() {
           Configure your account settings and preferences.
         </p>
         <Separator className="mt-4" />
-        <Card className="mt-6">
+        {/* <Card className="mt-6">
           <CardHeader>
             <CardTitle>General Settings</CardTitle>
             <CardDescription>Manage your account preferences.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="currency">Currency</Label>
-                <select
-                  id="currency"
-                  value={preferences.currency}
-                  onChange={(e) => updatePreference('currency', e.target.value)}
-                  disabled={saving}
-                  className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="USD">USD - US Dollar</option>
-                  <option value="EUR">EUR - Euro</option>
-                  <option value="GBP">GBP - British Pound</option>
-                  <option value="JPY">JPY - Japanese Yen</option>
-                  <option value="CAD">CAD - Canadian Dollar</option>
-                  <option value="AUD">AUD - Australian Dollar</option>
-                </select>
-              </div>
               <div>
                 <Label htmlFor="dateFormat">Date Format</Label>
                 <select
@@ -162,7 +145,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <div>
@@ -186,13 +169,13 @@ export default function SettingsPage() {
               </div>
               <Switch
                 id="budget-alerts-enabled"
-                checked={preferences.notifications.budgetAlerts.enabled}
+                checked={preferences.notifications?.budgetAlerts?.enabled ?? true}
                 onCheckedChange={(checked) => updateNotificationPreference('budgetAlerts', 'enabled', checked)}
                 disabled={saving}
               />
             </div>
 
-            {preferences.notifications.budgetAlerts.enabled && (
+            {(preferences.notifications?.budgetAlerts?.enabled ?? true) && (
               <div>
                 <Label className="text-sm font-medium">Alert Thresholds (%)</Label>
                 <p className="text-sm text-muted-foreground mb-3">Get notified at these spending percentages.</p>
@@ -201,9 +184,9 @@ export default function SettingsPage() {
                     <label key={threshold} className="flex items-center space-x-2">
                       <input
                         type="checkbox"
-                        checked={preferences.notifications.budgetAlerts.thresholds.includes(threshold)}
+                        checked={(preferences.notifications?.budgetAlerts?.thresholds ?? [80, 90, 100]).includes(threshold)}
                         onChange={(e) => {
-                          const current = preferences.notifications.budgetAlerts.thresholds;
+                          const current = preferences.notifications?.budgetAlerts?.thresholds ?? [80, 90, 100];
                           const updated = e.target.checked
                             ? [...current, threshold].sort((a, b) => a - b)
                             : current.filter(t => t !== threshold);
@@ -235,19 +218,19 @@ export default function SettingsPage() {
               </div>
               <Switch
                 id="goal-reminders-enabled"
-                checked={preferences.notifications.goalReminders.enabled}
+                checked={preferences.notifications?.goalReminders?.enabled ?? true}
                 onCheckedChange={(checked) => updateNotificationPreference('goalReminders', 'enabled', checked)}
                 disabled={saving}
               />
             </div>
 
-            {preferences.notifications.goalReminders.enabled && (
+            {(preferences.notifications?.goalReminders?.enabled ?? true) && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="goal-frequency">Reminder Frequency</Label>
                   <select
                     id="goal-frequency"
-                    value={preferences.notifications.goalReminders.frequency}
+                    value={preferences.notifications?.goalReminders?.frequency ?? 'weekly'}
                     onChange={(e) => updateNotificationPreference('goalReminders', 'frequency', e.target.value)}
                     disabled={saving}
                     className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -264,7 +247,7 @@ export default function SettingsPage() {
                     type="number"
                     min="1"
                     max="30"
-                    value={preferences.notifications.goalReminders.daysBeforeDeadline}
+                    value={preferences.notifications?.goalReminders?.daysBeforeDeadline ?? 7}
                     onChange={(e) => updateNotificationPreference('goalReminders', 'daysBeforeDeadline', parseInt(e.target.value))}
                     disabled={saving}
                     className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -289,13 +272,13 @@ export default function SettingsPage() {
               </div>
               <Switch
                 id="transaction-alerts-enabled"
-                checked={preferences.notifications.transactionAlerts.enabled}
+                checked={preferences.notifications?.transactionAlerts?.enabled ?? true}
                 onCheckedChange={(checked) => updateNotificationPreference('transactionAlerts', 'enabled', checked)}
                 disabled={saving}
               />
             </div>
 
-            {preferences.notifications.transactionAlerts.enabled && (
+            {(preferences.notifications?.transactionAlerts?.enabled ?? true) && (
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="min-amount">Minimum Alert Amount</Label>
@@ -306,7 +289,7 @@ export default function SettingsPage() {
                       type="number"
                       min="0"
                       step="0.01"
-                      value={preferences.notifications.transactionAlerts.minAmount}
+                      value={preferences.notifications?.transactionAlerts?.minAmount ?? 100}
                       onChange={(e) => updateNotificationPreference('transactionAlerts', 'minAmount', parseFloat(e.target.value))}
                       disabled={saving}
                       className="w-full pl-8 rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -322,7 +305,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     id="unusual-spending"
-                    checked={preferences.notifications.transactionAlerts.unusualSpending}
+                    checked={preferences.notifications?.transactionAlerts?.unusualSpending ?? true}
                     onCheckedChange={(checked) => updateNotificationPreference('transactionAlerts', 'unusualSpending', checked)}
                     disabled={saving}
                   />
@@ -346,18 +329,18 @@ export default function SettingsPage() {
               </div>
               <Switch
                 id="email-notifications-enabled"
-                checked={preferences.notifications.emailNotifications.enabled}
+                checked={preferences.notifications?.emailNotifications?.enabled ?? false}
                 onCheckedChange={(checked) => updateNotificationPreference('emailNotifications', 'enabled', checked)}
                 disabled={saving}
               />
             </div>
 
-            {preferences.notifications.emailNotifications.enabled && (
+            {(preferences.notifications?.emailNotifications?.enabled ?? false) && (
               <div>
                 <Label htmlFor="email-digest">Email Digest Frequency</Label>
                 <select
                   id="email-digest"
-                  value={preferences.notifications.emailNotifications.digest}
+                  value={preferences.notifications?.emailNotifications?.digest ?? 'daily'}
                   onChange={(e) => updateNotificationPreference('emailNotifications', 'digest', e.target.value)}
                   disabled={saving}
                   className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm"

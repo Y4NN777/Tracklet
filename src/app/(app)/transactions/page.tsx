@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrency } from '@/contexts/preferences-context';
+import { supabase } from '@/lib/supabase';
 
 import {
   Card,
@@ -62,12 +62,12 @@ export default function TransactionsPage() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [userCurrency, setUserCurrency] = useState('USD');
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined,
   });
   const { toast } = useToast();
-  const { formatCurrency } = useCurrency();
 
   // Fetch transactions on component mount
   useEffect(() => {
@@ -76,12 +76,31 @@ export default function TransactionsPage() {
 
   const fetchTransactions = async () => {
     try {
-      const response = await api.getTransactions();
+      // Get the current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (response.data) {
-        setTransactions(response.data.transactions || []);
-      } else if (response.error) {
-        console.error('Error fetching transactions:', response.error);
+      if (sessionError || !session) {
+        console.error('No session found');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch user profile and transactions in parallel
+      const [profileResponse, transactionsResponse] = await Promise.all([
+        supabase.from('user_profiles').select('preferences').eq('id', session.user.id).single(),
+        api.getTransactions()
+      ]);
+
+      // Get user's preferred currency
+      if (profileResponse.data?.preferences?.currency) {
+        setUserCurrency(profileResponse.data.preferences.currency);
+      }
+
+      // Get transactions
+      if (transactionsResponse.data) {
+        setTransactions(transactionsResponse.data.transactions || []);
+      } else if (transactionsResponse.error) {
+        console.error('Error fetching transactions:', transactionsResponse.error);
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
@@ -96,6 +115,7 @@ export default function TransactionsPage() {
       const transactionData = {
         ...values,
         date: values.date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD
+        category_id: values.category_id || null, // Convert empty string to null
       };
 
       const response = await api.createTransaction(transactionData);
@@ -139,6 +159,7 @@ export default function TransactionsPage() {
       const transactionData = {
         ...values,
         date: values.date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD
+        category_id: values.category_id || null, // Convert empty string to null
       };
 
       const response = await api.updateTransaction(editingTransaction.id, transactionData);
@@ -454,7 +475,10 @@ export default function TransactionsPage() {
                       transaction.type === 'expense' ? 'text-red-600' : 'text-blue-600'
                     }`}>
                       {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''}
-                      {formatCurrency(Math.abs(transaction.amount))}
+                      {Math.abs(transaction.amount).toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: userCurrency
+                      })}
                     </div>
                     <div className="text-xs text-muted-foreground capitalize hidden sm:block">
                       {transaction.type}
