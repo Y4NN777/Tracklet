@@ -10,7 +10,6 @@ export default function AuthLayout({
       <div className="w-full max-w-md space-y-8 px-4">
         <div className="flex flex-col items-center space-y-2">
           <Logo />
-          <h1 className="text-2xl font-bold">FinTrack</h1>
           <p className="text-muted-foreground text-center">
             Smart personal finance management powered by AI
           </p>
