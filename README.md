@@ -9,6 +9,8 @@ A fully open-source personal finance management application designed to help use
 [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI-4285F4.svg)](https://ai.google)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg)](https://github.com/Y4NN777/FinTrack)
+[![Contributors](https://img.shields.io/github/contributors/Y4NN777/FinTrack)](https://github.com/Y4NN777/FinTrack/graphs/contributors)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Y4NN777/FinTrack/pulls)
 
 ## Overview
 
@@ -18,6 +20,20 @@ A fully open-source personal finance management application designed to help use
 FinTrack is a sophisticated personal finance management system built on a modern full-stack architecture. By combining a responsive Next.js frontend with a robust Supabase backend and Google Gemini AI capabilities, FinTrack provides comprehensive financial management tools with interactive AI-powered financial guidance.
 
 The system includes AI-powered forms where users can input their financial information to receive personalized insights and recommendations, alongside comprehensive transaction tracking, budgeting, and goal-setting features.
+
+## 🤝 How to Contribute
+
+FinTrack is an **open-source project** that welcomes contributions! Whether you're a developer, designer, or financial expert, you can help improve FinTrack.
+
+- **🐛 Fix Issues**: Help us resolve bugs and improve stability
+- **✨ Add Features**: Implement new financial tools and enhancements
+- **📚 Improve Docs**: Enhance documentation and create tutorials
+- **🎨 UI/UX**: Improve the user interface and experience
+- **🧪 Testing**: Add tests and ensure code quality
+
+**[Get Started Contributing →](#-contributing-to-fintrack)** | **[View Issues →](https://github.com/Y4NN777/FinTrack/issues)**
+
+---
 
 ## Key Features
 
@@ -303,7 +319,7 @@ Access the application at `http://localhost:9002`
 - **Data Display**: Charts, tables, progress indicators, and financial dashboards
 - **Navigation**: Responsive sidebar, mobile bottom navigation, and header components
 - **UI Elements**: Cards, dialogs, dropdowns, and interactive components
-- **Context Providers**: Notification, Preferences, and Theme management
+- **Context Providers**: Notification system, User preferences, and Theme management
 - **Custom Hooks**: Mobile detection, preferences management, and toast notifications
 
 #### AI Integration
@@ -319,6 +335,7 @@ npm run genkit:dev
 
 - Financial data CRUD operations
 - AI service integration
+- Notification system management
 - Data validation and sanitization
 - Error handling and logging
 
@@ -329,6 +346,14 @@ npm run genkit:dev
 - Prompt engineering and optimization
 - Response validation and formatting
 
+**lib/actions/notifications/**: Notification System
+
+- Real-time notification delivery
+- User preference management
+- Budget alerts and reminders
+- Background job processing
+- Browser notification integration
+
 **app/**: Frontend Routing
 
 - Page components with server-side data fetching
@@ -336,22 +361,80 @@ npm run genkit:dev
 - Responsive UI implementation
 - Accessibility compliance
 
-## Contributing Guidelines
+##  Contributing to FinTrack
 
-### Development Standards
+We welcome contributions from developers of all skill levels! FinTrack is an open-source project that benefits from community involvement. Whether you're fixing bugs, adding features, improving documentation, or suggesting ideas, your contributions are valuable.
 
-- **Code Quality**: TypeScript with strict type checking
-- **Component Design**: Reusable, accessible UI components
-- **Documentation**: Comprehensive function and component documentation
-- **Financial Accuracy**: Validated financial calculations and representations
+###  Quick Start for Contributors
+
+1. **Fork & Clone**: Fork the repository and clone it locally
+2. **Setup Environment**: Follow the installation guide above
+3. **Pick an Issue**: Check [GitHub Issues](https://github.com/Y4NN777/FinTrack/issues) for good first issues
+4. **Create Branch**: Use descriptive branch names (e.g., `feature/add-budget-categories`)
+5. **Make Changes**: Implement your feature or fix
+6. **Test Thoroughly**: Ensure your changes work as expected
+7. **Submit PR**: Create a pull request with a clear description
+
+###  Contribution Guidelines
+
+#### Development Standards
+- **Code Quality**: TypeScript with strict type checking and ESLint compliance
+- **Component Design**: Reusable, accessible UI components following shadcn/ui patterns
+- **Documentation**: Comprehensive JSDoc comments and README updates
+- **Financial Accuracy**: Validated financial calculations with proper error handling
+- **Testing**: Unit tests for critical financial logic
+- **Performance**: Optimized queries and efficient state management
+
+#### Code Style
+- Use TypeScript for all new code
+- Follow the existing naming conventions
+- Keep components small and focused
+- Use meaningful commit messages
+- Write clear, concise comments
+
+#### Areas for Contribution
+-  **Bug Fixes**: Help us squash bugs and improve stability
+-  **New Features**: Add financial tools, improve UX, enhance AI capabilities
+-  **Mobile Optimization**: Improve responsive design and mobile experience
+-  **UI/UX Improvements**: Enhance visual design and user experience
+-  **Documentation**: Improve docs, add examples, create tutorials
+-  **Testing**: Add unit tests, integration tests, and E2E tests
+-  **Internationalization**: Add support for new languages
+-  **Artificial Intelligence Integration Enhancement**: Leverage GenAI for more powerful and real time data driven management 
 
 ### Contribution Process
 
-1. Fork repository and create feature branch
-2. Implement financial features or improvements
-3. Add unit tests for new functionality
-4. Update documentation and examples
-5. Submit pull request with detailed description
+1. **Choose an Issue**: Look for issues labeled `good first issue` or `help wanted`
+2. **Discuss First**: For major changes, open an issue to discuss your approach
+3. **Fork & Branch**: Create a feature branch from `main`
+4. **Implement**: Write clean, well-tested code
+5. **Test**: Ensure all tests pass and add new tests if needed
+6. **Document**: Update documentation for any new features
+7. **Pull Request**: Submit a PR with:
+   - Clear title and description
+   - Reference to related issues
+   - Screenshots for UI changes
+   - Test results
+
+### Recognition
+
+Contributors will be:
+- Listed in the repository contributors
+- Mentioned in release notes
+- Featured in our community showcase
+- Eligible for special recognition badges
+
+###  Getting Help
+
+- **Issues**: [GitHub Issues](https://github.com/Y4NN777/FinTrack/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Y4NN777/FinTrack/discussions)
+- **Discord**: Join our community chat (coming soon)
+
+---
+
+**Ready to contribute?** Start with issues labeled `good first issue` and let's build something amazing together! 
+
+I started it solo but I believe it can goes far with others developers wanting to support this cause 
 
 ## License & Attribution
 
@@ -359,9 +442,9 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ## Project Maintainer
 
-Ragnang Newende Yanis Axel DABO
-Email: y4nn.dev@gmail.com
-LinkedIn: [Ragnang-Newende Yanis Axel DABO](https://www.linkedin.com/in/y4nnthedev777)
+- **The Y4NN**
+- **Email**: y4nn.dev@gmail.com
+- **LinkedIn**: [Ragnang-Newende Yanis Axel DABO](https://www.linkedin.com/in/y4nnthedev777)
 
 ## Acknowledgments
 
