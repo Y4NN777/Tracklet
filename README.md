@@ -1,6 +1,6 @@
 # FinTrack - AI-Powered Personal Finance Manager
 
-**A smart personal finance management application powered by Google Gemini AI, designed to help users track spending, set budgets, and achieve financial goals with intelligent insights.**
+A fully open-source personal finance management application designed to help users track spending, set budgets, and achieve financial goals with optional AI-powered insights.
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://typescriptlang.org)
@@ -15,32 +15,30 @@
 <img width="400" height="761" alt="image" src="https://github.com/user-attachments/assets/323b2569-4221-4299-9848-bb3746549a0e" />
 <img width="400" height="761" alt="image" src="https://github.com/user-attachments/assets/94e008cf-579e-4bc3-8cf5-14f597aff336" />
 
-FinTrack is a sophisticated personal finance management system built on a modern full-stack architecture. By combining a responsive Next.js frontend with a robust PostgreSQL backend and Google Gemini AI capabilities, FinTrack provides intelligent financial insights and recommendations to help users achieve their financial goals.
+FinTrack is a sophisticated personal finance management system built on a modern full-stack architecture. By combining a responsive Next.js frontend with a robust Supabase backend and Google Gemini AI capabilities, FinTrack provides comprehensive financial management tools with interactive AI-powered financial guidance.
 
-The system leverages advanced natural language processing and financial analysis capabilities to generate personalized savings opportunities and spending insights, ensuring both accuracy and relevance in financial guidance.
+The system includes AI-powered forms where users can input their financial information to receive personalized insights and recommendations, alongside comprehensive transaction tracking, budgeting, and goal-setting features.
 
 ## Key Features
 
 ### Core Financial Management
 
-- **💰 Transaction Tracking**: Comprehensive income and expense tracking with category-based organization
-- **📊 Budget Management**: Intuitive budget creation and monitoring with progress visualization
-- **🎯 Goal Setting**: Financial goal tracking with progress indicators and milestone celebrations
-- **📈 Dashboard Overview**: Real-time financial health metrics with spending trends and net worth analysis
+- Transaction Tracking: Comprehensive income and expense tracking with category-based organization
+- Category Management: User-driven transaction categorization with predefined category options
+- Budget Management: Intuitive budget creation and monitoring with progress visualization
+- Goal Setting: Financial goal tracking with progress indicators and milestone celebrations
+- Dashboard Overview: Real-time financial health metrics with spending trends and net worth analysis
 
 ### AI-Powered Intelligence
 
-- **🤖 Financial Insights**: AI-generated analysis of spending patterns and financial behaviors
-- **💡 Savings Recommendations**: Personalized suggestions for optimizing expenses and increasing savings
-- **🔮 Spending Predictions**: Forecasting tools based on historical financial data
-- **🧠 Intelligent Categorization**: Automatic transaction categorization using machine learning
+- AI Financial Advisoring: Interactive forms for personalized financial guidance ( Savings opportunities and Insights)
 
 ### Advanced Capabilities
 
-- **💱 Multi-Currency Support**: Manage finances in multiple currencies with automatic conversion
-- **📱 Responsive Design**: Mobile-first approach with optimized experience across all devices
-- **🔒 Secure Authentication**: JWT-based authentication with secure session management
-- **📤 Data Export**: Export financial data in CSV format for external analysis
+- Multi-Currency Support: Manage finances in multiple currencies with automatic conversion
+- Responsive Design: Mobile-first approach with optimized experience across all devices
+- Secure Authentication: JWT-based authentication with secure session management
+- Data Export: Export financial data in CSV format for external analysis
 
 ## Technical Architecture
 
@@ -59,7 +57,7 @@ The system leverages advanced natural language processing and financial analysis
 
 - **Node.js**: JavaScript runtime for server-side development
 - **Express.js**: Minimalist web framework for RESTful APIs
-- **PostgreSQL 15**: Advanced open-source relational database
+- **Supabase**: PostgreSQL-compatible database with real-time capabilities
 - **Prisma**: Next-generation ORM for database operations
 - **JWT**: Secure token-based authentication
 - **Google Genkit**: Framework for building AI-powered applications
@@ -70,19 +68,19 @@ The system leverages advanced natural language processing and financial analysis
 - **Genkit Flows**: Structured AI workflows for consistent results
 - **Prompt Engineering**: Optimized prompts for financial domain expertise
 
-### 🌐 Application Architecture
+### Application Architecture
 
-- **Component-Based Design**: Reusable UI components with consistent styling
-- **Server Actions**: Secure server-side mutations with validation
-- **API Routes**: RESTful endpoints for data operations
-- **Database Schema**: Normalized relational structure for financial data
+- Component-Based Design: Reusable UI components with consistent styling
+- Server Actions: Secure server-side mutations with validation
+- API Routes: RESTful endpoints for data operations
+- Database Schema: Normalized relational structure for financial data
 
-### ☁️ Infrastructure & Deployment
+### Infrastructure & Deployment
 
-- **Docker**: Containerization for consistent development environments
-- **Environment Management**: dotenv for configuration management
-- **Version Control**: Git-based development workflow
-- **CI/CD Pipeline**: Automated testing and deployment workflows
+- Docker: Containerization for consistent development environments
+- Environment Management: dotenv for configuration management
+- Version Control: Git-based development workflow
+- CI/CD Pipeline: Automated testing and deployment workflows
 
 ## System Workflow
 
@@ -132,8 +130,8 @@ FinTrack/
 ### Prerequisites
 
 - Node.js 18+ installed
-- PostgreSQL 15+ database
-- Google Cloud account with Gemini API access
+- Supabase account (free tier available)
+- Google Cloud account with Gemini API access (optional - for AI features)
 - Git version control
 
 #### Setup Instructions
@@ -153,21 +151,28 @@ npm install
 
 ##### 3. Environment Configuration
 
-Create `.env` file with required API credentials:
+Create `.env.local` file with required API credentials:
 
 ```env
-# Database Configuration
-SUPABASE_URL=postgresql://user:password@localhost:5432/fintrack
+# Supabase Configuration
+# Get these from https://supabase.com/dashboard → Your Project → Settings → API
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
-# Google Genkit Configuration
-GOOGLE_API_KEY=your_google_api_key
+# Google OAuth (Optional - for Google sign-in)
+# Get these from https://console.cloud.google.com → APIs & Services → Credentials
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_API_KEY=your-google-ai-studio-api-key
 
-# Authentication
-JWT_SECRET=your_secure_jwt_secret
-JWT_EXPIRES_IN=24h
+# Application Settings
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api/v1
+NEXTAUTH_URL=http://localhost:9002
+NEXTAUTH_SECRET=your-random-secret-here
 
-# Application Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+# Development
+NODE_ENV=development
 ```
 
 ##### 4. Database Setup
@@ -180,10 +185,10 @@ npx prisma migrate dev --name init
 npx prisma db seed
 ```
 
-##### 5. AI Services Initialization
+##### 5. AI Services Initialization (Optional)
 
 ```bash
-# Start Genkit development server
+# Start Genkit development server (only needed for AI features)
 npm run genkit:dev
 ```
 
@@ -198,7 +203,7 @@ npm run build
 npm start
 ```
 
-Access the application at `http://localhost:3000`
+Access the application at `http://localhost:9002`
 
 ## Development & Architecture
 
@@ -206,10 +211,12 @@ Access the application at `http://localhost:3000`
 
 #### Frontend Components
 
-- **Form Components**: TransactionForm, BudgetForm, GoalForm with validation
-- **Data Display**: Charts, tables, and progress indicators
-- **Navigation**: Sidebar, header, and mobile navigation
-- **UI Elements**: Cards, dialogs, and interactive components
+- **Form Components**: AccountForm, TransactionForm, BudgetForm, GoalForm, CategoryForm with validation
+- **Data Display**: Charts, tables, progress indicators, and financial dashboards
+- **Navigation**: Responsive sidebar, mobile bottom navigation, and header components
+- **UI Elements**: Cards, dialogs, dropdowns, and interactive components
+- **Context Providers**: Notification, Preferences, and Theme management
+- **Custom Hooks**: Mobile detection, preferences management, and toast notifications
 
 #### AI Integration
 
@@ -220,81 +227,26 @@ npm run genkit:dev
 
 ### Core Services
 
-**📁 lib/actions/**: Server-Side Operations
+**lib/actions/**: Server-Side Operations
 
 - Financial data CRUD operations
 - AI service integration
 - Data validation and sanitization
 - Error handling and logging
 
-**🧠 ai/flows/**: AI Workflows
+**ai/flows/**: AI Workflows
 
 - Financial insights generation
 - Savings opportunities analysis
 - Prompt engineering and optimization
 - Response validation and formatting
 
-**🌐 app/**: Frontend Routing
+**app/**: Frontend Routing
 
 - Page components with server-side data fetching
 - Client-side state management
 - Responsive UI implementation
 - Accessibility compliance
-
-## Production Deployment
-
-### Infrastructure Configuration
-
-#### Database Setup
-
-```sql
--- PostgreSQL database creation
-CREATE DATABASE fintrack;
-CREATE USER fintrack_user WITH ENCRYPTED PASSWORD 'secure_password';
-GRANT ALL PRIVILEGES ON DATABASE fintrack TO fintrack_user;
-```
-
-#### Environment Variables
-
-```bash
-export DATABASE_URL="postgresql://fintrack_user:secure_password@production-db:5432/fintrack"
-export GOOGLE_API_KEY="production_google_api_key"
-export JWT_SECRET="production_secure_jwt_secret"
-export NODE_ENV="production"
-```
-
-#### Process Management
-
-```bash
-# Using PM2 for process management
-npm install -g pm2
-pm2 start npm --name "fintrack" -- start
-pm2 startup
-pm2 save
-```
-
-## Performance Optimization
-
-### Frontend Optimization
-
-- **Code Splitting**: Dynamic imports for route-based code splitting
-- **Image Optimization**: Next.js Image component for responsive images
-- **Bundle Analysis**: Webpack Bundle Analyzer for size optimization
-- **Caching Strategies**: Client-side caching for improved UX
-
-### Backend Optimization
-
-- **Database Indexing**: Strategic indexing for financial queries
-- **Query Optimization**: Efficient database queries with Prisma
-- **Connection Pooling**: Database connection management
-- **API Caching**: Response caching for frequently accessed data
-
-### AI Service Optimization
-
-- **Prompt Caching**: Cache optimized prompts for consistent results
-- **Rate Limiting**: API usage management to prevent quota exhaustion
-- **Response Validation**: Ensure AI responses meet quality standards
-- **Fallback Mechanisms**: Graceful degradation for AI service failures
 
 ## Contributing Guidelines
 
@@ -319,18 +271,17 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ## Project Maintainer
 
-**Ragnang Newende Yanis Axel DABO**  
-📧 Email: <axeldaboworkplace@gmail.com>  
-🔗 LinkedIn: [Ragnang Newende Yanis Axel](https://www.linkedin.com/in/y4nnthedev777)
+Ragnang Newende Yanis Axel DABO
+Email: y4nn.dev@gmail.com
+LinkedIn: [Ragnang-Newende Yanis Axel DABO](https://www.linkedin.com/in/y4nnthedev777)
 
 ## Acknowledgments
 
 ### Technology Partners
 
-- **Google AI**: Gemini API for financial analysis
-- **Vercel**: Hosting and deployment platform
-- **PlanetScale**: Database infrastructure (alternative option)
-- **shadcn/ui**: Component library foundation
+- **Google AI**: Gemini API and GenKit for financial analysis
+- **Supabase**: Database and real-time infrastructure
+- **shadcn/ui**: Open Source Component library foundation
 
 ### Financial Domain Expertise
 
@@ -340,25 +291,72 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ## Support & Documentation
 
-**📋 Issues**: [GitHub Issues Tracker](https://github.com/Y4NN777/FinTrack/issues)  
-**📖 Documentation**: Comprehensive guides in `/docs` directory  
-**💬 Community**: Developer discussions and Q&A  
-**🔧 API Reference**: Complete endpoint documentation
+Issues: [GitHub Issues Tracker](https://github.com/Y4NN777/FinTrack/issues)
+Documentation: Comprehensive guides in `/docs` directory
+Community: Developer discussions and Q&A
+API Reference: Complete endpoint documentation
 
 ## Roadmap & Future Development
 
-### Planned Features
+### Currently Implemented Features
 
+- **Account Management**: Full CRUD operations for bank accounts, credit cards, and investment accounts with real-time balance calculations
+- **Category Management**: Customizable income and expense categories with color coding and icons
+- **Transaction Tracking**: Comprehensive income and expense tracking with category-based organization and account association
+- **Budget Management**: Budget creation and monitoring with progress visualization and spending alerts
+- **Goal Setting**: Financial goal tracking with progress indicators and milestone celebrations
+- **Dashboard Overview**: Real-time financial health metrics with spending trends and net worth analysis
+- **AI Financial ing**: Interactive forms for personalized financial guidance and recommendations
+- **Multi-Currency Support**: Manage finances in multiple currencies with automatic conversion
+- **Responsive Design**: Mobile-first approach with optimized experience across all devices
+- **Secure Authentication**: JWT-based authentication with Supabase and OAuth integration
+- **User Profile Management**: Comprehensive settings for preferences, themes, and account management
+- **Data Export**: Export financial data in CSV format for external analysis
+- **Real-time Notifications**: Intelligent alert system with user-configurable preferences and browser notifications
+- **Real-time Updates**: Live synchronization of financial data across all components
+
+### Planned Features (Not Yet Implemented)
+
+- [ ] **Forgot Password**: Password reset functionality via email
+- [ ] **Email Notifications**: Email-based notification delivery system
+- [ ] **Delete Account**: User account deletion with data cleanup
+- [ ] **AI Spending Analysis**: Automatic analysis of transaction patterns and spending behavior
+- [ ] **AI Savings Recommendations**: Intelligent suggestions based on actual spending data
 - [ ] **Investment Tracking**: Portfolio management and performance analysis
 - [ ] **Bill Reminders**: Automated payment reminders and due date tracking
 - [ ] **Financial Reports**: Comprehensive monthly and annual financial reports
-- [ ] **Tax Integration**: Tax preparation assistance and deduction tracking
 - [ ] **Family Accounts**: Shared financial management for households
+- [ ] **Real Assets Integration**: Integration with real assets app through uniform and normalized API
+
+### Planned Perfomance optimization
+
+#### Frontend Optimization
+
+- **Code Splitting**: Dynamic imports for route-based code splitting
+- **Image Optimization**: Next.js Image component for responsive images
+- **Bundle Analysis**: Webpack Bundle Analyzer for size optimization
+- **Caching Strategies**: Client-side caching for improved UX
+
+#### Backend Optimization
+
+- **Database Indexing**: Strategic indexing for financial queries
+- **Query Optimization**: Efficient database queries with Prisma
+- **Connection Pooling**: Database connection management
+- **API Caching**: Response caching for frequently accessed data
+
+#### AI Service Optimization
+
+- **Prompt Caching**: Cache optimized prompts for consistent results
+- **Rate Limiting**: API usage management to prevent quota exhaustion
+- **Response Validation**: Ensure AI responses meet quality standards
+- **Fallback Mechanisms**: Graceful degradation for AI service failures
+
+
 
 ### System Expansion
 
 - [ ] **Mobile Applications**: Native iOS/Android implementations
-- [ ] **Bank Integration**: Direct bank account synchronization
+- [ ] **Blockchain Integration**: Direct bank account synchronization
 - [ ] **Financial Institution API**: Integration with major banks and financial services
 - [ ] **Regulatory Compliance**: Financial data protection and privacy standards
 - [ ] **Advanced Analytics**: Predictive modeling and financial forecasting
@@ -415,4 +413,5 @@ If the application encounters issues during development, consider the following:
 
 ---
 
-**💰 Financial Management Disclaimer**: FinTrack provides tools and insights to help manage personal finances more effectively. This system enhances financial awareness but does not constitute financial advice, investment recommendations, or tax guidance. Always consult qualified financial professionals for important financial decisions.
+Financial Management Disclaimer: FinTrack provides tools and insights to help manage personal finances more effectively. This system enhances financial awareness but does not constitute financial advice, investment recommendations, or tax guidance. Always consult qualified financial professionals for important financial decisions.
+
