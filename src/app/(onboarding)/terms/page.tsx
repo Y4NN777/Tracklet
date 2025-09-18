@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,22 +13,53 @@ import {
   Users,
   Database,
   Mail,
-  CheckCircle,
-  ArrowRight
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db, supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function TermsAcceptancePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [returnTo, setReturnTo] = useState('');
   const [acceptances, setAcceptances] = useState({
     terms: false,
     privacy: false,
     dataProcessing: false
   });
+
+  // Check authentication status and get return URL
+  useEffect(() => {
+    const initializePage = async () => {
+      try {
+        // Check if user is authenticated
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError) {
+          console.warn('Session check error:', sessionError);
+          setIsAuthenticated(false);
+        } else {
+          setIsAuthenticated(!!session);
+        }
+
+        // Get return URL from query parameters
+        const returnUrl = searchParams.get('return_to');
+        if (returnUrl) {
+          setReturnTo(returnUrl);
+        }
+      } catch (error) {
+        console.error('Error initializing terms page:', error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    initializePage();
+  }, [searchParams]);
 
   const handleAcceptanceChange = (type: keyof typeof acceptances) => {
     setAcceptances(prev => ({
@@ -38,7 +69,8 @@ export default function TermsAcceptancePage() {
   };
 
   const handleAcceptAll = async () => {
-    if (!acceptances.terms || !acceptances.privacy || !acceptances.dataProcessing) {
+    // For authenticated users (OAuth flow), require all checkboxes
+    if (isAuthenticated && (!acceptances.terms || !acceptances.privacy || !acceptances.dataProcessing)) {
       toast({
         title: 'Please accept all terms',
         description: 'You must accept all terms and conditions to continue.',
@@ -47,6 +79,14 @@ export default function TermsAcceptancePage() {
       return;
     }
 
+    // For non-authenticated users (signup flow), just redirect back
+    if (!isAuthenticated) {
+      const redirectUrl = returnTo || '/signup';
+      await router.push(redirectUrl);
+      return;
+    }
+
+    // For authenticated users, proceed with database update
     setLoading(true);
     try {
       // Get current user with better validation
@@ -117,7 +157,7 @@ export default function TermsAcceptancePage() {
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);  // ✅ Always reset loading state
+      setLoading(false);  // Always reset loading state
     }
   };
 
@@ -127,6 +167,24 @@ export default function TermsAcceptancePage() {
     router.push('/auth/login?message=terms_required');
   };
 
+  // Show loading state while checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <div className="fixed inset-0 min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-8 px-4 overflow-auto">
+        <div className="w-full max-w-6xl mx-auto">
+          <Card className="w-full shadow-xl">
+            <CardContent className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading...</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-8 px-4 overflow-auto">
       <div className="w-full max-w-6xl mx-auto">
@@ -135,9 +193,14 @@ export default function TermsAcceptancePage() {
             <div className="mx-auto bg-primary/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
               <Shield className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl">Welcome to FinTrack</CardTitle>
+            <CardTitle className="text-2xl">Terms and Conditions</CardTitle>
             <CardDescription className="text-lg">
-              Before we get started, please review and accept our terms and conditions
+              {isAuthenticated === null
+                ? "Loading..."
+                : isAuthenticated
+                  ? "Please review and accept our terms and conditions to continue"
+                  : "Please read our terms and conditions before creating your account"
+              }
             </CardDescription>
           </CardHeader>
 
@@ -228,79 +291,103 @@ export default function TermsAcceptancePage() {
               </div>
             </ScrollArea>
 
-            {/* Acceptance Checkboxes */}
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="terms"
-                  checked={acceptances.terms}
-                  onCheckedChange={() => handleAcceptanceChange('terms')}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <label htmlFor="terms" className="text-sm font-medium cursor-pointer">
-                    I accept the Terms of Service
-                  </label>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    I agree to abide by FinTrack's terms and conditions of use.
+            {/* Acceptance Checkboxes - Only for authenticated users */}
+            {isAuthenticated && (
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="terms"
+                    checked={acceptances.terms}
+                    onCheckedChange={() => handleAcceptanceChange('terms')}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="terms" className="text-sm font-medium cursor-pointer">
+                      I accept the Terms of Service
+                    </label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      I agree to abide by FinTrack's terms and conditions of use.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="privacy"
+                    checked={acceptances.privacy}
+                    onCheckedChange={() => handleAcceptanceChange('privacy')}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="privacy" className="text-sm font-medium cursor-pointer">
+                      I accept the Privacy Policy
+                    </label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      I consent to the collection and processing of my personal data as described.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="dataProcessing"
+                    checked={acceptances.dataProcessing}
+                    onCheckedChange={() => handleAcceptanceChange('dataProcessing')}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="dataProcessing" className="text-sm font-medium cursor-pointer">
+                      I accept the Data Processing Agreement
+                    </label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      I understand how my financial data will be processed and stored.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Info message for non-authenticated users */}
+            {isAuthenticated === false && (
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    By proceeding with account creation, you acknowledge that you have read and understood our terms and conditions.
                   </p>
                 </div>
               </div>
+            )}
 
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="privacy"
-                  checked={acceptances.privacy}
-                  onCheckedChange={() => handleAcceptanceChange('privacy')}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <label htmlFor="privacy" className="text-sm font-medium cursor-pointer">
-                    I accept the Privacy Policy
-                  </label>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    I consent to the collection and processing of my personal data as described.
-                  </p>
-                </div>
+            {/* Action Buttons - Conditional based on authentication and loading state */}
+            {isAuthenticated === null ? (
+              // Loading state
+              <div className="flex justify-center pt-6 border-t">
+                <div className="text-sm text-muted-foreground">Loading...</div>
               </div>
-
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="dataProcessing"
-                  checked={acceptances.dataProcessing}
-                  onCheckedChange={() => handleAcceptanceChange('dataProcessing')}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <label htmlFor="dataProcessing" className="text-sm font-medium cursor-pointer">
-                    I accept the Data Processing Agreement
-                  </label>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    I understand how my financial data will be processed and stored.
-                  </p>
-                </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(returnTo || '/signup')}
+                  className="w-full sm:w-auto"
+                  disabled={loading}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  {isAuthenticated ? 'Decline & Return to Login' : 'Back to Signup'}
+                </Button>
+                <Button
+                  onClick={handleAcceptAll}
+                  className="w-full sm:w-auto"
+                  disabled={loading || (isAuthenticated && (!acceptances.terms || !acceptances.privacy || !acceptances.dataProcessing))}
+                >
+                  {loading
+                    ? (isAuthenticated ? 'Accepting...' : 'Redirecting...')
+                    : (isAuthenticated ? 'Accept All & Continue' : 'I Have Read the Terms')
+                  }
+                  {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
               </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
-              <Button
-                variant="outline"
-                onClick={handleDecline}
-                className="w-full sm:w-auto"
-                disabled={loading}
-              >
-                Decline & Return to Login
-              </Button>
-              <Button
-                onClick={handleAcceptAll}
-                className="w-full sm:w-auto"
-                disabled={loading || !acceptances.terms || !acceptances.privacy || !acceptances.dataProcessing}
-              >
-                {loading ? 'Accepting...' : 'Accept All & Continue'}
-                {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
-              </Button>
-            </div>
+            )}
 
             <p className="text-xs text-muted-foreground text-center">
               By continuing, you acknowledge that you have read and understood our terms and conditions.

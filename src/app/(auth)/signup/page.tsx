@@ -136,7 +136,7 @@ export default function SignupPage() {
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <div className="relative">
@@ -153,7 +153,7 @@ export default function SignupPage() {
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
@@ -173,7 +173,7 @@ export default function SignupPage() {
               Must be at least 8 characters long
             </p>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
             <div className="relative">
@@ -195,7 +195,7 @@ export default function SignupPage() {
             <Checkbox
               id="terms"
               checked={formData.agreeToTerms}
-              onCheckedChange={(checked) => 
+              onCheckedChange={(checked) =>
                 setFormData({ ...formData, agreeToTerms: checked as boolean })
               }
               disabled={isLoading}
@@ -205,15 +205,18 @@ export default function SignupPage() {
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               I agree to the{' '}
-              <Link href="/terms" className="text-primary hover:underline">
+              <Link
+                href={`/terms?return_to=${encodeURIComponent('/signup')}`}
+                className="text-primary hover:underline"
+              >
                 terms and conditions
               </Link>
             </label>
           </div>
 
-          <Button 
-            type="submit" 
-            className="w-full" 
+          <Button
+            type="submit"
+            className="w-full"
             disabled={isLoading || !formData.agreeToTerms}
           >
             {isLoading ? (
