@@ -24,9 +24,13 @@ The system includes AI-powered forms where users can input their financial infor
 ### Core Financial Management
 
 - Transaction Tracking: Comprehensive income and expense tracking with category-based organization
+
 - Category Management: User-driven transaction categorization with predefined category options
+
 - Budget Management: Intuitive budget creation and monitoring with progress visualization
+
 - Goal Setting: Financial goal tracking with progress indicators and milestone celebrations
+
 - Dashboard Overview: Real-time financial health metrics with spending trends and net worth analysis
 
 ### AI-Powered Intelligence
@@ -35,10 +39,14 @@ The system includes AI-powered forms where users can input their financial infor
 
 ### Advanced Capabilities
 
-- Multi-Currency Support: Manage finances in multiple currencies with automatic conversion
+- Multi-Currency Support: Manage finances in multiple currencies
+
 - Responsive Design: Mobile-first approach with optimized experience across all devices
+
 - Secure Authentication: JWT-based authentication with secure session management
-- Data Export: Export financial data in CSV format for external analysis
+
+- Data Export: Export financial data in multiple formats (CSV, Excel XLSX, PDF) with user currency support
+
 
 ## Technical Architecture
 
@@ -47,25 +55,37 @@ The system includes AI-powered forms where users can input their financial infor
 #### Frontend Layer
 
 - **Next.js 15**: React-based framework with App Router and Server Components
+
 - **TypeScript 5.0**: Type-safe development with enhanced developer experience
+
 - **Tailwind CSS 3.0**: Utility-first CSS framework for responsive design
+
 - **shadcn/ui**: Reusable component library built on Radix UI primitives
+
 - **React Hook Form**: Performant, flexible forms with easy validation
+
 - **Zod**: TypeScript-first schema declaration and validation
 
 #### Backend Layer
 
 - **Node.js**: JavaScript runtime for server-side development
+
 - **Express.js**: Minimalist web framework for RESTful APIs
+
 - **Supabase**: PostgreSQL-compatible database with real-time capabilities
+
 - **Prisma**: Next-generation ORM for database operations
+
 - **JWT**: Secure token-based authentication
+
 - **Google Genkit**: Framework for building AI-powered applications
 
 #### AI Integration
 
 - **Google Gemini**: State-of-the-art language models for financial analysis
+
 - **Genkit Flows**: Structured AI workflows for consistent results
+
 - **Prompt Engineering**: Optimized prompts for financial domain expertise
 
 ### Application Architecture
@@ -363,19 +383,34 @@ API Reference: Complete endpoint documentation
 ### Currently Implemented Features
 
 - **Account Management**: Full CRUD operations for bank accounts, credit cards, and investment accounts with real-time balance calculations
+
 - **Category Management**: Customizable income and expense categories with color coding and icons
+
 - **Transaction Tracking**: Comprehensive income and expense tracking with category-based organization and account association
+
 - **Budget Management**: Budget creation and monitoring with progress visualization and spending alerts
+
 - **Goal Setting**: Financial goal tracking with progress indicators and milestone celebrations
+
 - **Dashboard Overview**: Real-time financial health metrics with spending trends and net worth analysis
+
 - **AI Financial ing**: Interactive forms for personalized financial guidance and recommendations
+
 - **Multi-Currency Support**: Manage finances in multiple currencies with automatic conversion
+
 - **Responsive Design**: Mobile-first approach with optimized experience across all devices
+
 - **Secure Authentication**: JWT-based authentication with Supabase and OAuth integration
+
 - **User Profile Management**: Comprehensive settings for preferences, themes, and account management
-- **Data Export**: Export financial data in CSV format for external analysis
+
+- **Data Export**: Export financial data in multiple formats (CSV, Excel XLSX, PDF) with user currency support
+
 - **Real-time Notifications**: Intelligent alert system with user-configurable preferences and browser notifications
+
 - **Real-time Updates**: Live synchronization of financial data across all components
+
+- **Enhanced Terms Flow**: Dual-mode terms acceptance supporting both OAuth and regular signup users
 
 ### Planned Features (Not Yet Implemented)
 
@@ -389,6 +424,7 @@ API Reference: Complete endpoint documentation
 - [ ] **Financial Reports**: Comprehensive monthly and annual financial reports
 - [ ] **Family Accounts**: Shared financial management for households
 - [ ] **Real Assets Integration**: Integration with real assets app through uniform and normalized API
+- [ ] **Automatic system language detection and switching for better UX**
 
 ### Planned Perfomance optimization
 
