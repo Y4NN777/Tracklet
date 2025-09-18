@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,12 +15,39 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CreditCard, LogOut, Settings, User } from 'lucide-react';
-import { auth } from '@/lib/supabase';
+import { auth, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 export function UserNav() {
   const router = useRouter();
   const { toast } = useToast();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get initial user session
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+      setLoading(false);
+    };
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const displayEmail = user?.email || 'user@example.com';
+  const avatarUrl = user?.user_metadata?.avatar_url;
+  const initials = displayName.charAt(0).toUpperCase();
 
   const handleLogout = async () => {
     try {
@@ -74,22 +102,32 @@ export function UserNav() {
     }
   };
 
+  if (loading) {
+    return (
+      <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+        <Avatar className="h-8 w-8">
+          <AvatarFallback>...</AvatarFallback>
+        </Avatar>
+      </Button>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="https://placehold.co/100x100.png" alt="@shadcn" data-ai-hint="person portrait" />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarImage src={avatarUrl} alt={displayName} />
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">User</p>
+            <p className="text-sm font-medium leading-none">{displayName}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              user@example.com
+              {displayEmail}
             </p>
           </div>
         </DropdownMenuLabel>
