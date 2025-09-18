@@ -73,12 +73,12 @@ export default function AuthCallback() {
             console.log('Profile created successfully:', createdProfile)
 
             // New user - go to terms acceptance first
-            router.push('/onboarding/terms')
+            router.push('/terms')
           } else if (profile) {
             // Profile exists - check if terms accepted
             if (!profile.terms_accepted) {
               // Existing user who hasn't accepted terms - go to terms acceptance
-              router.push('/onboarding/terms')
+              router.push('/terms')
             } else {
               // Existing user with accepted terms - go to dashboard
               router.push('/')
