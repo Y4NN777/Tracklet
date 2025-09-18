@@ -34,6 +34,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/lib/api-client';
 import { useCurrency } from '@/contexts/preferences-context';
+import { calculateAccountBalance } from '@/lib/financial-calculations';
+import { supabase } from '@/lib/supabase';
 import {
   DollarSign,
   CreditCard,
@@ -121,6 +123,7 @@ interface Account {
   type: string;
   balance: number;
   currency: string;
+  calculatedBalance?: number;
 }
 
 interface Category {
@@ -212,6 +215,40 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
     }
   }, [editingTransaction, form]);
 
+  // Set up real-time updates for account balances
+  useEffect(() => {
+    if (!open) return;
+
+    const setupRealtimeUpdates = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Subscribe to transaction changes to refresh account balances
+      const subscription = supabase
+        .channel('transaction-form-updates')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'transactions',
+          filter: `user_id=eq.${session.user.id}`
+        }, () => {
+          // Refresh accounts when transactions change
+          fetchAccountsAndCategories();
+        })
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    };
+
+    const cleanup = setupRealtimeUpdates();
+
+    return () => {
+      cleanup?.then(cleanupFn => cleanupFn?.());
+    };
+  }, [open]);
+
   const fetchAccountsAndCategories = async () => {
     setLoading(true);
     try {
@@ -221,7 +258,32 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
       ]);
 
       if (accountsResponse.data) {
-        setAccounts(accountsResponse.data.accounts || []);
+        const accountsData = accountsResponse.data.accounts || [];
+
+        // Calculate balances for each account
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const accountsWithBalances = await Promise.all(
+            accountsData.map(async (account: Account) => {
+              try {
+                const calculatedBalance = await calculateAccountBalance(account.id, session.user.id);
+                return {
+                  ...account,
+                  calculatedBalance
+                };
+              } catch (error) {
+                console.error(`Error calculating balance for account ${account.id}:`, error);
+                return {
+                  ...account,
+                  calculatedBalance: account.balance || 0 // Fallback to stored balance
+                };
+              }
+            })
+          );
+          setAccounts(accountsWithBalances);
+        } else {
+          setAccounts(accountsData);
+        }
       } else if (accountsResponse.error) {
         console.error('Error fetching accounts:', accountsResponse.error);
       }
@@ -355,7 +417,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                       <option value="">Select an account</option>
                       {accounts.map((account) => (
                         <option key={account.id} value={account.id}>
-                          {account.name} ({account.type}) - {account.balance.toLocaleString('en-US', { style: 'currency', currency: account.currency })}
+                          {account.name} ({account.type}) - {(account.calculatedBalance ?? account.balance).toLocaleString('en-US', { style: 'currency', currency: account.currency })}
                         </option>
                       ))}
                     </select>

@@ -15,6 +15,7 @@ import { PlusCircle, Wallet, PiggyBank, CreditCard, TrendingUp, Edit, Trash2 } f
 import { AccountForm } from '@/components/account-form';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api-client';
+import { calculateAccountBalance } from '@/lib/financial-calculations';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +36,7 @@ interface Account {
   balance: number;
   currency: string;
   created_at: string;
+  calculatedBalance?: number;
 }
 
 const accountTypeIcons = {
@@ -62,6 +64,51 @@ export default function AccountsPage() {
   // Fetch accounts on component mount
   useEffect(() => {
     fetchAccounts();
+
+    // Set up real-time subscriptions for balance updates
+    const setupRealtimeUpdates = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Subscribe to transaction changes
+      const transactionSubscription = supabase
+        .channel('transactions')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'transactions',
+          filter: `user_id=eq.${session.user.id}`
+        }, () => {
+          // Refresh balances when transactions change
+          refreshAccountBalances();
+        })
+        .subscribe();
+
+      // Subscribe to account changes
+      const accountSubscription = supabase
+        .channel('accounts')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'accounts',
+          filter: `user_id=eq.${session.user.id}`
+        }, () => {
+          // Refresh accounts when accounts change
+          fetchAccounts();
+        })
+        .subscribe();
+
+      return () => {
+        transactionSubscription.unsubscribe();
+        accountSubscription.unsubscribe();
+      };
+    };
+
+    const cleanup = setupRealtimeUpdates();
+
+    return () => {
+      cleanup?.then(cleanupFn => cleanupFn?.());
+    };
   }, []);
 
   const fetchAccounts = async () => {
@@ -86,9 +133,30 @@ export default function AccountsPage() {
         setUserCurrency(profileResponse.data.preferences.currency);
       }
 
-      // Get accounts
+      // Get accounts and calculate balances
       if (accountsResponse.data) {
-        setAccounts(accountsResponse.data.accounts || []);
+        const accountsData = accountsResponse.data.accounts || [];
+
+        // Calculate balances for each account
+        const accountsWithBalances = await Promise.all(
+          accountsData.map(async (account: Account) => {
+            try {
+              const calculatedBalance = await calculateAccountBalance(account.id, session.user.id);
+              return {
+                ...account,
+                calculatedBalance
+              };
+            } catch (error) {
+              console.error(`Error calculating balance for account ${account.id}:`, error);
+              return {
+                ...account,
+                calculatedBalance: account.balance || 0 // Fallback to stored balance
+              };
+            }
+          })
+        );
+
+        setAccounts(accountsWithBalances);
       } else if (accountsResponse.error) {
         console.error('Error fetching accounts:', accountsResponse.error);
       }
@@ -96,6 +164,33 @@ export default function AccountsPage() {
       console.error('Error fetching accounts:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Function to refresh account balances
+  const refreshAccountBalances = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const updatedAccounts = await Promise.all(
+        accounts.map(async (account: Account) => {
+          try {
+            const calculatedBalance = await calculateAccountBalance(account.id, session.user.id);
+            return {
+              ...account,
+              calculatedBalance
+            };
+          } catch (error) {
+            console.error(`Error recalculating balance for account ${account.id}:`, error);
+            return account;
+          }
+        })
+      );
+
+      setAccounts(updatedAccounts);
+    } catch (error) {
+      console.error('Error refreshing account balances:', error);
     }
   };
 
@@ -194,8 +289,8 @@ export default function AccountsPage() {
     setEditingAccount(null);
   };
 
-  // Calculate net worth
-  const netWorth = accounts.reduce((sum, account) => sum + account.balance, 0);
+  // Calculate net worth using calculated balances
+  const netWorth = accounts.reduce((sum, account) => sum + (account.calculatedBalance ?? account.balance), 0);
 
   // Group accounts by type
   const accountsByType = accounts.reduce((acc, account) => {
@@ -283,7 +378,7 @@ export default function AccountsPage() {
         {/* Accounts by Type */}
         {Object.entries(accountsByType).map(([type, typeAccounts]) => {
           const IconComponent = accountTypeIcons[type as keyof typeof accountTypeIcons];
-          const typeTotal = typeAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+          const typeTotal = typeAccounts.reduce((sum, acc) => sum + (acc.calculatedBalance ?? acc.balance), 0);
 
           return (
             <div key={type} className="space-y-4">
@@ -360,8 +455,8 @@ export default function AccountsPage() {
                             </AlertDialogContent>
                           </AlertDialog>
                           <div className="text-right ml-4">
-                            <div className={`text-lg font-semibold ${account.balance < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                              {account.balance.toLocaleString('en-US', {
+                            <div className={`text-lg font-semibold ${(account.calculatedBalance ?? account.balance) < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                              {(account.calculatedBalance ?? account.balance).toLocaleString('en-US', {
                                 style: 'currency',
                                 currency: account.currency
                               })}

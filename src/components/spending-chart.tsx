@@ -15,16 +15,13 @@ import {
   ChartLegendContent,
 } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Loader2 } from 'lucide-react';
+import { MonthlyData } from '@/lib/financial-calculations';
 
-const chartData = [
-  { month: 'January', income: 1860, expenses: 800 },
-  { month: 'February', income: 2050, expenses: 1200 },
-  { month: 'March', income: 2370, expenses: 1390 },
-  { month: 'April', income: 1890, expenses: 1480 },
-  { month: 'May', income: 2000, expenses: 1300 },
-  { month: 'June', income: 2180, expenses: 1600 },
-];
+interface SpendingChartProps {
+  monthlyData?: MonthlyData[]
+  isLoading?: boolean
+}
 
 const chartConfig = {
   income: {
@@ -37,7 +34,50 @@ const chartConfig = {
   },
 };
 
-export function SpendingChart() {
+export function SpendingChart({ monthlyData, isLoading = false }: SpendingChartProps) {
+  // Transform monthly data for the chart - reverse order to start from current month
+  const chartData = monthlyData?.map(data => ({
+    month: new Date(data.month + '-01').toLocaleDateString('en-US', { month: 'long' }),
+    income: Math.round(data.income),
+    expenses: Math.round(data.expenses)
+  })).reverse() || []
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" /> Spending Trends
+          </CardTitle>
+          <CardDescription>Income vs. Expenses over the last 6 months.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 w-full flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!chartData.length) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" /> Spending Trends
+          </CardTitle>
+          <CardDescription>Income vs. Expenses over the last 6 months.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 w-full flex items-center justify-center text-muted-foreground">
+            No data available
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
