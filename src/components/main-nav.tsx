@@ -10,6 +10,7 @@ import {
   User,
   Wallet,
   Tag,
+  GraduationCap,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -27,6 +28,7 @@ const navItems = [
   { href: '/budgets', label: 'Budgets & Goals', icon: Target },
   { href: '/savings', label: 'Savings AI', icon: Sparkles },
   { href: '/insights', label: 'Financial Insights', icon: Lightbulb },
+  { href: '/learning', label: 'Learning Center', icon: GraduationCap },
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/settings/profile', label: 'Profile', icon: User },
 ];
