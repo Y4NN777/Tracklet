@@ -38,7 +38,6 @@ export default function RootLayout({
             <Toaster />
           </PreferencesProvider>
         </ThemeProvider>
-        // Google tags
         <>
           {/* Google Analytics */}
           <Script
