@@ -45,6 +45,7 @@
     "embla-carousel-react": "^8.6.0",
     "exceljs": "^4.4.0",
     "firebase": "^11.9.1",
+    "framer-motion": "^12.23.16",
     "genkit": "^1.14.1",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
