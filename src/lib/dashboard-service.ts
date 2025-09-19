@@ -39,7 +39,7 @@ class DashboardService {
       const { data: { session } } = await supabase.auth.getSession()
       this.userId = session?.user?.id || null
     } catch (error) {
-      console.error('Failed to initialize user:', error)
+//      console.error('Failed to initialize user:', error)
     }
   }
 
@@ -125,7 +125,7 @@ class DashboardService {
       }
 
     } catch (error) {
-      console.error('Error fetching dashboard data:', error)
+//      console.error('Error fetching dashboard data:', error)
       return {
         financialSummary: null,
         budgets: [],
@@ -183,7 +183,7 @@ class DashboardService {
       }
 
     } catch (error) {
-      console.error('Error fetching dashboard metrics:', error)
+//      console.error('Error fetching dashboard metrics:', error)
       return {
         netWorth: 0,
         monthlyIncome: 0,
@@ -231,7 +231,7 @@ class DashboardService {
       return alerts
 
     } catch (error) {
-      console.error('Error fetching budget alerts:', error)
+//      console.error('Error fetching budget alerts:', error)
       return []
     }
   }

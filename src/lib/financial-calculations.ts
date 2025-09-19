@@ -70,7 +70,7 @@ export async function calculateFinancialSummary(
     .lte('date', endDate.toISOString().split('T')[0])
 
   if (error) {
-    console.error('Error fetching transactions for summary:', error)
+//    console.error('Error fetching transactions for summary:', error)
     throw new Error('Failed to calculate financial summary')
   }
 
@@ -211,7 +211,7 @@ export async function calculateBudgetProgress(
     .single()
 
   if (budgetError || !budget) {
-    console.error('Error fetching budget:', budgetError)
+//    console.error('Error fetching budget:', budgetError)
     return null
   }
 
@@ -226,7 +226,7 @@ export async function calculateBudgetProgress(
     .lte('date', budget.end_date || new Date().toISOString().split('T')[0])
 
   if (transactionError) {
-    console.error('Error fetching transactions for budget:', transactionError)
+//    console.error('Error fetching transactions for budget:', transactionError)
     return null
   }
 
@@ -259,7 +259,7 @@ export async function calculateAccountBalance(accountId: string, userId: string)
     .single()
 
   if (accountError || !account) {
-    console.error('Error fetching account:', accountError)
+//    console.error('Error fetching account:', accountError)
     return 0
   }
 
@@ -271,7 +271,7 @@ export async function calculateAccountBalance(accountId: string, userId: string)
     .eq('account_id', accountId)
 
   if (transactionError) {
-    console.error('Error fetching transactions for account:', transactionError)
+//    console.error('Error fetching transactions for account:', transactionError)
     return account.balance || 0
   }
 
@@ -324,7 +324,7 @@ export async function generateFinancialInsights(userId: string): Promise<string[
     }
 
   } catch (error) {
-    console.error('Error generating insights:', error)
+//    console.error('Error generating insights:', error)
   }
 
   return insights

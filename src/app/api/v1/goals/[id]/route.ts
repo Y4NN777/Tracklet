@@ -36,7 +36,7 @@ export async function GET(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Goal not found' }, { status: 404 })
       }
-      console.error('Error fetching goal:', error)
+//      console.error('Error fetching goal:', error)
       return NextResponse.json({ error: 'Failed to fetch goal' }, { status: 500 })
     }
 
@@ -49,7 +49,7 @@ export async function GET(
     return NextResponse.json({ goal: data })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -103,7 +103,7 @@ export async function PATCH(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Goal not found' }, { status: 404 })
       }
-      console.error('Error updating goal:', error)
+//      console.error('Error updating goal:', error)
       return NextResponse.json({ error: 'Failed to update goal' }, { status: 500 })
     }
 
@@ -114,7 +114,7 @@ export async function PATCH(
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -168,7 +168,7 @@ export async function PUT(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Goal not found' }, { status: 404 })
       }
-      console.error('Error replacing goal:', error)
+//      console.error('Error replacing goal:', error)
       return NextResponse.json({ error: 'Failed to replace goal' }, { status: 500 })
     }
 
@@ -178,7 +178,7 @@ export async function PUT(
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -211,14 +211,14 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting goal:', error)
+//      console.error('Error deleting goal:', error)
       return NextResponse.json({ error: 'Failed to delete goal' }, { status: 500 })
     }
 
     return NextResponse.json({ message: 'Goal deleted successfully' })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

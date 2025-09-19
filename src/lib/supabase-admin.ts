@@ -16,7 +16,7 @@ if (typeof window === 'undefined' && supabaseServiceKey) {
   })
 } else if (typeof window !== 'undefined') {
   // We're in the browser - don't create admin client
-  console.warn('Admin client not available in browser environment')
+//  console.warn('Admin client not available in browser environment')
 }
 
 // Export admin client (will be null in browser)

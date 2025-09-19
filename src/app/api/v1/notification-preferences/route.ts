@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error fetching notification preferences:', error)
+//      console.error('Error fetching notification preferences:', error)
       return NextResponse.json({ error: 'Failed to fetch notification preferences' }, { status: 500 })
     }
 
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -75,7 +75,7 @@ export async function PATCH(request: NextRequest) {
       .single()
 
     if (fetchError) {
-      console.error('Error fetching current preferences:', fetchError)
+//      console.error('Error fetching current preferences:', fetchError)
       return NextResponse.json({ error: 'Failed to fetch current preferences' }, { status: 500 })
     }
 
@@ -105,7 +105,7 @@ export async function PATCH(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error updating notification preferences:', error)
+//      console.error('Error updating notification preferences:', error)
       return NextResponse.json({ error: 'Failed to update notification preferences' }, { status: 500 })
     }
 
@@ -118,7 +118,7 @@ export async function PATCH(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -106,22 +106,22 @@ export default function OnboardingPage() {
           const dbStep = nextStep >= 3 ? nextStep + 1 : nextStep;
           await db.updateOnboardingProgress(user.id, dbStep);
         } catch (error) {
-          console.error('Failed to save progress:', error);
+//          console.error('Failed to save progress:', error);
         }
       }
     } else {
       setIsLoading(true);
       try {
         if (user) {
-          try { await db.updateOnboardingProgress(user.id, 5, true); } catch (e) { console.error(e); }
-          try { await db.updateUserPreferences(user.id, preferences); } catch (e) { console.error(e); }
+//          try { await db.updateOnboardingProgress(user.id, 5, true); } catch (e) { console.error(e); }
+//          try { await db.updateUserPreferences(user.id, preferences); } catch (e) { console.error(e); }
         }
 
         toast({ title: 'Welcome to FinTrack!', description: 'Redirecting you to the dashboard...' });
         await new Promise(resolve => setTimeout(resolve, 1500));
         router.push('/dashboard');
       } catch (error) {
-        console.error('Onboarding completion failed:', error);
+//        console.error('Onboarding completion failed:', error);
         toast({ title: 'Setup failed', description: 'Redirecting you anyway.', variant: 'destructive' });
         await new Promise(resolve => setTimeout(resolve, 1500));
         router.push('/dashboard');

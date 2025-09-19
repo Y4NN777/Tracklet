@@ -75,7 +75,7 @@ export function usePreferences() {
     try {
       localStorage.setItem('fintrack-preferences', JSON.stringify(prefs));
     } catch (error) {
-      console.warn('Failed to save preferences to localStorage:', error);
+//      console.warn('Failed to save preferences to localStorage:', error);
     }
   }, []);
 
@@ -86,7 +86,7 @@ export function usePreferences() {
     try {
       await db.updateUserPreferences(user.id, prefs);
     } catch (error) {
-      console.warn('Failed to sync preferences with database:', error);
+//      console.warn('Failed to sync preferences with database:', error);
     }
   }, [user]);
 
@@ -102,7 +102,7 @@ export function usePreferences() {
         saveLocalPreferences(dbPrefs);
       }
     } catch (error) {
-      console.warn('Failed to load preferences from database:', error);
+//      console.warn('Failed to load preferences from database:', error);
     }
   }, [user, saveLocalPreferences]);
 
@@ -140,7 +140,7 @@ export function usePreferences() {
           const result = await Promise.race([authPromise, authTimeout]);
           currentUser = result.user;
         } catch (authError) {
-          console.warn('Auth check failed or timed out:', authError);
+//          console.warn('Auth check failed or timed out:', authError);
           // Continue with null user (unauthenticated)
         }
 
@@ -151,12 +151,12 @@ export function usePreferences() {
           try {
             await loadDatabasePreferences();
           } catch (dbError) {
-            console.warn('Failed to load database preferences:', dbError);
+//            console.warn('Failed to load database preferences:', dbError);
             // Continue with local preferences only
           }
         }
       } catch (error) {
-        console.error('Error initializing preferences:', error);
+//        console.error('Error initializing preferences:', error);
         // Ensure we have default preferences loaded
         const localPrefs = loadLocalPreferences();
         setPreferences(localPrefs);

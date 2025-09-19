@@ -87,7 +87,7 @@ export default function TransactionsPage() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !session) {
-        console.error('No session found');
+//        console.error('No session found');
         setLoading(false);
         return;
       }
@@ -107,10 +107,10 @@ export default function TransactionsPage() {
       if (transactionsResponse.data) {
         setTransactions(transactionsResponse.data.transactions || []);
       } else if (transactionsResponse.error) {
-        console.error('Error fetching transactions:', transactionsResponse.error);
+//        console.error('Error fetching transactions:', transactionsResponse.error);
       }
     } catch (error) {
-      console.error('Error fetching transactions:', error);
+//      console.error('Error fetching transactions:', error);
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export default function TransactionsPage() {
       const response = await api.createTransaction(transactionData);
 
       if (response.data) {
-        console.log('Transaction added:', response.data.transaction);
+//        console.log('Transaction added:', response.data.transaction);
         // Refresh transactions list
         await fetchTransactions();
         toast({
@@ -136,7 +136,7 @@ export default function TransactionsPage() {
           description: 'Your transaction has been recorded successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to add transaction:', response.error);
+//        console.error('Failed to add transaction:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to add transaction. Please try again.',
@@ -144,7 +144,7 @@ export default function TransactionsPage() {
         });
       }
     } catch (error) {
-      console.error('Error adding transaction:', error);
+//      console.error('Error adding transaction:', error);
       toast({
         title: 'Error',
         description: 'Failed to add transaction. Please try again.',
@@ -180,7 +180,7 @@ export default function TransactionsPage() {
           description: 'Your transaction has been updated successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to update transaction:', response.error);
+//        console.error('Failed to update transaction:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to update transaction. Please try again.',
@@ -188,7 +188,7 @@ export default function TransactionsPage() {
         });
       }
     } catch (error) {
-      console.error('Error updating transaction:', error);
+//      console.error('Error updating transaction:', error);
       toast({
         title: 'Error',
         description: 'Failed to update transaction. Please try again.',
@@ -209,7 +209,7 @@ export default function TransactionsPage() {
           description: 'Your transaction has been deleted successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to delete transaction:', response.error);
+//        console.error('Failed to delete transaction:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to delete transaction. Please try again.',
@@ -217,7 +217,7 @@ export default function TransactionsPage() {
         });
       }
     } catch (error) {
-      console.error('Error deleting transaction:', error);
+//      console.error('Error deleting transaction:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete transaction. Please try again.',

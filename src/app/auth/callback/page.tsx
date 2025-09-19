@@ -18,7 +18,7 @@ export default function AuthCallback() {
         const { data, error } = await supabase.auth.getSession()
 
         if (error) {
-          console.error('Auth callback error:', error)
+//          console.error('Auth callback error:', error)
           setError('Authentication failed. Please try again.')
           return
         }
@@ -35,7 +35,7 @@ export default function AuthCallback() {
 
           if (profileError && profileError.code === 'PGRST116') {
             // Profile doesn't exist - this is a new user, create profile and go to onboarding
-            console.log('Creating profile for user:', user.id, user.email)
+//            console.log('Creating profile for user:', user.id, user.email)
 
             const profileData = {
               id: user.id,
@@ -56,7 +56,7 @@ export default function AuthCallback() {
               terms_accepted: false
             }
 
-            console.log('Profile data to insert:', profileData)
+//            console.log('Profile data to insert:', profileData)
 
             const { data: createdProfile, error: createError } = await supabase
               .from('user_profiles')
@@ -64,13 +64,13 @@ export default function AuthCallback() {
               .select()
 
             if (createError) {
-              console.error('Error creating profile:', createError)
-              console.error('Error details:', JSON.stringify(createError, null, 2))
+//              console.error('Error creating profile:', createError)
+//              console.error('Error details:', JSON.stringify(createError, null, 2))
               setError(`Failed to create user profile: ${createError.message || 'Unknown error'}`)
               return
             }
 
-            console.log('Profile created successfully:', createdProfile)
+//            console.log('Profile created successfully:', createdProfile)
 
             // New user - go to terms acceptance first
             router.push('/terms')
@@ -85,7 +85,7 @@ export default function AuthCallback() {
             }
           } else {
             // Error fetching profile
-            console.error('Error fetching profile:', profileError)
+//            console.error('Error fetching profile:', profileError)
             setError('Error loading user profile. Please try again.')
             return
           }
@@ -93,7 +93,7 @@ export default function AuthCallback() {
           setError('No session found. Please try logging in again.')
         }
       } catch (err) {
-        console.error('Unexpected error during auth callback:', err)
+//        console.error('Unexpected error during auth callback:', err)
         setError('An unexpected error occurred. Please try again.')
       } finally {
         setLoading(false)

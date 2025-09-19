@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       .select('id')
 
     if (error) {
-      console.error('Error marking notifications as read:', error)
+//      console.error('Error marking notifications as read:', error)
       return NextResponse.json({ error: 'Failed to mark notifications as read' }, { status: 500 })
     }
 
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

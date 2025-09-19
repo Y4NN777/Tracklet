@@ -37,7 +37,7 @@ export function UserNav() {
           const profileData = await db.getUserProfile(session.user.id);
           setProfile(profileData.data);
         } catch (error) {
-          console.warn('Failed to load profile:', error);
+//          console.warn('Failed to load profile:', error);
         }
       }
 
@@ -57,7 +57,7 @@ export function UserNav() {
             const profileData = await db.getUserProfile(session.user.id);
             setProfile(profileData.data);
           } catch (error) {
-            console.warn('Failed to load profile:', error);
+//            console.warn('Failed to load profile:', error);
           }
         } else {
           setProfile(null);
@@ -79,7 +79,7 @@ export function UserNav() {
       const { error } = await auth.signOut();
 
       if (error) {
-        console.error('Logout error:', error);
+//        console.error('Logout error:', error);
         toast({
           title: 'Error',
           description: 'Failed to log out. Please try again.',
@@ -93,7 +93,7 @@ export function UserNav() {
         description: 'You have been successfully logged out.',
       });
     } catch (error) {
-      console.error('Unexpected logout error:', error);
+//      console.error('Unexpected logout error:', error);
       toast({
         title: 'Error',
         description: 'An unexpected error occurred during logout.',

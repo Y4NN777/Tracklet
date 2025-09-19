@@ -41,7 +41,7 @@ function TermsAcceptanceContent() {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
-          console.warn('Session check error:', sessionError);
+//          console.warn('Session check error:', sessionError);
           setIsAuthenticated(false);
         } else {
           setIsAuthenticated(!!session);
@@ -53,7 +53,7 @@ function TermsAcceptanceContent() {
           setReturnTo(returnUrl);
         }
       } catch (error) {
-        console.error('Error initializing terms page:', error);
+//        console.error('Error initializing terms page:', error);
         setIsAuthenticated(false);
       }
     };
@@ -106,7 +106,7 @@ function TermsAcceptanceContent() {
         throw new Error('No authenticated user found');
       }
 
-      console.log('Updating terms acceptance for user:', user.id);
+//      console.log('Updating terms acceptance for user:', user.id);
 
       // Database update with detailed error
       const { error: updateError } = await supabase
@@ -121,7 +121,7 @@ function TermsAcceptanceContent() {
         throw new Error(`Database update failed: ${updateError.message} (Code: ${updateError.code || 'Unknown'})`);
       }
 
-      console.log('Terms acceptance updated successfully');
+//      console.log('Terms acceptance updated successfully');
 
       // Get user profile to check onboarding status
       const { data: profile } = await db.getUserProfile(user.id);
@@ -142,7 +142,7 @@ function TermsAcceptanceContent() {
           await router.push('/onboarding');
         }
       } catch (routerError) {
-        console.error('Router navigation failed:', routerError);
+//        console.error('Router navigation failed:', routerError);
         // Fallback redirect
         if (profile?.onboarding_completed) {
           window.location.href = '/';
@@ -152,7 +152,7 @@ function TermsAcceptanceContent() {
       }
 
     } catch (error) {
-      console.error('Terms acceptance failed:', error);
+//      console.error('Terms acceptance failed:', error);
 
       // Show specific error to user
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';

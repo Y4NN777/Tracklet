@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Error running notification job:', error)
+//    console.error('Error running notification job:', error)
     return NextResponse.json({
       error: 'Failed to run notification job',
       timestamp: new Date().toISOString()

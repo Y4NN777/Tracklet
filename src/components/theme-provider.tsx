@@ -63,7 +63,7 @@ export function ThemeProvider({
           setTheme(preferences.theme);
         }
       } catch (error) {
-        console.warn('Failed to parse theme preferences:', error);
+//        console.warn('Failed to parse theme preferences:', error);
       }
     }
   }, [storageKey]);

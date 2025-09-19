@@ -33,14 +33,14 @@ export async function GET(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Account not found' }, { status: 404 })
       }
-      console.error('Error fetching account:', error)
+//      console.error('Error fetching account:', error)
       return NextResponse.json({ error: 'Failed to fetch account' }, { status: 500 })
     }
 
     return NextResponse.json({ account: data })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -98,7 +98,7 @@ export async function PATCH(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Account not found' }, { status: 404 })
       }
-      console.error('Error updating account:', error)
+//      console.error('Error updating account:', error)
       return NextResponse.json({ error: 'Failed to update account' }, { status: 500 })
     }
 
@@ -109,7 +109,7 @@ export async function PATCH(
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -167,7 +167,7 @@ export async function PUT(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Account not found' }, { status: 404 })
       }
-      console.error('Error replacing account:', error)
+//      console.error('Error replacing account:', error)
       return NextResponse.json({ error: 'Failed to replace account' }, { status: 500 })
     }
 
@@ -177,7 +177,7 @@ export async function PUT(
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -210,14 +210,14 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting account:', error)
+//      console.error('Error deleting account:', error)
       return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 })
     }
 
     return NextResponse.json({ message: 'Account deleted successfully' })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

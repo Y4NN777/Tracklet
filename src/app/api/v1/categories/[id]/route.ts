@@ -25,14 +25,14 @@ export async function GET(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Category not found' }, { status: 404 })
       }
-      console.error('Error fetching category:', error)
+//      console.error('Error fetching category:', error)
       return NextResponse.json({ error: 'Failed to fetch category' }, { status: 500 })
     }
 
     return NextResponse.json({ category: data })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -82,7 +82,7 @@ export async function PATCH(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Category not found' }, { status: 404 })
       }
-      console.error('Error updating category:', error)
+//      console.error('Error updating category:', error)
       return NextResponse.json({ error: 'Failed to update category' }, { status: 500 })
     }
 
@@ -93,7 +93,7 @@ export async function PATCH(
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -143,7 +143,7 @@ export async function PUT(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Category not found' }, { status: 404 })
       }
-      console.error('Error replacing category:', error)
+//      console.error('Error replacing category:', error)
       return NextResponse.json({ error: 'Failed to replace category' }, { status: 500 })
     }
 
@@ -153,7 +153,7 @@ export async function PUT(
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -178,14 +178,14 @@ export async function DELETE(
       .eq('user_id', session.user.id)
 
     if (error) {
-      console.error('Error deleting category:', error)
+//      console.error('Error deleting category:', error)
       return NextResponse.json({ error: 'Failed to delete category' }, { status: 500 })
     }
 
     return NextResponse.json({ message: 'Category deleted successfully' })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

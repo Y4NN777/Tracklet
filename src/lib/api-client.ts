@@ -40,7 +40,7 @@ class ApiClient {
         };
       }
     } catch (error) {
-      console.warn('Failed to get auth token:', error);
+//      console.warn('Failed to get auth token:', error);
     }
 
     return {};
@@ -89,7 +89,7 @@ class ApiClient {
 
       return { data };
     } catch (error) {
-      console.error('API request failed:', error);
+//      console.error('API request failed:', error);
       return {
         error: error instanceof Error ? error.message : 'Network error',
       };

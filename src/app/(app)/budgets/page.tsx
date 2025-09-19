@@ -69,16 +69,16 @@ export default function BudgetsPage() {
       if (budgetsResponse.data) {
         setBudgets(budgetsResponse.data.budgets || []);
       } else if (budgetsResponse.error) {
-        console.error('Error fetching budgets:', budgetsResponse.error);
+//        console.error('Error fetching budgets:', budgetsResponse.error);
       }
 
       if (goalsResponse.data) {
         setGoals(goalsResponse.data.goals || []);
       } else if (goalsResponse.error) {
-        console.error('Error fetching goals:', goalsResponse.error);
+//        console.error('Error fetching goals:', goalsResponse.error);
       }
     } catch (error) {
-      console.error('Error fetching budgets and goals:', error);
+//      console.error('Error fetching budgets and goals:', error);
     } finally {
       setLoading(false);
     }
@@ -95,7 +95,7 @@ export default function BudgetsPage() {
           description: 'Your budget has been created successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to add budget:', response.error);
+//        console.error('Failed to add budget:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to add budget. Please try again.',
@@ -103,7 +103,7 @@ export default function BudgetsPage() {
         });
       }
     } catch (error) {
-      console.error('Error adding budget:', error);
+//      console.error('Error adding budget:', error);
       toast({
         title: 'Error',
         description: 'Failed to add budget. Please try again.',
@@ -123,7 +123,7 @@ export default function BudgetsPage() {
           description: 'Your financial goal has been created successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to add goal:', response.error);
+//        console.error('Failed to add goal:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to add goal. Please try again.',
@@ -131,7 +131,7 @@ export default function BudgetsPage() {
         });
       }
     } catch (error) {
-      console.error('Error adding goal:', error);
+//      console.error('Error adding goal:', error);
       toast({
         title: 'Error',
         description: 'Failed to add goal. Please try again.',
@@ -160,7 +160,7 @@ export default function BudgetsPage() {
           description: 'Your budget has been updated successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to update budget:', response.error);
+//        console.error('Failed to update budget:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to update budget. Please try again.',
@@ -168,7 +168,7 @@ export default function BudgetsPage() {
         });
       }
     } catch (error) {
-      console.error('Error updating budget:', error);
+//      console.error('Error updating budget:', error);
       toast({
         title: 'Error',
         description: 'Failed to update budget. Please try again.',
@@ -189,7 +189,7 @@ export default function BudgetsPage() {
           description: 'Your budget has been deleted successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to delete budget:', response.error);
+//        console.error('Failed to delete budget:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to delete budget. Please try again.',
@@ -197,7 +197,7 @@ export default function BudgetsPage() {
         });
       }
     } catch (error) {
-      console.error('Error deleting budget:', error);
+//      console.error('Error deleting budget:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete budget. Please try again.',

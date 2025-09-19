@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (authError || !authData.user) {
-      console.error('Auth creation error:', authError)
+//      console.error('Auth creation error:', authError)
       return NextResponse.json(
         { error: authError?.message || 'Failed to create user' },
         { status: 400 }
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (profileError) {
-      console.error('Profile creation error:', profileError)
+//      console.error('Profile creation error:', profileError)
       // If profile creation fails, we should clean up the auth user
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
       return NextResponse.json(
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
-    console.error('Signup API error:', error)
+//    console.error('Signup API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -72,7 +72,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         setNotifications(data.notifications || []);
       }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+//      console.error('Error fetching notifications:', error);
     } finally {
       setLoading(false);
     }
@@ -176,7 +176,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         // The realtime subscription will handle adding to state
       }
     } catch (error) {
-      console.error('Error adding notification:', error);
+//      console.error('Error adding notification:', error);
     }
   };
 
@@ -200,7 +200,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     );
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+//      console.error('Error marking notification as read:', error);
     }
   };
 
@@ -222,7 +222,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     );
       }
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+//      console.error('Error marking all notifications as read:', error);
     }
   };
 
@@ -242,7 +242,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => prev.filter(n => n.id !== id));
       }
     } catch (error) {
-      console.error('Error removing notification:', error);
+//      console.error('Error removing notification:', error);
     }
   };
 

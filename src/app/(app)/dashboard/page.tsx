@@ -72,7 +72,7 @@ export default function DashboardPage() {
       setMetrics(metricsData);
       setBudgetAlerts(alerts);
     } catch (err) {
-      console.error('Failed to load dashboard data:', err);
+//      console.error('Failed to load dashboard data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
     } finally {
       setIsLoading(false);

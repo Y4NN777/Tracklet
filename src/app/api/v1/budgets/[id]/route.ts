@@ -44,7 +44,7 @@ export async function GET(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Budget not found' }, { status: 404 })
       }
-      console.error('Error fetching budget:', error)
+//      console.error('Error fetching budget:', error)
       return NextResponse.json({ error: 'Failed to fetch budget' }, { status: 500 })
     }
 
@@ -57,7 +57,7 @@ export async function GET(
     return NextResponse.json({ budget: data })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -125,7 +125,7 @@ export async function PATCH(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Budget not found' }, { status: 404 })
       }
-      console.error('Error updating budget:', error)
+//      console.error('Error updating budget:', error)
       return NextResponse.json({ error: 'Failed to update budget' }, { status: 500 })
     }
 
@@ -136,7 +136,7 @@ export async function PATCH(
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -204,7 +204,7 @@ export async function PUT(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Budget not found' }, { status: 404 })
       }
-      console.error('Error replacing budget:', error)
+//      console.error('Error replacing budget:', error)
       return NextResponse.json({ error: 'Failed to replace budget' }, { status: 500 })
     }
 
@@ -214,7 +214,7 @@ export async function PUT(
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -247,14 +247,14 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting budget:', error)
+//      console.error('Error deleting budget:', error)
       return NextResponse.json({ error: 'Failed to delete budget' }, { status: 500 })
     }
 
     return NextResponse.json({ message: 'Budget deleted successfully' })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -271,7 +271,7 @@ async function calculateBudgetProgress(budget: any, userId: string) {
     .lte('date', budget.end_date || new Date().toISOString().split('T')[0])
 
   if (error) {
-    console.error('Error calculating budget progress:', error)
+//    console.error('Error calculating budget progress:', error)
     return { spent: 0, remaining: budget.amount, percentage: 0 }
   }
 

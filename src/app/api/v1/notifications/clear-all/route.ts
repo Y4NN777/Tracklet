@@ -31,7 +31,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error clearing notifications:', error)
+//      console.error('Error clearing notifications:', error)
       return NextResponse.json({ error: 'Failed to clear notifications' }, { status: 500 })
     }
 
@@ -41,7 +41,7 @@ export async function DELETE(request: NextRequest) {
     }, { status: 200 })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

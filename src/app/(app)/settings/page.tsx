@@ -38,7 +38,7 @@ export default function SettingsPage() {
         description: 'Your preferences have been updated.',
       });
     } catch (error) {
-      console.error('Failed to save preferences:', error);
+//      console.error('Failed to save preferences:', error);
       toast({
         title: 'Error',
         description: 'Failed to save your preferences.',

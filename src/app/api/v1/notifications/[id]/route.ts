@@ -76,7 +76,7 @@ export async function PATCH(
       .single()
 
     if (error) {
-      console.error('Error updating notification:', error)
+//      console.error('Error updating notification:', error)
       return NextResponse.json({ error: 'Failed to update notification' }, { status: 500 })
     }
 
@@ -89,7 +89,7 @@ export async function PATCH(
     })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -135,7 +135,7 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting notification:', error)
+//      console.error('Error deleting notification:', error)
       return NextResponse.json({ error: 'Failed to delete notification' }, { status: 500 })
     }
 
@@ -144,7 +144,7 @@ export async function DELETE(
     }, { status: 204 })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

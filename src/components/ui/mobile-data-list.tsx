@@ -52,8 +52,8 @@ export function MobileDataList({
           <TransactionCard
             key={item.id}
             transaction={item}
-            onEdit={() => console.log("Edit transaction", item.id)}
-            onDelete={() => console.log("Delete transaction", item.id)}
+//            onEdit={() => console.log("Edit transaction", item.id)}
+//            onDelete={() => console.log("Delete transaction", item.id)}
           />
         )
       case "budgets":
@@ -61,8 +61,8 @@ export function MobileDataList({
           <BudgetCard
             key={item.id || item.name}
             budget={item}
-            onEdit={() => console.log("Edit budget", item.id || item.name)}
-            onDelete={() => console.log("Delete budget", item.id || item.name)}
+//            onEdit={() => console.log("Edit budget", item.id || item.name)}
+//            onDelete={() => console.log("Delete budget", item.id || item.name)}
           />
         )
       default:

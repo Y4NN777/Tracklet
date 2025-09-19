@@ -109,7 +109,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
       })
       handleClose();
     } catch (error) {
-      console.error('Account creation failed:', error);
+//      console.error('Account creation failed:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create account. Please try again.",

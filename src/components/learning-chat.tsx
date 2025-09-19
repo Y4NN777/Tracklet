@@ -158,7 +158,7 @@ export function LearningChat() {
       setMessages(prev => [...prev, aiMessage]);
       setSelectedTheme(response.theme || null);
     } catch (error) {
-      console.error('Learning chat error:', error);
+//      console.error('Learning chat error:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: 'I apologize, but I encountered an error. Please try again.',

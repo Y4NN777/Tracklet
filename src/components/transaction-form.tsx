@@ -270,7 +270,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                   calculatedBalance
                 };
               } catch (error) {
-                console.error(`Error calculating balance for account ${account.id}:`, error);
+//                console.error(`Error calculating balance for account ${account.id}:`, error);
                 return {
                   ...account,
                   calculatedBalance: account.balance || 0 // Fallback to stored balance
@@ -283,16 +283,16 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
           setAccounts(accountsData);
         }
       } else if (accountsResponse.error) {
-        console.error('Error fetching accounts:', accountsResponse.error);
+//        console.error('Error fetching accounts:', accountsResponse.error);
       }
 
       if (categoriesResponse.data) {
         setCategories(categoriesResponse.data.categories || []);
       } else if (categoriesResponse.error) {
-        console.error('Error fetching categories:', categoriesResponse.error);
+//        console.error('Error fetching categories:', categoriesResponse.error);
       }
     } catch (error) {
-      console.error('Error fetching accounts and categories:', error);
+//      console.error('Error fetching accounts and categories:', error);
     } finally {
       setLoading(false);
     }

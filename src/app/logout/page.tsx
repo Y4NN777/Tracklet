@@ -18,7 +18,7 @@ export default function LogoutPage() {
         const { error } = await auth.signOut();
 
         if (error) {
-          console.error('Logout error:', error);
+//          console.error('Logout error:', error);
           setError('Failed to log out. Please try again.');
           setIsLoggingOut(false);
           return;
@@ -30,7 +30,7 @@ export default function LogoutPage() {
         }, 1000);
 
       } catch (error) {
-        console.error('Unexpected logout error:', error);
+//        console.error('Unexpected logout error:', error);
         setError('An unexpected error occurred. Please try again.');
         setIsLoggingOut(false);
       }
@@ -47,7 +47,7 @@ export default function LogoutPage() {
       const { error } = await auth.signOut();
 
       if (error) {
-        console.error('Manual logout error:', error);
+//        console.error('Manual logout error:', error);
         setError('Failed to log out. Please try again.');
         setIsLoggingOut(false);
         return;
@@ -56,7 +56,7 @@ export default function LogoutPage() {
       router.push('/login?message=logged_out');
 
     } catch (error) {
-      console.error('Unexpected manual logout error:', error);
+//      console.error('Unexpected manual logout error:', error);
       setError('An unexpected error occurred. Please try again.');
       setIsLoggingOut(false);
     }

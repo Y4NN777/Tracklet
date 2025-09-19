@@ -35,7 +35,7 @@ export async function checkBudgetAlerts(userId: string) {
       .single()
 
     if (profileError || !profile) {
-      console.error('Error fetching user preferences:', profileError)
+//      console.error('Error fetching user preferences:', profileError)
       return
     }
 
@@ -64,7 +64,7 @@ export async function checkBudgetAlerts(userId: string) {
       .eq('user_id', userId)
 
     if (budgetsError) {
-      console.error('Error fetching budgets:', budgetsError)
+//      console.error('Error fetching budgets:', budgetsError)
       return
     }
 
@@ -103,7 +103,7 @@ export async function checkBudgetAlerts(userId: string) {
       }
     }
   } catch (error) {
-    console.error('Error in checkBudgetAlerts:', error)
+//    console.error('Error in checkBudgetAlerts:', error)
   }
 }
 
@@ -121,7 +121,7 @@ export async function checkGoalReminders(userId: string) {
       .single()
 
     if (profileError || !profile) {
-      console.error('Error fetching user preferences:', profileError)
+//      console.error('Error fetching user preferences:', profileError)
       return
     }
 
@@ -141,7 +141,7 @@ export async function checkGoalReminders(userId: string) {
       .not('target_date', 'is', null)
 
     if (goalsError) {
-      console.error('Error fetching goals:', goalsError)
+//      console.error('Error fetching goals:', goalsError)
       return
     }
 
@@ -202,7 +202,7 @@ export async function checkGoalReminders(userId: string) {
       }
     }
   } catch (error) {
-    console.error('Error in checkGoalReminders:', error)
+//    console.error('Error in checkGoalReminders:', error)
   }
 }
 
@@ -220,7 +220,7 @@ export async function checkTransactionAlerts(userId: string, transactionId?: str
       .single()
 
     if (profileError || !profile) {
-      console.error('Error fetching user preferences:', profileError)
+//      console.error('Error fetching user preferences:', profileError)
       return
     }
 
@@ -262,7 +262,7 @@ export async function checkTransactionAlerts(userId: string, transactionId?: str
     const { data: transactions, error: txError } = await query
 
     if (txError) {
-      console.error('Error fetching transactions:', txError)
+//      console.error('Error fetching transactions:', txError)
       return
     }
 
@@ -318,7 +318,7 @@ export async function checkTransactionAlerts(userId: string, transactionId?: str
       }
     }
   } catch (error) {
-    console.error('Error in checkTransactionAlerts:', error)
+//    console.error('Error in checkTransactionAlerts:', error)
   }
 }
 
@@ -346,7 +346,7 @@ async function calculateBudgetSpending(userId: string, budget: any): Promise<num
   const { data, error } = await query
 
   if (error) {
-    console.error('Error calculating budget spending:', error)
+//    console.error('Error calculating budget spending:', error)
     return 0
   }
 
@@ -393,7 +393,7 @@ async function detectUnusualSpending(userId: string, transaction: any): Promise<
 
     return isOutlier || isHighPercentile
   } catch (error) {
-    console.error('Error detecting unusual spending:', error)
+//    console.error('Error detecting unusual spending:', error)
     return false
   }
 }
@@ -437,7 +437,7 @@ async function checkDuplicateAlert(
 
     return !error && existing && existing.length > 0
   } catch (error) {
-    console.error('Error checking duplicate alert:', error)
+//    console.error('Error checking duplicate alert:', error)
     return false
   }
 }
@@ -465,7 +465,7 @@ async function createNotification(
       .single()
 
     if (typeError || !typeData) {
-      console.error('Invalid notification type:', type)
+//      console.error('Invalid notification type:', type)
       return
     }
 
@@ -482,9 +482,9 @@ async function createNotification(
       }])
 
     if (error) {
-      console.error('Error creating notification:', error)
+//      console.error('Error creating notification:', error)
     }
   } catch (error) {
-    console.error('Error in createNotification:', error)
+//    console.error('Error in createNotification:', error)
   }
 }

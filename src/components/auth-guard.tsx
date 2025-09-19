@@ -27,7 +27,7 @@ export function AuthGuard({
         const { data: { session }, error } = await supabase.auth.getSession()
 
         if (error) {
-          console.error('Auth check error:', error)
+//          console.error('Auth check error:', error)
           if (requireAuth && pathname !== '/') {
             router.push('/login')
             return
@@ -53,31 +53,31 @@ export function AuthGuard({
               // Handle different types of errors appropriately
               if (profileError.code === 'PGRST116') {
                 // Profile doesn't exist - redirect to onboarding
-                console.log('Profile not found, redirecting to onboarding')
+//                console.log('Profile not found, redirecting to onboarding')
                 if (pathname !== '/onboarding') {
                   router.push('/onboarding')
                   return
                 }
               } else {
                 // Network/database error - allow access to prevent infinite loops
-                console.error('Profile check failed (allowing access):', profileError)
+//                console.error('Profile check failed (allowing access):', profileError)
                 // Don't redirect, allow user access to prevent loops
               }
             } else if (profile && !profile.onboarding_completed) {
               // Profile exists but onboarding not completed
-              console.log('Profile found but onboarding incomplete, redirecting to onboarding')
+//              console.log('Profile found but onboarding incomplete, redirecting to onboarding')
               if (pathname !== '/onboarding') {
                 router.push('/onboarding')
                 return
               }
             } else if (profile && profile.onboarding_completed && pathname === '/onboarding') {
               // User completed onboarding but trying to access onboarding page
-              console.log('Onboarding completed, redirecting to dashboard')
+//              console.log('Onboarding completed, redirecting to dashboard')
               router.push('/dashboard')
               return
             }
           } catch (error) {
-            console.error('Onboarding check error (allowing access):', error)
+//            console.error('Onboarding check error (allowing access):', error)
             // On unexpected error, allow access to prevent infinite loops
             // Don't redirect to onboarding
           }
@@ -87,7 +87,7 @@ export function AuthGuard({
         setAuthorized(true)
 
       } catch (error) {
-        console.error('Auth guard error:', error)
+//        console.error('Auth guard error:', error)
         if (requireAuth) {
           router.push('/login')
           return

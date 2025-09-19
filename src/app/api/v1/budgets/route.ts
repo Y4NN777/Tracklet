@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     const { data: budgets, error } = await query
 
     if (error) {
-      console.error('Error fetching budgets:', error)
+//      console.error('Error fetching budgets:', error)
       return NextResponse.json({ error: 'Failed to fetch budgets' }, { status: 500 })
     }
 
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ budgets })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -114,14 +114,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating budget:', error)
+//      console.error('Error creating budget:', error)
       return NextResponse.json({ error: 'Failed to create budget' }, { status: 500 })
     }
 
     return NextResponse.json({ budget: data }, { status: 201 })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -138,7 +138,7 @@ async function calculateBudgetProgress(budget: any, userId: string) {
     .lte('date', budget.end_date || new Date().toISOString().split('T')[0])
 
   if (error) {
-    console.error('Error calculating budget progress:', error)
+//    console.error('Error calculating budget progress:', error)
     return { spent: 0, remaining: budget.amount, percentage: 0 }
   }
 

@@ -121,10 +121,10 @@ export default function CategoriesPage() {
       if (response.data) {
         setCategories(response.data.categories || []);
       } else if (response.error) {
-        console.error('Error fetching categories:', response.error);
+//        console.error('Error fetching categories:', response.error);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+//      console.error('Error fetching categories:', error);
     } finally {
       setLoading(false);
     }
@@ -141,7 +141,7 @@ export default function CategoriesPage() {
           description: 'Your category has been created successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to add category:', response.error);
+//        console.error('Failed to add category:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to add category. Please try again.',
@@ -149,7 +149,7 @@ export default function CategoriesPage() {
         });
       }
     } catch (error) {
-      console.error('Error adding category:', error);
+//      console.error('Error adding category:', error);
       toast({
         title: 'Error',
         description: 'Failed to add category. Please try again.',
@@ -177,7 +177,7 @@ export default function CategoriesPage() {
           description: 'Your category has been updated successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to update category:', response.error);
+//        console.error('Failed to update category:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to update category. Please try again.',
@@ -185,7 +185,7 @@ export default function CategoriesPage() {
         });
       }
     } catch (error) {
-      console.error('Error updating category:', error);
+//      console.error('Error updating category:', error);
       toast({
         title: 'Error',
         description: 'Failed to update category. Please try again.',
@@ -206,7 +206,7 @@ export default function CategoriesPage() {
           description: 'Your category has been deleted successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to delete category:', response.error);
+//        console.error('Failed to delete category:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to delete category. Please try again.',
@@ -214,7 +214,7 @@ export default function CategoriesPage() {
         });
       }
     } catch (error) {
-      console.error('Error deleting category:', error);
+//      console.error('Error deleting category:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete category. Please try again.',

@@ -62,7 +62,7 @@ export default function ProfilePage() {
             avatarUrl: dbProfile?.avatar_url || user.user_metadata?.avatar_url || '',
           });
         } catch (error) {
-          console.error('Error loading profile:', error);
+//          console.error('Error loading profile:', error);
           // Fallback to auth user data
           setProfile({
             name: user.user_metadata?.full_name || user.user_metadata?.name || '',
@@ -101,7 +101,7 @@ export default function ProfilePage() {
 
       // Handle avatar upload if there's a new file
       if (newAvatarFile) {
-        console.log('Starting avatar upload...');
+//        console.log('Starting avatar upload...');
 
         const fileExt = newAvatarFile.name.split('.').pop();
         const fileName = `${user.id}/avatar.${fileExt}`;
@@ -114,11 +114,11 @@ export default function ProfilePage() {
           });
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
+//          console.error('Upload error:', uploadError);
           throw new Error(`Upload failed: ${uploadError.message}`);
         }
 
-        console.log('Upload successful, getting public URL...');
+//        console.log('Upload successful, getting public URL...');
 
         const { data: { publicUrl } } = supabase.storage
           .from('fintrack-avatars')
@@ -132,7 +132,7 @@ export default function ProfilePage() {
 
       // Update profile in database only if there are changes
       if (Object.keys(profileUpdates).length > 0) {
-        console.log('Updating profile in database...');
+//        console.log('Updating profile in database...');
         await db.updateUserProfile(user.id, profileUpdates);
       }
 
@@ -141,7 +141,7 @@ export default function ProfilePage() {
         description: 'Your profile information has been saved.',
       });
     } catch (err) {
-      console.error('Profile update error:', err);
+//      console.error('Profile update error:', err);
       toast({
         title: 'Error',
         description: err instanceof Error ? err.message : 'Failed to update profile. Please try again.',
@@ -193,7 +193,7 @@ export default function ProfilePage() {
       const { error } = await auth.updatePassword(passwordData.newPassword);
 
       if (error) {
-        console.error('Password update error:', error);
+//        console.error('Password update error:', error);
         toast({
           title: 'Error',
           description: 'Failed to update password. Please try again.',
@@ -214,7 +214,7 @@ export default function ProfilePage() {
         confirmPassword: '',
       });
     } catch (err) {
-      console.error('Unexpected password update error:', err);
+//      console.error('Unexpected password update error:', err);
       toast({
         title: 'Error',
         description: 'An unexpected error occurred. Please try again.',

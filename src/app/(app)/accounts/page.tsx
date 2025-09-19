@@ -117,7 +117,7 @@ export default function AccountsPage() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !session) {
-        console.error('No session found');
+//        console.error('No session found');
         setLoading(false);
         return;
       }
@@ -147,7 +147,7 @@ export default function AccountsPage() {
                 calculatedBalance
               };
             } catch (error) {
-              console.error(`Error calculating balance for account ${account.id}:`, error);
+//              console.error(`Error calculating balance for account ${account.id}:`, error);
               return {
                 ...account,
                 calculatedBalance: account.balance || 0 // Fallback to stored balance
@@ -158,10 +158,10 @@ export default function AccountsPage() {
 
         setAccounts(accountsWithBalances);
       } else if (accountsResponse.error) {
-        console.error('Error fetching accounts:', accountsResponse.error);
+//        console.error('Error fetching accounts:', accountsResponse.error);
       }
     } catch (error) {
-      console.error('Error fetching accounts:', error);
+//      console.error('Error fetching accounts:', error);
     } finally {
       setLoading(false);
     }
@@ -182,7 +182,7 @@ export default function AccountsPage() {
               calculatedBalance
             };
           } catch (error) {
-            console.error(`Error recalculating balance for account ${account.id}:`, error);
+//            console.error(`Error recalculating balance for account ${account.id}:`, error);
             return account;
           }
         })
@@ -190,7 +190,7 @@ export default function AccountsPage() {
 
       setAccounts(updatedAccounts);
     } catch (error) {
-      console.error('Error refreshing account balances:', error);
+//      console.error('Error refreshing account balances:', error);
     }
   };
 
@@ -208,7 +208,7 @@ export default function AccountsPage() {
         throw new Error(response.error);
       }
     } catch (error) {
-      console.error('Error creating account:', error);
+//      console.error('Error creating account:', error);
       toast({
         title: 'Error',
         description: 'Failed to add account. Please try again.',
@@ -238,7 +238,7 @@ export default function AccountsPage() {
           description: 'Your account has been updated successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to update account:', response.error);
+//        console.error('Failed to update account:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to update account. Please try again.',
@@ -246,7 +246,7 @@ export default function AccountsPage() {
         });
       }
     } catch (error) {
-      console.error('Error updating account:', error);
+//      console.error('Error updating account:', error);
       toast({
         title: 'Error',
         description: 'Failed to update account. Please try again.',
@@ -267,7 +267,7 @@ export default function AccountsPage() {
           description: 'Your account has been deleted successfully.',
         });
       } else if (response.error) {
-        console.error('Failed to delete account:', response.error);
+//        console.error('Failed to delete account:', response.error);
         toast({
           title: 'Error',
           description: 'Failed to delete account. Please try again.',
@@ -275,7 +275,7 @@ export default function AccountsPage() {
         });
       }
     } catch (error) {
-      console.error('Error deleting account:', error);
+//      console.error('Error deleting account:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete account. Please try again.',

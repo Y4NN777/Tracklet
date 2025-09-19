@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const { data: goals, error } = await query
 
     if (error) {
-      console.error('Error fetching goals:', error)
+//      console.error('Error fetching goals:', error)
       return NextResponse.json({ error: 'Failed to fetch goals' }, { status: 500 })
     }
 
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ goals })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -92,14 +92,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating goal:', error)
+//      console.error('Error creating goal:', error)
       return NextResponse.json({ error: 'Failed to create goal' }, { status: 500 })
     }
 
     return NextResponse.json({ goal: data }, { status: 201 })
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+//    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

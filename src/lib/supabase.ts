@@ -45,7 +45,7 @@ export const auth = {
 
       return { data: result.data, error: null }
     } catch (error) {
-      console.error('Signup error:', error)
+//      console.error('Signup error:', error)
       return { data: null, error: { message: 'Network error during signup' } }
     }
   },
