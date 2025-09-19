@@ -55,25 +55,59 @@ FinTrack is an **open-source project** that welcomes contributions! Whether you'
 
 - Category Management: User-driven transaction categorization with predefined category options
 
+<img width="559" height="301" alt="image" src="https://github.com/user-attachments/assets/0cc7ffa7-ec43-49f4-9268-d1350e6ae6ab" />
+
+---
+
+
+- Category Management: User-driven transaction categorization with predefined category options
+<img width="559" height="301" alt="image" src="https://github.com/user-attachments/assets/1c19f5f6-293d-49e6-87bf-aee012bfd7ea" />
+
+---
+
+
 - Budget Management: Intuitive budget creation and monitoring with progress visualization
 
 - Goal Setting: Financial goal tracking with progress indicators and milestone celebrations
 
+<img width="559" height="301" alt="image" src="https://github.com/user-attachments/assets/7a04d67e-07c5-46f5-9bac-9c6b97724ebc" />
+
+---
+
+
 - Dashboard Overview: Real-time financial health metrics with spending trends and net worth analysis
+<img width="559" height="301" alt="image" src="https://github.com/user-attachments/assets/3b9e6fe1-e345-4e43-a4c8-ae97aceb1a9d" />
+
+ ---
 
 ### AI-Powered Intelligence
 
 - AI Financial Advisoring: Interactive forms for personalized financial guidance ( Savings opportunities and Insights)
+<img width="459" height="401" alt="image" src="https://github.com/user-attachments/assets/9b9c32e7-e0e7-4fd7-bcc3-a261f7e64089" />
+<img width="459" height="301" alt="image" src="https://github.com/user-attachments/assets/52fd44fa-ed6b-4e91-b3b8-14e95d21678f" />
+
+
 
 ### Advanced Capabilities
 
 - Multi-Currency Support: Manage finances in multiple currencies
 
+<div>
+      <img width="400" height="400" src="https://github.com/user-attachments/assets/c6aa1980-77e6-466f-bd30-7e2f03dcf3fa" />
+</div>
+
+
 - Responsive Design: Mobile-first approach with optimized experience across all devices
+<img width="759" height="501" alt="image" src="https://github.com/user-attachments/assets/0bd4f485-ca8e-4c41-a6b4-da8d9c186864" />
+
 
 - Secure Authentication: JWT-based authentication with secure session management
 
 - Data Export: Export financial data in multiple formats (CSV, Excel XLSX, PDF) with user currency support
+
+
+<img width="360" height="275" alt="image" src="https://github.com/user-attachments/assets/3ed11d32-f4df-4a23-a025-8356681151d6" />
+
 
 
 ## Technical Architecture
@@ -440,7 +474,38 @@ Contributors will be:
 
 - **Issues**: [GitHub Issues](https://github.com/Y4NN777/FinTrack/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/Y4NN777/FinTrack/discussions)
+
+
+
+
+### Contribution Process
+
+1. **Choose an Issue**: Look for issues labeled `good first issue` or `help wanted`
+2. **Discuss First**: For major changes, open an issue to discuss your approach
+3. **Fork & Branch**: Create a feature branch from `main`
+4. **Implement**: Write clean, well-tested code
+5. **Test**: Ensure all tests pass and add new tests if needed
+6. **Document**: Update documentation for any new features
+7. **Pull Request**: Submit a PR with:
+   - Clear title and description
+   - Reference to related issues
+   - Screenshots for UI changes
+   - Test results
+
+### Recognition
+
+Contributors will be:
+- Listed in the repository contributors
+- Mentioned in release notes
+- Featured in our community showcase
+- Eligible for special recognition badges
+
+###  Getting Help
+
+- **Issues**: [GitHub Issues](https://github.com/Y4NN777/FinTrack/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Y4NN777/FinTrack/discussions)
 - **Discord**: Join our community chat (coming soon)
+
 
 ---
 
