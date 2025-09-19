@@ -83,10 +83,15 @@ FinTrack is an **open-source project** that welcomes contributions! Whether you'
 ### AI-Powered Intelligence
 
 - AI Financial Advisoring: Interactive forms for personalized financial guidance (Savings opportunities and Insights)
-- Learning Center: Educational chatbot with 7 structured learning themes covering personal finance basics
-- Learning Center: Educational chatbot with 7 structured learning themes covering personal finance basics (English/French bilingual support)
+
 <img width="459" height="401" alt="image" src="https://github.com/user-attachments/assets/9b9c32e7-e0e7-4fd7-bcc3-a261f7e64089" />
 <img width="459" height="301" alt="image" src="https://github.com/user-attachments/assets/52fd44fa-ed6b-4e91-b3b8-14e95d21678f" />
+
+---
+
+- Learning Center: Educational chatbot with 7 structured learning themes covering personal finance basics (English/French bilingual support)
+<img width="766" height="501" alt="image" src="https://github.com/user-attachments/assets/e3795a1d-e05a-4c7c-a2ca-c77b0c51333d" />
+
 
 
 
