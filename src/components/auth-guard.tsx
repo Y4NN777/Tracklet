@@ -28,14 +28,14 @@ export function AuthGuard({
 
         if (error) {
           console.error('Auth check error:', error)
-          if (requireAuth) {
+          if (requireAuth && pathname !== '/') {
             router.push('/login')
             return
           }
         }
 
-        // If auth is required but no session
-        if (requireAuth && !session) {
+        // If auth is required but no session, redirect to login (except for landing page)
+        if (requireAuth && !session && pathname !== '/') {
           router.push('/login')
           return
         }
@@ -73,7 +73,7 @@ export function AuthGuard({
             } else if (profile && profile.onboarding_completed && pathname === '/onboarding') {
               // User completed onboarding but trying to access onboarding page
               console.log('Onboarding completed, redirecting to dashboard')
-              router.push('/')
+              router.push('/dashboard')
               return
             }
           } catch (error) {
