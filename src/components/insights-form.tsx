@@ -21,16 +21,21 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from "zod";
+import { formatMarkdown } from '@/lib/markdown-utils';
+import { useCurrency } from '@/contexts/preferences-context';
+import { useState } from 'react';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 const InsightsSchema = z.object({
   income: z.coerce.number().min(0, "Income must be a positive number."),
   savings: z.coerce.number().min(0, "Savings must be a positive number."),
-  debt: z.coerce.number().min(0, "Debt must be a positive number."),
+  debt: z.coerce.number().min(0, "Debt must be a positive number.").optional(),
   financialGoals: z.string().min(5, "Please describe your financial goals."),
   expenses: z.array(z.object({
     category: z.string().min(1, 'Category is required'),
     amount: z.coerce.number().min(0.01, 'Amount must be positive'),
   })).min(1, "Please add at least one expense."),
+  currency: z.string().min(1, "Currency is required."),
 });
 
 type InsightsFormValues = z.infer<typeof InsightsSchema>;
@@ -47,14 +52,14 @@ function SubmitButton() {
 
 const initialState: InsightsState = {
   form: {
-    income: 5000,
-    savings: 10000,
-    debt: 2500,
-    financialGoals: "Save for a down payment on a house.",
+    income: 0,
+    savings: 0,
+    debt: 0,
+    financialGoals: "",
     expenses: [
-      { category: "Rent", amount: 1500 },
-      { category: "Groceries", amount: 400 },
+      { category: "", amount: 0 },
     ],
+    currency: "USD",
   },
   error: undefined,
   result: undefined,
@@ -64,6 +69,8 @@ export function InsightsForm() {
   const [state, formAction] = useActionState(getFinancialInsightsAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
+  const { currency } = useCurrency();
+  const [isExpanded, setIsExpanded] = useState(false);
   
   const { control, handleSubmit, formState: { errors } } = useForm<InsightsFormValues>({
     resolver: zodResolver(InsightsSchema),
@@ -86,15 +93,17 @@ export function InsightsForm() {
   }, [state.error, toast]);
 
   return (
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-      <Card className="w-full">
+    <div className={`grid gap-8 ${isExpanded ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+      {!isExpanded && (
+        <Card className="w-full">
         <CardHeader>
           <CardTitle>Financial Insights</CardTitle>
           <CardDescription>
             Provide your financial details to receive AI-powered insights.
           </CardDescription>
         </CardHeader>
-        <form ref={formRef} action={formAction} onSubmit={handleSubmit(() => formRef.current?.requestSubmit())}>
+        <form ref={formRef} action={formAction}>
+          <input type="hidden" name="currency" value={currency} />
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Controller
@@ -182,11 +191,34 @@ export function InsightsForm() {
           </CardFooter>
         </form>
       </Card>
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Bot className="h-5 w-5" />
-            AI Generated Insights
-        </h3>
+      )}
+      <div className={`space-y-4 ${isExpanded ? 'w-full' : ''}`}>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Bot className="h-5 w-5" />
+              AI Generated Insights
+          </h3>
+          {state.result && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-2"
+            >
+              {isExpanded ? (
+                <>
+                  <Minimize2 className="h-4 w-4" />
+                  Collapse
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="h-4 w-4" />
+                  Expand
+                </>
+              )}
+            </Button>
+          )}
+        </div>
         {state.result ? (
             <div className="space-y-4">
               <Card>
@@ -194,7 +226,10 @@ export function InsightsForm() {
                   <CardTitle>Spending Patterns</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>{state.result.spendingPatterns}</p>
+                  <div
+                    className="prose prose-sm max-w-none prose-headings:mb-4 prose-p:mb-3 prose-ul:mb-3 prose-ol:mb-3"
+                    dangerouslySetInnerHTML={{ __html: formatMarkdown(state.result.spendingPatterns) }}
+                  />
                 </CardContent>
               </Card>
               <Card>
@@ -202,7 +237,10 @@ export function InsightsForm() {
                   <CardTitle>Potential Savings</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>{state.result.potentialSavings}</p>
+                  <div
+                    className="prose prose-sm max-w-none prose-headings:mb-4 prose-p:mb-3 prose-ul:mb-3 prose-ol:mb-3"
+                    dangerouslySetInnerHTML={{ __html: formatMarkdown(state.result.potentialSavings) }}
+                  />
                 </CardContent>
               </Card>
                <Card>
@@ -210,7 +248,10 @@ export function InsightsForm() {
                   <CardTitle>Investment Opportunities</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>{state.result.investmentOpportunities}</p>
+                  <div
+                    className="prose prose-sm max-w-none prose-headings:mb-4 prose-p:mb-3 prose-ul:mb-3 prose-ol:mb-3"
+                    dangerouslySetInnerHTML={{ __html: formatMarkdown(state.result.investmentOpportunities) }}
+                  />
                 </CardContent>
               </Card>
             </div>

@@ -19,6 +19,7 @@ const FinancialInsightsInputSchema = z.object({
   savings: z.number().describe('The user\'s total savings.'),
   debt: z.number().describe('The user\'s total debt.'),
   financialGoals: z.array(z.string()).describe('A list of the user\'s financial goals.'),
+  currency: z.string().describe('The user\'s preferred currency code (e.g., USD, EUR, GBP).'),
 });
 export type FinancialInsightsInput = z.infer<typeof FinancialInsightsInputSchema>;
 
@@ -37,21 +38,34 @@ const financialInsightsPrompt = ai.definePrompt({
   name: 'financialInsightsPrompt',
   input: {schema: FinancialInsightsInputSchema},
   output: {schema: FinancialInsightsOutputSchema},
-  prompt: `You are a personal finance advisor. Analyze the user\'s financial data and provide insights on their spending patterns, potential savings opportunities, and investment opportunities.
+  prompt: `You are a personal finance advisor for FinTrack, a modern financial management app designed for users in Africa and other emerging markets. Analyze the user's financial data and provide contextual, practical insights that consider their local financial environment.
 
-  Income: {{{income}}}
-  Expenses:
+  You are providing advice within the FinTrack app, so reference the app's features instead of suggesting external tools. Consider the African context where banking systems, mobile money, and financial habits may differ from Western norms.
+
+  User Financial Data:
+  - Monthly Income: {{{income}}} {{{currency}}}
+  - Monthly Expenses:
   {{#each expenses}}
-  - Category: {{{category}}}, Amount: {{{amount}}}
+  - {{{category}}}: {{{amount}}} {{{currency}}}
   {{/each}}
-  Savings: {{{savings}}}
-  Debt: {{{debt}}}
-  Financial Goals:
-  {{#each financialGoals}}
-  - {{{this}}}
-  {{/each}}
+  - Current Savings: {{{savings}}} {{{currency}}}
+  - Current Debt: {{{debt}}} {{{currency}}}
+  - Financial Goals: {{#each financialGoals}}{{#if @first}}{{this}}{{else}}, {{this}}{{/if}}{{/each}}
 
-  Provide the insights in a clear and concise manner.
+  Key Context for Advice:
+  - This user is using FinTrack, which has features for transaction tracking, budgeting, savings goals, and financial insights
+  - Consider African financial context: mobile money prevalence, informal economies, variable income streams, community/family financial obligations
+  - Focus on practical, actionable advice that works within local financial systems
+  - Reference FinTrack's features like transaction categorization, budget tracking, and goal setting
+  - IMPORTANT: Do NOT suggest automated transfers, scheduled payments, or any automation features that don't exist in African mobile money systems
+
+  Provide insights that are:
+  - Culturally relevant to African users
+  - Practical for users with potentially irregular income
+  - Focused on FinTrack's capabilities rather than external tools
+  - Realistic about local financial constraints and opportunities
+  - Free of unrealistic automation suggestions
+  - Suggest practical manual savings methods like community groups, separate wallets, or conscious daily savings habits
 
   Spending Patterns: {{spendingPatterns}}
   Potential Savings: {{potentialSavings}}

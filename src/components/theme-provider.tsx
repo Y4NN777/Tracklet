@@ -25,7 +25,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'fintrack-ui-theme',
+  storageKey = 'fintrack-preferences',
   ...props
 }: ThemeProviderProps) {
   // Start with default theme (same on server and client)
@@ -38,12 +38,55 @@ export function ThemeProvider({
   useEffect(() => {
     setIsClient(true); // Now we know we're on the client
 
-    // Safe to access localStorage now
-    const storedTheme = localStorage.getItem(storageKey) as Theme;
-    if (storedTheme) {
-      setTheme(storedTheme);
+    // Check if we're recovering from a language switch
+    const switchingFlag = sessionStorage.getItem('language-switching');
+    const preservedTheme = sessionStorage.getItem('theme-at-switch') as Theme;
+
+    if (switchingFlag === 'true' && preservedTheme) {
+      // Clear the flags and restore theme in preferences object
+      sessionStorage.removeItem('language-switching');
+      sessionStorage.removeItem('theme-at-switch');
+
+      const currentPrefs = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      currentPrefs.theme = preservedTheme;
+      localStorage.setItem(storageKey, JSON.stringify(currentPrefs));
+      setTheme(preservedTheme);
+      return;
+    }
+
+    // Otherwise, use the stored theme from preferences object
+    const storedPrefs = localStorage.getItem(storageKey);
+    if (storedPrefs) {
+      try {
+        const preferences = JSON.parse(storedPrefs);
+        if (preferences.theme) {
+          setTheme(preferences.theme);
+        }
+      } catch (error) {
+        console.warn('Failed to parse theme preferences:', error);
+      }
     }
   }, [storageKey]);
+
+  // Listen for language change events
+  useEffect(() => {
+    if (!isClient) return;
+
+    const handleLanguageChange = (event: CustomEvent) => {
+      const { previousTheme } = event.detail;
+      if (previousTheme) {
+        // Ensure the theme is preserved
+        localStorage.setItem(storageKey, previousTheme);
+        setTheme(previousTheme);
+      }
+    };
+
+    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
+
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+    };
+  }, [isClient, storageKey]);
 
   // Apply the theme to the page
   useEffect(() => {
@@ -70,7 +113,9 @@ export function ThemeProvider({
 
       // Only save to localStorage if we're on the client
       if (isClient) {
-        localStorage.setItem(storageKey, newTheme);
+        const currentPrefs = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        currentPrefs.theme = newTheme;
+        localStorage.setItem(storageKey, JSON.stringify(currentPrefs));
       }
     },
   };

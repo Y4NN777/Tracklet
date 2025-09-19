@@ -12,6 +12,7 @@ const SavingsSchema = z.object({
     category: z.string().min(1),
     amount: z.coerce.number().min(0.01),
   })).min(1, "Please add at least one expense."),
+  currency: z.string().min(1, "Currency is required."),
 });
 
 export type SavingsState = {
@@ -24,6 +25,8 @@ export async function getSavingsOpportunitiesAction(
   prevState: SavingsState,
   formData: FormData
 ): Promise<SavingsState> {
+  console.log('🔍 getSavingsOpportunitiesAction called with form data');
+
   const expenseCategories = formData.getAll('expenseCategory');
   const expenseAmounts = formData.getAll('expenseAmount');
 
@@ -38,6 +41,7 @@ export async function getSavingsOpportunitiesAction(
     debt: formData.get("debt"),
     financialGoals: formData.get("financialGoals"),
     expenses,
+    currency: formData.get("currency") || "USD",
   };
 
   const validatedFields = SavingsSchema.safeParse(formValues);
@@ -53,19 +57,21 @@ export async function getSavingsOpportunitiesAction(
 
   try {
      const aiInput = {
-      ...validatedFields.data,
-      financialGoals: validatedFields.data.financialGoals.split('\n').filter(g => g.trim() !== ''),
-    }
-    const result = await getSavingsOpportunities(aiInput);
+       ...validatedFields.data,
+       financialGoals: validatedFields.data.financialGoals.split('\n').filter(g => g.trim() !== ''),
+       currency: validatedFields.data.currency,
+     }
+     const result = await getSavingsOpportunities(aiInput);
     return {
       form: validatedFields.data,
       result: result,
     };
   } catch (e) {
-    console.error(e);
+    console.error('❌ AI Error:', e);
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error occurred';
     return {
       form: validatedFields.data,
-      error: "Failed to get savings opportunities. Please try again.",
+      error: `AI Error: ${errorMessage}. Please check your API key and try again.`,
     };
   }
 }
