@@ -269,8 +269,8 @@ export default function OnboardingPage() {
     handleNext();
   };
 
-  // Calculate total steps based on user type
-  const totalSteps = isOAuthUser ? 4 : 6;
+  // Calculate total steps
+  const totalSteps = 6;
   const progress = (currentStep / totalSteps) * 100;
 
   if (!user) {
