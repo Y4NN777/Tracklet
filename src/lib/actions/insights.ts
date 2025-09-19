@@ -12,6 +12,7 @@ const InsightsSchema = z.object({
     category: z.string().min(1),
     amount: z.coerce.number().min(0.01),
   })).min(1, "Please add at least one expense."),
+  currency: z.string().min(1, "Currency is required."),
 });
 
 export type InsightsState = {
@@ -24,6 +25,8 @@ export async function getFinancialInsightsAction(
   prevState: InsightsState,
   formData: FormData
 ): Promise<InsightsState> {
+  console.log('🔍 getFinancialInsightsAction called with form data');
+
   const expenseCategories = formData.getAll('expenseCategory');
   const expenseAmounts = formData.getAll('expenseAmount');
 
@@ -38,6 +41,7 @@ export async function getFinancialInsightsAction(
     debt: formData.get("debt"),
     financialGoals: formData.get("financialGoals"),
     expenses,
+    currency: formData.get("currency") || "USD",
   };
 
   const validatedFields = InsightsSchema.safeParse(formValues);
@@ -55,6 +59,7 @@ export async function getFinancialInsightsAction(
     const aiInput = {
       ...validatedFields.data,
       financialGoals: validatedFields.data.financialGoals.split('\n').filter(g => g.trim() !== ''),
+      currency: validatedFields.data.currency,
     }
     const result = await getFinancialInsights(aiInput);
     return {
@@ -62,10 +67,11 @@ export async function getFinancialInsightsAction(
       result: result,
     };
   } catch (e) {
-    console.error(e);
+    console.error('❌ AI Error:', e);
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error occurred';
     return {
       form: validatedFields.data,
-      error: "Failed to generate financial insights. Please try again.",
+      error: `AI Error: ${errorMessage}. Please check your API key and try again.`,
     };
   }
 }
