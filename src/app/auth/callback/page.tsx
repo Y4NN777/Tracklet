@@ -81,7 +81,7 @@ export default function AuthCallback() {
               router.push('/terms')
             } else {
               // Existing user with accepted terms - go to dashboard
-              router.push('/')
+              router.push('/dashboard')
             }
           } else {
             // Error fetching profile
