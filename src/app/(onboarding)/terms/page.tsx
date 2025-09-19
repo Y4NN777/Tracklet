@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -20,7 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { db, supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function TermsAcceptancePage() {
+function TermsAcceptanceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -185,7 +185,7 @@ export default function TermsAcceptancePage() {
       </div>
     );
   }
-
+  
   return (
     <div className="fixed inset-0 min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-8 px-4 overflow-auto">
       <div className="w-full max-w-6xl mx-auto">
@@ -398,4 +398,25 @@ export default function TermsAcceptancePage() {
       </div>
     </div>
   );
+}
+
+export default function TermsAcceptancePage() {
+ return (
+   <Suspense fallback={
+     <div className="fixed inset-0 min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-8 px-4 overflow-auto">
+       <div className="w-full max-w-6xl mx-auto">
+         <Card className="w-full shadow-xl">
+           <CardContent className="flex items-center justify-center h-64">
+             <div className="text-center">
+               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+               <p className="text-muted-foreground">Loading...</p>
+             </div>
+           </CardContent>
+         </Card>
+       </div>
+     </div>
+   }>
+     <TermsAcceptanceContent />
+   </Suspense>
+ );
 }
