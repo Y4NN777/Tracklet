@@ -6,7 +6,7 @@ if [ -f ".env.local" ]; then
 fi
 
 # Set defaults if not in environment
-API_BASE_URL="${NEXT_PUBLIC_API_BASE_URL:-http://localhost:9002}"
+API_BASE_URL="${NEXTAUTH_URL}"
 NOTIFICATION_SECRET="${NOTIFICATION_JOB_SECRET}"
 
 # Remove /api/v1 suffix if present to get base URL
@@ -20,8 +20,8 @@ if [ -z "$NOTIFICATION_SECRET" ]; then
 fi
 
 if [ -z "$API_BASE_URL" ]; then
-  echo "Warning: NEXT_PUBLIC_API_BASE_URL not set, using default: http://localhost:9002"
-  API_BASE_URL="http://localhost:9002"
+  echo "Error: NEXTAUTH_URL not set. Please set it in .env.local or as an environment variable."
+  exit 1
 fi
 
 # Trigger notifications
@@ -43,3 +43,5 @@ else
 fi
 
 echo "Notification trigger completed!"
+
+
