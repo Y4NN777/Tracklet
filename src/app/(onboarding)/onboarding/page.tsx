@@ -144,106 +144,45 @@ export default function OnboardingPage() {
         }
       }
     } else {
-      // Complete onboarding with proper error handling
+      // Complete onboarding
       setIsLoading(true);
       try {
         if (user) {
-          // Update onboarding progress
-          try {
-            await db.updateOnboardingProgress(user.id, 6, true);
-          } catch (error) {
-            console.error('Failed to update onboarding progress:', error);
-            // Continue with other operations
-          }
-
-          // Update user preferences
-          try {
-            await db.updateUserPreferences(user.id, preferences);
-          } catch (error) {
-            console.error('Failed to update preferences:', error);
-            // Continue with other operations
-          }
-
-          // Update terms acceptance
+          // Best effort updates
+          try { await db.updateOnboardingProgress(user.id, 6, true); } catch (e) { console.error(e); }
+          try { await db.updateUserPreferences(user.id, preferences); } catch (e) { console.error(e); }
           if (termsAccepted || !isOAuthUser) {
             try {
-              await supabase
-                .from('user_profiles')
-                .update({
-                  terms_accepted: true,
-                  terms_accepted_at: new Date().toISOString()
-                })
-                .eq('id', user.id);
-            } catch (error) {
-              console.error('Failed to update terms acceptance:', error);
-              // Continue anyway
-            }
+              await supabase.from('user_profiles').update({
+                terms_accepted: true,
+                terms_accepted_at: new Date().toISOString(),
+              }).eq('id', user.id);
+            } catch (e) { console.error(e); }
           }
         }
 
-        // Small delay to allow database operations to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
+        toast({
+          title: 'Welcome to FinTrack!',
+          description: 'Redirecting you to the dashboard...',
+        });
 
-        // Verify profile update before redirect
-        const { data: verifiedProfile, error: verifyError } = await db.getUserProfile(user.id);
+        // Delay for toast visibility, then redirect
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        router.push('/dashboard');
 
-        if (verifiedProfile?.onboarding_completed) {
-          toast({
-            title: 'Welcome to FinTrack!',
-            description: 'Your account is ready to go.'
-          });
-
-          // Add delay to let toast be visible before navigation
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          router.push('/');
-        } else {
-          // Profile update may not be visible yet, wait and retry
-          console.warn('Profile verification failed, retrying...', verifyError);
-
-          toast({
-            title: 'Almost there!',
-            description: 'Finalizing your account setup...'
-          });
-
-          // Wait a moment and retry verification
-          setTimeout(async () => {
-            const { data: retryProfile } = await db.getUserProfile(user.id);
-            if (retryProfile?.onboarding_completed) {
-              toast({
-                title: 'Welcome to FinTrack!',
-                description: 'Your account is ready to go.'
-              });
-
-              // Add delay before navigation
-              await new Promise(resolve => setTimeout(resolve, 1500));
-              router.push('/');
-            } else {
-              // If still not updated, show error but redirect anyway
-              console.error('Profile update verification failed after retry');
-              toast({
-                title: 'Setup completed',
-                description: 'Welcome to FinTrack! Some preferences may update shortly.',
-                variant: 'default'
-              });
-
-              // Add delay before navigation
-              await new Promise(resolve => setTimeout(resolve, 1500));
-              router.push('/');
-            }
-          }, 2000);
-        }
       } catch (error) {
         console.error('Onboarding completion failed:', error);
         toast({
-          title: 'Setup completed with minor issues',
-          description: 'Welcome to FinTrack! Some preferences may need to be set later.',
+          title: 'Setup failed',
+          description: 'There was an issue completing your setup. Redirecting you anyway.',
+          variant: 'destructive'
         });
-
-        // Add delay before navigation even on error
         await new Promise(resolve => setTimeout(resolve, 1500));
-        // Still redirect to dashboard
-        router.push('/');
+        router.push('/dashboard');
       } finally {
+        // This will be called after redirection attempt.
+        // If redirection is successful, the component unmounts.
+        // If not, we want to un-set the loading state.
         setIsLoading(false);
       }
     }
