@@ -84,8 +84,8 @@ FinTrack is an **open-source project** that welcomes contributions! Whether you'
 
 - AI Financial Advisoring: Interactive forms for personalized financial guidance (Savings opportunities and Insights)
 
-<img width="459" height="401" alt="image" src="https://github.com/user-attachments/assets/9b9c32e7-e0e7-4fd7-bcc3-a261f7e64089" />
-<img width="459" height="301" alt="image" src="https://github.com/user-attachments/assets/52fd44fa-ed6b-4e91-b3b8-14e95d21678f" />
+<img width="429" height="401" alt="image" src="https://github.com/user-attachments/assets/9b9c32e7-e0e7-4fd7-bcc3-a261f7e64089" />
+<img width="429" height="301" alt="image" src="https://github.com/user-attachments/assets/52fd44fa-ed6b-4e91-b3b8-14e95d21678f" />
 
 ---
 
