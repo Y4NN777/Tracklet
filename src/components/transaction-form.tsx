@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } => 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useIntlayer } from 'next-intlayer';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +23,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Calendar } from "@/components/ui/calendar"
@@ -36,56 +36,24 @@ import { api } from '@/lib/api-client';
 import { useCurrency } from '@/contexts/preferences-context';
 import { calculateAccountBalance } from '@/lib/financial-calculations';
 import { supabase } from '@/lib/supabase';
-import {
-  DollarSign,
-  CreditCard,
-  Home,
-  Car,
-  UtensilsCrossed,
-  Film,
-  ShoppingBag,
-  Lightbulb,
-  Stethoscope,
-  BookOpen,
-  Plane,
-  Music,
-  Gamepad2,
-  Monitor,
-  Smartphone,
-  Dumbbell,
-  Circle,
-  Palette,
-  Theater,
-  Pizza,
-  Coffee,
-  Beer,
-  Umbrella,
-  Snowflake,
-  TreePine,
-  Gift,
-  Briefcase,
-  Building,
-  Store,
-  Tag
-} from 'lucide-react';
 
-const transactionSchema = z.object({
+const getTransactionSchema = (i: any) => z.object({
   description: z.string().min(2, {
-    message: "Description must be at least 5 characters.",
+    message: i.descriptionMinLength,
   }),
   amount: z.coerce.number()
-    .gt(0, { message: "Amount must be greater than 0." }),
+    .gt(0, { message: i.amountGreaterThanZero }),
   type: z.enum(['income', 'expense', 'transfer'], {
-    required_error: "Please select a transaction type.",
+    required_error: i.typeRequired,
   }),
   category_id: z.string().optional(),
   account_id: z.string().min(1, {
-    message: "Account must be selected.",
+    message: i.accountRequired,
   }),
   date: z.date(),
 });
 
-type TransactionFormValues = z.infer<typeof transactionSchema>
+type TransactionFormValues = z.infer<ReturnType<typeof getTransactionSchema>>
 
 interface Transaction {
   id: string;
@@ -132,44 +100,15 @@ interface Category {
   icon: string;
 }
 
-const iconComponents = {
-  DollarSign,
-  CreditCard,
-  Home,
-  Car,
-  UtensilsCrossed,
-  Film,
-  ShoppingBag,
-  Lightbulb,
-  Stethoscope,
-  BookOpen,
-  Plane,
-  Music,
-  Gamepad2,
-  Monitor,
-  Smartphone,
-  Dumbbell,
-  Circle,
-  Palette,
-  Theater,
-  Pizza,
-  Coffee,
-  Beer,
-  Umbrella,
-  Snowflake,
-  TreePine,
-  Gift,
-  Briefcase,
-  Building,
-  Store
-};
-
 export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, onClose }: TransactionFormProps) {
+  const i = useIntlayer('transaction-form');
   const { toast } = useToast();
   const { currency } = useCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const transactionSchema = getTransactionSchema(i);
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -225,7 +164,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
       const subscription = supabase
         .channel('transaction-form-updates')
         .on('postgres_changes', {
-          event: '*',
+          event: '*', 
           schema: 'public',
           table: 'transactions',
           filter: `user_id=eq.${session.user.id}`
@@ -313,11 +252,11 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingTransaction ? 'Edit Transaction' : 'Add Transaction'}</DialogTitle>
+          <DialogTitle>{editingTransaction ? i.editTransaction : i.addTransaction}</DialogTitle>
           <DialogDescription>
             {editingTransaction
-              ? 'Update your transaction information.'
-              : 'Add a new transaction to track your finances.'
+              ? i.updateTransactionInfo
+              : i.addTransactionToTrack
             }
           </DialogDescription>
         </DialogHeader>
@@ -328,9 +267,9 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{i.description}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Description" {...field} />
+                    <Input placeholder={i.description} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -341,9 +280,9 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>{i.amount}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Amount" type="number" {...field} />
+                    <Input placeholder={i.amount} type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -354,20 +293,20 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Transaction Type</FormLabel>
+                  <FormLabel>{i.transactionType}</FormLabel>
                   <FormControl>
                     <select
                       {...field}
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <option value="">Select transaction type</option>
-                      <option value="income">Income</option>
-                      <option value="expense">Expense</option>
-                      <option value="transfer">Transfer</option>
+                      <option value="">{i.selectTransactionType}</option>
+                      <option value="income">{i.income}</option>
+                      <option value="expense">{i.expense}</option>
+                      <option value="transfer">{i.transfer}</option>
                     </select>
                   </FormControl>
                   <FormDescription>
-                    Choose whether this is income, expense, or transfer.
+                    {i.chooseTransactionType}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -378,14 +317,14 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
               name="category_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category (optional)</FormLabel>
+                  <FormLabel>{i.categoryOptional}</FormLabel>
                   <FormControl>
                     <select
                       {...field}
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={loading}
                     >
-                      <option value="">Select a category</option>
+                      <option value="">{i.selectCategory}</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
                           {category.name}
@@ -394,7 +333,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                     </select>
                   </FormControl>
                   <FormDescription>
-                    Choose the category for this transaction (optional).
+                    {i.chooseCategory}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -405,23 +344,23 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
               name="account_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Account</FormLabel>
+                  <FormLabel>{i.account}</FormLabel>
                   <FormControl>
                     <select
                       {...field}
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={loading}
                     >
-                      <option value="">Select an account</option>
+                      <option value="">{i.selectAccount}</option>
                       {accounts.map((account) => (
                         <option key={account.id} value={account.id}>
-                          {account.name} ({account.type}) - {(account.calculatedBalance ?? account.balance).toLocaleString('en-US', { style: 'currency', currency: account.currency })}
+                          {account.name} ({account.type}) - {(account.calculatedBalance ?? account.balance).toLocaleString(i.locale, { style: 'currency', currency: account.currency })}
                         </option>
                       ))}
                     </select>
                   </FormControl>
                   <FormDescription>
-                    Choose the account for this transaction.
+                    {i.chooseAccount}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -432,7 +371,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                name="date"
                render={({ field }) => (
                  <FormItem className="flex flex-col">
-                   <FormLabel>Date</FormLabel>
+                   <FormLabel>{i.date}</FormLabel>
                    <Popover>
                      <PopoverTrigger asChild>
                        <FormControl>
@@ -446,7 +385,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                            {field.value ? (
                              format(field.value, "PPP")
                            ) : (
-                             <span>Pick a date</span>
+                             <span>{i.pickDate}</span>
                            )}
                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                          </Button>
@@ -467,17 +406,17 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
              />
              <div className="space-y-2">
                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                 Currency
+                 {i.currency}
                </label>
                <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
                  {currency}
                </div>
                <p className="text-xs text-muted-foreground">
-                 Currency is set based on your preferences and cannot be changed here.
+                 {i.currencyDescription}
                </p>
              </div>
             <DialogFooter>
-              <Button type="submit">{editingTransaction ? 'Update Transaction' : 'Add Transaction'}</Button>
+              <Button type="submit">{editingTransaction ? i.updateTransaction : i.addTransactionButton}</Button>
             </DialogFooter>
           </form>
         </Form>
