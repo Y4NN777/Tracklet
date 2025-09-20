@@ -1,73 +1,143 @@
-
 import { t, type DeclarationContent } from "intlayer";
 
 const termsPageContent: DeclarationContent = {
   key: "terms-page",
   content: {
-    // Page Titles and Descriptions
-    title: t({ en: "Terms and Conditions", fr: "Termes et Conditions" }),
-    descriptionAuthenticated: t({ en: "Please review and accept our terms and conditions to continue", fr: "Veuillez consulter et accepter nos termes et conditions pour continuer" }),
-    descriptionUnauthenticated: t({ en: "Please read our terms and conditions before creating your account", fr: "Veuillez lire nos termes et conditions avant de créer votre compte" }),
-
-    // Loading State
+    // Loading states
     loading: t({ en: "Loading...", fr: "Chargement..." }),
-
-    // Terms Sections
+    
+    // Main page content
+    title: t({ en: "Terms of Service & Privacy Policy", fr: "Conditions d'utilisation et Politique de confidentialité" }),
+    descriptionAuthenticated: t({ 
+      en: "Please review and accept our terms to continue using FinTrack.", 
+      fr: "Veuillez consulter et accepter nos conditions pour continuer à utiliser FinTrack." 
+    }),
+    descriptionUnauthenticated: t({ 
+      en: "Please review our terms and privacy policy before creating your account.", 
+      fr: "Veuillez consulter nos conditions et notre politique de confidentialité avant de créer votre compte." 
+    }),
+    
+    // Terms of Service section
     termsOfServiceTitle: t({ en: "Terms of Service", fr: "Conditions d'utilisation" }),
-    terms1Title: t({ en: "1. Acceptance of Terms", fr: "1. Acceptation des conditions" }),
-    terms1Content: t({ en: "By accessing and using FinTrack, you accept and agree to be bound by the terms and provision of this agreement.", fr: "En accédant et en utilisant FinTrack, vous acceptez d'être lié par les termes et dispositions de cet accord." }),
-    terms2Title: t({ en: "2. Use License", fr: "2. Licence d'utilisation" }),
-    terms2Content: t({ en: "Permission is granted to temporarily use FinTrack for personal, non-commercial transitory viewing only.", fr: "L'autorisation est accordée d'utiliser temporairement FinTrack pour un usage personnel et non commercial transitoire uniquement." }),
-    terms3Title: t({ en: "3. Disclaimer", fr: "3. Clause de non-responsabilité" }),
-    terms3Content: t({ en: "The materials on FinTrack are provided on an 'as is' basis. FinTrack makes no warranties, expressed or implied.", fr: "Les matériaux sur FinTrack sont fournis 'tels quels'. FinTrack ne donne aucune garantie, expresse ou implicite." }),
-    terms4Title: t({ en: "4. Limitations", fr: "4. Limitations" }),
-    terms4Content: t({ en: "In no event shall FinTrack be liable for any damages arising out of the use of our services.", fr: "En aucun cas, FinTrack ne sera responsable des dommages résultant de l'utilisation de nos services." }),
-
+    terms1Title: t({ en: "1. Service Acceptance", fr: "1. Acceptation du service" }),
+    terms1Content: t({ 
+      en: "By using FinTrack, you agree to these terms and confirm you are 18+ years old. This is a free, open-source personal finance management application.", 
+      fr: "En utilisant FinTrack, vous acceptez ces conditions et confirmez avoir plus de 18 ans. Il s'agit d'une application gratuite et open-source de gestion des finances personnelles." 
+    }),
+    terms2Title: t({ en: "2. User Responsibilities", fr: "2. Responsabilités de l'utilisateur" }),
+    terms2Content: t({ 
+      en: "You are responsible for maintaining the confidentiality of your account, providing accurate information, and using the service lawfully.", 
+      fr: "Vous êtes responsable de maintenir la confidentialité de votre compte, de fournir des informations exactes et d'utiliser le service légalement." 
+    }),
+    terms3Title: t({ en: "3. Service Availability", fr: "3. Disponibilité du service" }),
+    terms3Content: t({ 
+      en: "FinTrack is provided as-is. While we strive for reliability, we cannot guarantee uninterrupted service availability.", 
+      fr: "FinTrack est fourni en l'état. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons garantir une disponibilité ininterrompue du service." 
+    }),
+    terms4Title: t({ en: "4. Limitation of Liability", fr: "4. Limitation de responsabilité" }),
+    terms4Content: t({ 
+      en: "FinTrack is for informational purposes only. We are not liable for financial decisions made based on the application's suggestions.", 
+      fr: "FinTrack est à des fins informatives uniquement. Nous ne sommes pas responsables des décisions financières prises sur la base des suggestions de l'application." 
+    }),
+    
+    // Privacy Policy section
     privacyPolicyTitle: t({ en: "Privacy Policy", fr: "Politique de confidentialité" }),
-    privacy1Title: t({ en: "1. Information We Collect", fr: "1. Informations que nous collectons" }),
-    privacy1Content: t({ en: "We collect information you provide directly, such as when you create an account or use our services.", fr: "Nous collectons les informations que vous fournissez directement, comme lorsque vous créez un compte ou utilisez nos services." }),
-    privacy2Title: t({ en: "2. How We Use Information", fr: "2. Comment nous utilisons les informations" }),
-    privacy2Content: t({ en: "We use the information to provide, maintain, and improve our services, and to communicate with you.", fr: "Nous utilisons les informations pour fournir, maintenir et améliorer nos services, et pour communiquer avec vous." }),
-    privacy3Title: t({ en: "3. Information Sharing", fr: "3. Partage d'informations" }),
-    privacy3Content: t({ en: "We do not sell, trade, or otherwise transfer your personal information to third parties without your consent.", fr: "Nous ne vendons, n'échangeons ni ne transférons de quelque manière que ce soit vos informations personnelles à des tiers sans votre consentement." }),
-    privacy4Title: t({ en: "4. Data Security", fr: "4. Sécurité des données" }),
-    privacy4Content: t({ en: "We implement appropriate security measures to protect your personal information against unauthorized access.", fr: "Nous mettons en œuvre des mesures de sécurité appropriées pour protéger vos informations personnelles contre tout accès non autorisé." }),
-
+    privacy1Title: t({ en: "1. Data Collection", fr: "1. Collecte de données" }),
+    privacy1Content: t({ 
+      en: "We collect only essential information: email, profile data, and financial information you choose to input for personal finance management.", 
+      fr: "Nous ne collectons que les informations essentielles : email, données de profil et informations financières que vous choisissez de saisir pour la gestion de vos finances personnelles." 
+    }),
+    privacy2Title: t({ en: "2. Data Usage", fr: "2. Utilisation des données" }),
+    privacy2Content: t({ 
+      en: "Your data is used solely to provide personalized financial insights and improve your experience. We never sell or share personal data with third parties.", 
+      fr: "Vos données sont utilisées uniquement pour fournir des informations financières personnalisées et améliorer votre expérience. Nous ne vendons jamais vos données personnelles à des tiers." 
+    }),
+    privacy3Title: t({ en: "3. Data Security", fr: "3. Sécurité des données" }),
+    privacy3Content: t({ 
+      en: "We implement industry-standard security measures including encryption, secure authentication, and regular security audits.", 
+      fr: "Nous mettons en œuvre des mesures de sécurité conformes aux normes de l'industrie, incluant le chiffrement, l'authentification sécurisée et des audits de sécurité réguliers." 
+    }),
+    privacy4Title: t({ en: "4. Data Retention", fr: "4. Conservation des données" }),
+    privacy4Content: t({ 
+      en: "Your data is retained only as long as necessary to provide our services. You can request data deletion at any time through your account settings.", 
+      fr: "Vos données ne sont conservées que le temps nécessaire pour fournir nos services. Vous pouvez demander la suppression de vos données à tout moment via les paramètres de votre compte." 
+    }),
+    
+    // Data Processing section
     dataProcessingTitle: t({ en: "Data Processing Agreement", fr: "Accord de traitement des données" }),
-    data1Title: t({ en: "1. Data Controller", fr: "1. Responsable du traitement des données" }),
-    data1Content: t({ en: "FinTrack acts as the data controller for personal data processed through our services.", fr: "FinTrack agit en tant que responsable du traitement des données personnelles traitées via nos services." }),
-    data2Title: t({ en: "2. Legal Basis", fr: "2. Base juridique" }),
-    data2Content: t({ en: "We process your data based on your consent and legitimate business interests.", fr: "Nous traitons vos données sur la base de votre consentement et de nos intérêts commerciaux légitimes." }),
-    data3Title: t({ en: "3. Data Retention", fr: "3. Conservation des données" }),
-    data3Content: t({ en: "We retain your data for as long as necessary to provide our services and comply with legal obligations.", fr: "Nous conservons vos données aussi longtemps que nécessaire pour fournir nos services et nous conformer aux obligations légales." }),
-    data4Title: t({ en: "4. Your Rights", fr: "4. Vos droits" }),
-    data4Content: t({ en: "You have the right to access, rectify, erase, and port your personal data.", fr: "Vous avez le droit d'accéder, de rectifier, d'effacer et de porter vos données personnelles." }),
-
-    // Acceptance Checkboxes
-    acceptTermsLabel: t({ en: "I accept the Terms of Service", fr: "J'accepte les Conditions d'utilisation" }),
-    acceptTermsDescription: t({ en: "I agree to abide by FinTrack's terms and conditions of use.", fr: "Je m'engage à respecter les termes et conditions d'utilisation de FinTrack." }),
-    acceptPrivacyLabel: t({ en: "I accept the Privacy Policy", fr: "J'accepte la Politique de confidentialité" }),
-    acceptPrivacyDescription: t({ en: "I consent to the collection and processing of my personal data as described.", fr: "Je consens à la collecte et au traitement de mes données personnelles comme décrit." }),
-    acceptDataLabel: t({ en: "I accept the Data Processing Agreement", fr: "J'accepte l'Accord de traitement des données" }),
-    acceptDataDescription: t({ en: "I understand how my financial data will be processed and stored.", fr: "Je comprends comment mes données financières seront traitées et stockées." }),
-
-    // Unauthenticated Info
-    unauthenticatedInfo: t({ en: "By proceeding with account creation, you acknowledge that you have read and understood our terms and conditions.", fr: "En poursuivant la création de votre compte, vous reconnaissez avoir lu et compris nos termes et conditions." }),
-
+    data1Title: t({ en: "1. Processing Purpose", fr: "1. Objectif du traitement" }),
+    data1Content: t({ 
+      en: "We process your financial data to provide AI-powered insights, budget tracking, expense categorization, and personalized recommendations.", 
+      fr: "Nous traitons vos données financières pour fournir des informations basées sur l'IA, le suivi budgétaire, la catégorisation des dépenses et des recommandations personnalisées." 
+    }),
+    data2Title: t({ en: "2. Legal Basis", fr: "2. Base légale" }),
+    data2Content: t({ 
+      en: "Processing is based on your consent and our legitimate interest in providing personalized financial management services.", 
+      fr: "Le traitement est basé sur votre consentement et notre intérêt légitime à fournir des services de gestion financière personnalisés." 
+    }),
+    data3Title: t({ en: "3. Your Rights", fr: "3. Vos droits" }),
+    data3Content: t({ 
+      en: "You have the right to access, rectify, delete, or port your data. You can also withdraw consent or object to processing at any time.", 
+      fr: "Vous avez le droit d'accéder, de rectifier, de supprimer ou de porter vos données. Vous pouvez également retirer votre consentement ou vous opposer au traitement à tout moment." 
+    }),
+    data4Title: t({ en: "4. Data Protection", fr: "4. Protection des données" }),
+    data4Content: t({ 
+      en: "All processing complies with GDPR and other applicable data protection laws. Your privacy is our top priority.", 
+      fr: "Tout traitement est conforme au RGPD et aux autres lois applicables sur la protection des données. Votre vie privée est notre priorité absolue." 
+    }),
+    
+    // Acceptance labels
+    acceptTermsLabel: t({ 
+      en: "I have read and accept the Terms of Service", 
+      fr: "J'ai lu et j'accepte les Conditions d'utilisation" 
+    }),
+    acceptTermsDescription: t({ 
+      en: "You must accept the terms to use FinTrack's services.", 
+      fr: "Vous devez accepter les conditions pour utiliser les services de FinTrack." 
+    }),
+    acceptPrivacyLabel: t({ 
+      en: "I have read and accept the Privacy Policy", 
+      fr: "J'ai lu et j'accepte la Politique de confidentialité" 
+    }),
+    acceptPrivacyDescription: t({ 
+      en: "Required to understand how your data is handled.", 
+      fr: "Requis pour comprendre comment vos données sont traitées." 
+    }),
+    acceptDataLabel: t({ 
+      en: "I consent to data processing as described", 
+      fr: "Je consens au traitement des données tel que décrit" 
+    }),
+    acceptDataDescription: t({ 
+      en: "Enables AI-powered insights and personalized features.", 
+      fr: "Active les informations basées sur l'IA et les fonctionnalités personnalisées." 
+    }),
+    
+    // Info messages
+    unauthenticatedInfo: t({ 
+      en: "You can review these terms now and will need to accept them during account creation.", 
+      fr: "Vous pouvez consulter ces conditions maintenant et devrez les accepter lors de la création de votre compte." 
+    }),
+    
     // Buttons
-    declineButton: t({ en: "Decline & Return to Login", fr: "Refuser et retourner à la connexion" }),
+    declineButton: t({ en: "Decline", fr: "Refuser" }),
     backToSignupButton: t({ en: "Back to Signup", fr: "Retour à l'inscription" }),
-    acceptingButton: t({ en: "Accepting...", fr: "Acceptation en cours..." }),
-    redirectingButton: t({ en: "Redirecting...", fr: "Redirection en cours..." }),
-    acceptAllButton: t({ en: "Accept All & Continue", fr: "Tout accepter et continuer" }),
-    readTermsButton: t({ en: "I Have Read the Terms", fr: "J'ai lu les conditions" }),
-
-    // Toasts
+    acceptAllButton: t({ en: "Accept All Terms", fr: "Accepter toutes les conditions" }),
+    readTermsButton: t({ en: "Continue to Signup", fr: "Continuer vers l'inscription" }),
+    acceptingButton: t({ en: "Accepting...", fr: "Acceptation..." }),
+    redirectingButton: t({ en: "Redirecting...", fr: "Redirection..." }),
+    
+    // Toast messages
     acceptAllToastTitle: t({ en: "Please accept all terms", fr: "Veuillez accepter toutes les conditions" }),
-    acceptAllToastDescription: t({ en: "You must accept all terms and conditions to continue.", fr: "Vous devez accepter tous les termes et conditions pour continuer." }),
-    termsAcceptedToastTitle: t({ en: "Terms accepted!", fr: "Conditions acceptées !" }),
-    termsAcceptedToastDescription: t({ en: "Welcome to FinTrack. Setting up your account...", fr: "Bienvenue sur FinTrack. Configuration de votre compte en cours..." }),
-    acceptanceFailedToastTitle: t({ en: "Terms Acceptance Failed", fr: "Échec de l'acceptation des conditions" }),
+    acceptAllToastDescription: t({ 
+      en: "You must check all boxes to continue using FinTrack.", 
+      fr: "Vous devez cocher toutes les cases pour continuer à utiliser FinTrack." 
+    }),
+    termsAcceptedToastTitle: t({ en: "Terms accepted", fr: "Conditions acceptées" }),
+    termsAcceptedToastDescription: t({ 
+      en: "Thank you for accepting our terms. Redirecting...", 
+      fr: "Merci d'avoir accepté nos conditions. Redirection..." 
+    }),
+    acceptanceFailedToastTitle: t({ en: "Acceptance failed", fr: "Échec de l'acceptation" }),
   },
 };
 

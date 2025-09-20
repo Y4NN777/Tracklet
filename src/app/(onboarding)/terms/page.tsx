@@ -43,7 +43,6 @@ function TermsAcceptanceContent() {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
-//          console.warn('Session check error:', sessionError);
           setIsAuthenticated(false);
         } else {
           setIsAuthenticated(!!session);
@@ -55,7 +54,6 @@ function TermsAcceptanceContent() {
           setReturnTo(returnUrl);
         }
       } catch (error) {
-//        console.error('Error initializing terms page:', error);
         setIsAuthenticated(false);
       }
     };
@@ -71,8 +69,6 @@ function TermsAcceptanceContent() {
   };
 
   const handleDecline = () => {
-    // For authenticated users, declining terms means they can't use the app
-    // Redirect them back to login or show an explanation
     router.push('/auth/login?message=terms_required');
   };
 
@@ -108,8 +104,6 @@ function TermsAcceptanceContent() {
         throw new Error('No authenticated user found');
       }
 
-//      console.log('Updating terms acceptance for user:', user.id);
-
       // Database update with detailed error
       const { error: updateError } = await supabase
         .from('user_profiles')
@@ -122,8 +116,6 @@ function TermsAcceptanceContent() {
       if (updateError) {
         throw new Error(`Database update failed: ${updateError.message} (Code: ${updateError.code || 'Unknown'})`);
       }
-
-//      console.log('Terms acceptance updated successfully');
 
       // Get user profile to check onboarding status
       const { data: profile } = await db.getUserProfile(user.id);
@@ -144,7 +136,6 @@ function TermsAcceptanceContent() {
           await router.push('/onboarding');
         }
       } catch (routerError) {
-//        console.error('Router navigation failed:', routerError);
         // Fallback redirect
         if (profile?.onboarding_completed) {
           window.location.href = '/';
@@ -154,8 +145,6 @@ function TermsAcceptanceContent() {
       }
 
     } catch (error) {
-//      console.error('Terms acceptance failed:', error);
-
       // Show specific error to user
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
@@ -168,7 +157,6 @@ function TermsAcceptanceContent() {
       setLoading(false);  // Always reset loading state
     }
   };
-
 
   // Show loading state while checking authentication
   if (isAuthenticated === null) {
@@ -402,23 +390,30 @@ function TermsAcceptanceContent() {
   );
 }
 
+// Loading component that can access i18n
+function LoadingFallback() {
+  const i = useIntlayer('terms-page');
+  
+  return (
+    <div className="fixed inset-0 min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-8 px-4 overflow-auto">
+      <div className="w-full max-w-6xl mx-auto">
+        <Card className="w-full shadow-xl">
+          <CardContent className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">{i.loading}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 export default function TermsAcceptancePage() {
- return (
-   <Suspense fallback={
-     <div className="fixed inset-0 min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-8 px-4 overflow-auto">
-       <div className="w-full max-w-6xl mx-auto">
-         <Card className="w-full shadow-xl">
-           <CardContent className="flex items-center justify-center h-64">
-             <div className="text-center">
-               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-               <p className="text-muted-foreground">{i.loading}</p>
-             </div>
-           </CardContent>
-         </Card>
-       </div>
-     </div>
-   }>
-     <TermsAcceptanceContent />
-   </Suspense>
- );
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <TermsAcceptanceContent />
+    </Suspense>
+  );
 }
