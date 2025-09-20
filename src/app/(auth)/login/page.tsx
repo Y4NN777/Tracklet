@@ -12,8 +12,10 @@ import { Separator } from '@/components/ui/separator';
 import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { auth } from '@/lib/supabase';
+import { useIntlayer } from 'next-intlayer';
 
 export default function LoginPage() {
+  const i = useIntlayer('login-page');
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -39,14 +41,14 @@ export default function LoginPage() {
 
       if (data.user) {
         toast({
-          title: 'Welcome back!',
-          description: 'You have successfully logged in.',
+          title: i.welcomeBackToastTitle,
+          description: i.welcomeBackToastDescription,
         });
 
         router.push('/');
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      setError(i.unexpectedError);
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +67,7 @@ export default function LoginPage() {
       // The OAuth flow will redirect to Google, then back to /auth/callback
       // No need to do anything else here - the callback page will handle the rest
     } catch (err) {
-      setError('Failed to login with Google. Please try again.');
+      setError(i.googleLoginFailed);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -74,9 +76,9 @@ export default function LoginPage() {
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+        <CardTitle className="text-2xl font-bold">{i.title}</CardTitle>
         <CardDescription>
-          Enter your email and password to access your account
+          {i.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -89,13 +91,13 @@ export default function LoginPage() {
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{i.emailLabel}</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={i.emailPlaceholder}
                 className="pl-10"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -107,12 +109,12 @@ export default function LoginPage() {
           
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{i.passwordLabel}</Label>
               <Link 
                 href="/forgot-password" 
                 className="text-sm text-primary hover:underline"
               >
-                Forgot password?
+                {i.forgotPasswordLink}
               </Link>
             </div>
             <div className="relative">
@@ -120,7 +122,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={i.passwordPlaceholder}
                 className="pl-10"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -138,10 +140,10 @@ export default function LoginPage() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                {i.signingInButton}
               </>
             ) : (
-              'Sign in'
+              i.signInButton
             )}
           </Button>
         </form>
@@ -151,7 +153,7 @@ export default function LoginPage() {
             <Separator />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+            <span className="bg-card px-2 text-muted-foreground">{i.orContinueWith}</span>
           </div>
         </div>
 
@@ -164,7 +166,7 @@ export default function LoginPage() {
           {isGoogleLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Connecting to Google...
+              {i.connectingGoogleButton}
             </>
           ) : (
             <>
@@ -186,16 +188,16 @@ export default function LoginPage() {
                   fill="#EA4335"
                 ></path>
               </svg>
-              Continue with Google
+              {i.googleButton}
             </>
           )}
         </Button>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         <div className="text-sm text-muted-foreground text-center">
-          Don't have an account?{' '}
+          {i.noAccount}{' '}
           <Link href="/signup" className="text-primary hover:underline font-medium">
-            Sign up
+            {i.signUpLink}
           </Link>
         </div>
       </CardFooter>
