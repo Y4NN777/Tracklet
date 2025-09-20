@@ -6,8 +6,10 @@ import { auth } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogOut, Loader2 } from 'lucide-react';
+import { useIntlayer } from 'next-intlayer';
 
 export default function LogoutPage() {
+  const i = useIntlayer('logout-page');
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export default function LogoutPage() {
 
         if (error) {
 //          console.error('Logout error:', error);
-          setError('Failed to log out. Please try again.');
+          setError(i.logoutFailed);
           setIsLoggingOut(false);
           return;
         }
@@ -31,13 +33,13 @@ export default function LogoutPage() {
 
       } catch (error) {
 //        console.error('Unexpected logout error:', error);
-        setError('An unexpected error occurred. Please try again.');
+        setError(i.unexpectedError);
         setIsLoggingOut(false);
       }
     };
 
     performLogout();
-  }, [router]);
+  }, [router, i]);
 
   const handleManualLogout = async () => {
     setIsLoggingOut(true);
@@ -48,7 +50,7 @@ export default function LogoutPage() {
 
       if (error) {
 //        console.error('Manual logout error:', error);
-        setError('Failed to log out. Please try again.');
+        setError(i.logoutFailed);
         setIsLoggingOut(false);
         return;
       }
@@ -57,7 +59,7 @@ export default function LogoutPage() {
 
     } catch (error) {
 //      console.error('Unexpected manual logout error:', error);
-      setError('An unexpected error occurred. Please try again.');
+      setError(i.unexpectedError);
       setIsLoggingOut(false);
     }
   };
@@ -74,15 +76,15 @@ export default function LogoutPage() {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <LogOut className="h-6 w-6 text-primary" />
             </div>
-            <CardTitle>Logging out...</CardTitle>
+            <CardTitle>{i.loggingOutTitle}</CardTitle>
             <CardDescription>
-              Please wait while we securely log you out of your account.
+              {i.loggingOutDescription}
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
             <p className="mt-4 text-sm text-muted-foreground">
-              Clearing your session and redirecting...
+              {i.clearingSession}
             </p>
           </CardContent>
         </Card>
@@ -98,17 +100,17 @@ export default function LogoutPage() {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
               <LogOut className="h-6 w-6 text-destructive" />
             </div>
-            <CardTitle>Logout Error</CardTitle>
+            <CardTitle>{i.errorTitle}</CardTitle>
             <CardDescription>
               {error}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button onClick={handleManualLogout} className="w-full">
-              Try Again
+              {i.tryAgainButton}
             </Button>
             <Button onClick={returnToLogin} variant="outline" className="w-full">
-              Return to Login
+              {i.returnToLoginButton}
             </Button>
           </CardContent>
         </Card>
@@ -123,14 +125,14 @@ export default function LogoutPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
             <LogOut className="h-6 w-6 text-green-600" />
           </div>
-          <CardTitle>Logged Out Successfully</CardTitle>
+          <CardTitle>{i.successTitle}</CardTitle>
           <CardDescription>
-            You have been securely logged out of your account.
+            {i.successDescription}
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <Button onClick={returnToLogin} className="w-full">
-            Return to Login
+            {i.returnToLoginButton}
           </Button>
         </CardContent>
       </Card>
