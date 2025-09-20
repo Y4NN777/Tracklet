@@ -19,6 +19,7 @@ import { BudgetCard } from '@/components/ui/mobile-data-card';
 import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/contexts/preferences-context';
+import { useIntlayer } from 'next-intlayer';
 
 interface Budget {
   id: string;
@@ -44,6 +45,7 @@ interface Goal {
 }
 
 export default function BudgetsPage() {
+  const i = useIntlayer('budgets-page');
   const [openBudget, setOpenBudget] = useState(false);
   const [openGoal, setOpenGoal] = useState(false);
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -91,22 +93,22 @@ export default function BudgetsPage() {
       if (response.data) {
         setBudgets(prev => [response.data.budget, ...prev]);
         toast({
-          title: 'Budget added!',
-          description: 'Your budget has been created successfully.',
+          title: i.budgetAddedToastTitle,
+          description: i.budgetAddedToastDescription,
         });
       } else if (response.error) {
 //        console.error('Failed to add budget:', response.error);
         toast({
-          title: 'Error',
-          description: 'Failed to add budget. Please try again.',
+          title: i.errorToastTitle,
+          description: i.addBudgetFailed,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error adding budget:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to add budget. Please try again.',
+        title: i.errorToastTitle,
+        description: i.addBudgetFailed,
         variant: 'destructive',
       });
     }
@@ -119,22 +121,22 @@ export default function BudgetsPage() {
       if (response.data) {
         setGoals(prev => [response.data.goal, ...prev]);
         toast({
-          title: 'Goal added!',
-          description: 'Your financial goal has been created successfully.',
+          title: i.goalAddedToastTitle,
+          description: i.goalAddedToastDescription,
         });
       } else if (response.error) {
 //        console.error('Failed to add goal:', response.error);
         toast({
-          title: 'Error',
-          description: 'Failed to add goal. Please try again.',
+          title: i.errorToastTitle,
+          description: i.addGoalFailed,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error adding goal:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to add goal. Please try again.',
+        title: i.errorToastTitle,
+        description: i.addGoalFailed,
         variant: 'destructive',
       });
     }
@@ -156,22 +158,22 @@ export default function BudgetsPage() {
         await fetchBudgetsAndGoals();
         setEditingBudget(null);
         toast({
-          title: 'Budget updated!',
-          description: 'Your budget has been updated successfully.',
+          title: i.budgetUpdatedToastTitle,
+          description: i.budgetUpdatedToastDescription,
         });
       } else if (response.error) {
 //        console.error('Failed to update budget:', response.error);
         toast({
-          title: 'Error',
-          description: 'Failed to update budget. Please try again.',
+          title: i.errorToastTitle,
+          description: i.updateBudgetFailed,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error updating budget:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update budget. Please try again.',
+        title: i.errorToastTitle,
+        description: i.updateBudgetFailed,
         variant: 'destructive',
       });
     }
@@ -185,22 +187,22 @@ export default function BudgetsPage() {
         // DELETE returns 204 No Content, so no data but success
         setBudgets(prev => prev.filter(budget => budget.id !== budgetId));
         toast({
-          title: 'Budget deleted!',
-          description: 'Your budget has been deleted successfully.',
+          title: i.budgetDeletedToastTitle,
+          description: i.budgetDeletedToastDescription,
         });
       } else if (response.error) {
 //        console.error('Failed to delete budget:', response.error);
         toast({
-          title: 'Error',
-          description: 'Failed to delete budget. Please try again.',
+          title: i.errorToastTitle,
+          description: i.deleteBudgetFailed,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error deleting budget:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete budget. Please try again.',
+        title: i.errorToastTitle,
+        description: i.deleteBudgetFailed,
         variant: 'destructive',
       });
     }
@@ -220,7 +222,7 @@ export default function BudgetsPage() {
       <div className="space-y-8">
         <Card>
           <CardHeader>
-            <CardTitle>Loading budgets and goals...</CardTitle>
+            <CardTitle>{i.loading}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -235,10 +237,10 @@ export default function BudgetsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Target className="h-6 w-6" />
-            Monthly Budgets
+            {i.budgetsTitle}
           </h2>
           <Button onClick={() => setOpenBudget(true)} className="w-full sm:w-auto">
-            <PlusCircle className="mr-2 h-4 w-4" /> New Budget
+            <PlusCircle className="mr-2 h-4 w-4" /> {i.newBudgetButton}
           </Button>
         </div>
         <MobileDataList
@@ -251,8 +253,7 @@ export default function BudgetsPage() {
               budget={budget}
               onEdit={() => handleEditBudget(budget)}
               onDelete={() => {
-                // Use window.confirm for BudgetCard dropdown approach
-                const confirmDelete = window.confirm(`Are you sure you want to delete "${budget.name}"? This action cannot be undone.`);
+                const confirmDelete = window.confirm(typeof i.deleteConfirmation === 'function' ? i.deleteConfirmation({ name: budget.name }) : `Are you sure you want to delete "${budget.name}"? This action cannot be undone.`);
                 if (confirmDelete) {
                   handleDeleteBudget(budget.id);
                 }
@@ -260,10 +261,10 @@ export default function BudgetsPage() {
             />
           )}
           emptyState={{
-            title: "No budgets yet",
-            description: "Start managing your finances by creating your first budget.",
+            title: i.emptyBudgetsTitle,
+            description: i.emptyBudgetsDescription,
             action: {
-              label: "Create Budget",
+              label: i.createBudgetButton,
               onClick: () => setOpenBudget(true)
             }
           }}
@@ -273,10 +274,10 @@ export default function BudgetsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <PiggyBank className="h-6 w-6" />
-            Financial Goals
+            {i.goalsTitle}
           </h2>
           <Button onClick={() => setOpenGoal(true)} className="w-full sm:w-auto">
-            <PlusCircle className="mr-2 h-4 w-4" /> New Goal
+            <PlusCircle className="mr-2 h-4 w-4" /> {i.newGoalButton}
           </Button>
         </div>
         {hasGoals ? (
@@ -288,16 +289,16 @@ export default function BudgetsPage() {
                   <CardHeader>
                     <CardTitle>{goal.name}</CardTitle>
                     <CardDescription>
-                      Target: {formatCurrency(goal.target_amount)}
+                      {typeof i.goalTarget === 'function' ? i.goalTarget({ amount: formatCurrency(goal.target_amount) }) : `Target: ${formatCurrency(goal.target_amount)}`}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                      <Progress value={progress} className="h-3" />
-                     <p className="text-sm mt-2 text-muted-foreground">{progress.toFixed(1)}% complete</p>
+                     <p className="text-sm mt-2 text-muted-foreground">{typeof i.goalProgress === 'function' ? i.goalProgress({ progress: progress.toFixed(1) }) : `${progress.toFixed(1)}% complete`}</p>
                   </CardContent>
                    <CardFooter className="flex justify-end text-sm">
                     <p>
-                      <span className="font-bold">{formatCurrency(goal.current_amount)}</span> saved
+                      <span className="font-bold">{formatCurrency(goal.current_amount)}</span> {typeof i.goalSaved === 'function' ? i.goalSaved({ amount: formatCurrency(goal.current_amount) }) : 'saved'}
                     </p>
                   </CardFooter>
                 </Card>
@@ -309,12 +310,12 @@ export default function BudgetsPage() {
             <CardContent>
               <div className="flex flex-col items-center justify-center h-[300px] space-y-4">
                 <PiggyBank className="h-12 w-12 text-muted-foreground" />
-                <h3 className="text-xl font-semibold">No financial goals yet</h3>
+                <h3 className="text-xl font-semibold">{i.emptyGoalsTitle}</h3>
                 <p className="text-muted-foreground text-center max-w-md">
-                  Set your financial goals to stay motivated and track your progress.
+                  {i.emptyGoalsDescription}
                 </p>
                 <Button onClick={() => setOpenGoal(true)}>
-                  <PlusCircle className="mr-2 h-4 w-4" /> Create Goal
+                  <PlusCircle className="mr-2 h-4 w-4" /> {i.createGoalButton}
                 </Button>
               </div>
             </CardContent>
