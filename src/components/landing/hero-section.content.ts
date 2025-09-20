@@ -5,7 +5,7 @@ const heroSectionContent: DeclarationContent = {
   content: {
     title: t({
       en: ["AI-Powered Personal", "Finance Management"],
-      fr: ["Gestion des Finances", "Personnelles par l'IA"],
+      fr: ["Gestion des Finances", "Personnelles assistée par l'IA"],
     }),
     subtitle: t({
       en: "Take control of your finances with intelligent insights and smart recommendations. Free, open source software built by for everyone.",
