@@ -4,8 +4,11 @@ import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Quote } from 'lucide-react'
+import { useIntlayer } from 'next-intlayer'
 
 export function DeveloperStory() {
+  const i = useIntlayer('developer-story')
+
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
@@ -30,7 +33,7 @@ export function DeveloperStory() {
                   <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-primary/20 shadow-xl">
                     <img
                       src="/they4nn-photo.jpeg"
-                      alt="The Y4NN - Developer & Creator"
+                      alt={i.altText}
                       className="w-full h-full object-cover object-center"
                       style={{ imageRendering: 'auto' }}
                     />
@@ -46,8 +49,8 @@ export function DeveloperStory() {
                     transition={{ duration: 0.6, delay: 0.3 }}
                     viewport={{ once: true }}
                   >
-                    <Quote className="w-6 h-6 text-primary" />
-                    <h3 className="text-2xl font-bold">Built by a developer carrying about his community problem, for other devs, friends, youth and everyone struggling with finances management</h3>
+                    <Quote className="w-20 h-20 text-primary" />
+                    <h3 className="text-2xl font-bold">{i.title}</h3>
                   </motion.div>
 
                   <motion.p
@@ -57,8 +60,7 @@ export function DeveloperStory() {
                     transition={{ duration: 0.6, delay: 0.4 }}
                     viewport={{ once: true }}
                   >
-                    As a developer who struggled with personal finance management, I created FinTrack
-                    to help others achieve financial clarity through free, open source software.
+                    {i.story}
                   </motion.p>
 
                   <motion.div
@@ -69,13 +71,13 @@ export function DeveloperStory() {
                     viewport={{ once: true }}
                   >
                     <div className="text-center md:text-left">
-                      <p className="font-semibold text-lg">TheY4NN</p>
-                      <p className="text-sm text-muted-foreground">Developer</p>
+                      <p className="font-semibold text-lg">{i.name}</p>
+                      <p className="text-sm text-muted-foreground">{i.role}</p>
                     </div>
                     <div className="flex gap-2 text-sm text-muted-foreground">
-                      <span>Open Source Advocate</span>
+                      <span>{i.openSourceAdvocate}</span>
                       <span>•</span>
-                      <span>Finances & Economics, dAPPs & Blockchain Enthusiast</span>
+                      <span>{i.enthusiast}</span>
                       
                     </div>
                   </motion.div>
@@ -91,8 +93,7 @@ export function DeveloperStory() {
                 viewport={{ once: true }}
               >
                 <p className="text-center text-muted-foreground italic">
-                  "Our mission is simple: To empower individuals with the tools and knowledge they need to take control
-                  of their finances, break free from financial stress, and build a more secure financial future."
+                  {i.mission}
                 </p>
               </motion.div>
             </CardContent>

@@ -4,31 +4,35 @@ import { motion } from 'framer-motion'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { HelpCircle } from 'lucide-react'
-
-const faqs = [
-  {
-    question: "Is FinTrack really free?",
-    answer: "Yes, FinTrack is completely free with no hidden costs, subscriptions, or premium tiers. It's open source software that you can use forever without any payment."
-  },
-  {
-    question: "Can I contribute to the development?",
-    answer: "Absolutely! FinTrack is an open source project that welcomes contributions from developers of all skill levels. You can contribute code, report issues, suggest features, or help with documentation."
-  },
-  {
-    question: "Is my financial data secure?",
-    answer: "Yes, we take security seriously. FinTrack uses JWT-based authentication, Supabase enterprise-grade database security, OAuth integration for secure user access, and data encryption at rest and in transit."
-  },
-  {
-    question: "What makes FinTrack different from other finance apps?",
-    answer: "FinTrack combines AI-powered insights with complete open source transparency. Unlike proprietary apps, you can see exactly how your data is handled, and the AI features are built specifically for personal finance management."
-  },
-  {
-    question: "Do I need financial knowledge to use FinTrack?",
-    answer: "Not at all! FinTrack includes a comprehensive Learning Center with AI-powered educational content in multiple languages. The app is designed to be user-friendly while teaching you financial concepts along the way."
-  }
-]
+import { useIntlayer } from 'next-intlayer'
+// import faqSectionContent from './faq-section.content'
 
 export function FAQSection() {
+  const i = useIntlayer('faq-section')
+
+  const faqs = [
+    {
+      question: i.isFinTrackFree,
+      answer: i.isFinTrackFreeAnswer
+    },
+    {
+      question: i.canIContribute,
+      answer: i.canIContributeAnswer
+    },
+    {
+      question: i.isDataSecure,
+      answer: i.isDataSecureAnswer
+    },
+    {
+      question: i.whatMakesFinTrackDifferent,
+      answer: i.whatMakesFinTrackDifferentAnswer
+    },
+    {
+      question: i.doINeedFinancialKnowledge,
+      answer: i.doINeedFinancialKnowledgeAnswer
+    }
+  ]
+
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
@@ -41,10 +45,10 @@ export function FAQSection() {
         >
           <div className="flex items-center justify-center gap-3 mb-4">
             <HelpCircle className="w-8 h-8 text-primary" />
-            <h2 className="text-3xl md:text-4xl font-bold">Frequently Asked Questions</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">{i.frequentlyAskedQuestions}</h2>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to know about FinTrack
+            {i.everythingYouNeedToKnow}
           </p>
         </motion.div>
 
@@ -57,7 +61,7 @@ export function FAQSection() {
         >
           <Card>
             <CardHeader>
-              <CardTitle className="text-center">Common Questions</CardTitle>
+              <CardTitle className="text-center">{i.commonQuestions}</CardTitle>
             </CardHeader>
             <CardContent>
               <Accordion type="single" collapsible className="w-full">
@@ -92,7 +96,7 @@ export function FAQSection() {
           viewport={{ once: true }}
         >
           <p className="text-muted-foreground mb-4">
-            Still have questions?
+            {i.stillHaveQuestions}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
@@ -101,7 +105,7 @@ export function FAQSection() {
               rel="noopener noreferrer"
               className="text-primary hover:underline font-medium"
             >
-              View Documentation →
+              {i.viewDocumentation}
             </a>
             <a
               href="https://github.com/Y4NN777/FinTrack/issues"
@@ -109,7 +113,7 @@ export function FAQSection() {
               rel="noopener noreferrer"
               className="text-primary hover:underline font-medium"
             >
-              Ask on GitHub →
+              {i.askOnGitHub}
             </a>
           </div>
         </motion.div>

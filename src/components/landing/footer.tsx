@@ -3,8 +3,11 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Github, Mail, Linkedin, Heart } from 'lucide-react'
+import { useIntlayer } from 'next-intlayer'
 
 export function Footer() {
+  // Fix 1: Use the key string directly, not footerContent.key
+  const i = useIntlayer('footer')
   const currentYear = new Date().getFullYear()
 
   return (
@@ -26,7 +29,7 @@ export function Footer() {
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              FinTrack
+              {i.finTrack}
             </motion.h3>
             <motion.p
               className="text-muted-foreground mb-6 max-w-md"
@@ -35,8 +38,7 @@ export function Footer() {
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              AI-powered personal finance management. Free, open source software
-              built by developers for everyone seeking financial clarity.
+              {i.description}
             </motion.p>
             <motion.div
               className="flex items-center gap-1 text-sm text-muted-foreground"
@@ -45,9 +47,9 @@ export function Footer() {
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <span>Made with</span>
+              <span>{i.madeWith}</span>
               <Heart className="w-4 h-4 text-red-500 fill-current" />
-              <span>by developers, for the community</span>
+              <span>{i.byDevelopers}</span>
             </motion.div>
           </div>
 
@@ -60,7 +62,7 @@ export function Footer() {
               transition={{ duration: 0.6, delay: 0.4 }}
               viewport={{ once: true }}
             >
-              Quick Links
+              {i.quickLinks}
             </motion.h4>
             <motion.ul
               className="space-y-2 text-muted-foreground"
@@ -71,12 +73,12 @@ export function Footer() {
             >
               <li>
                 <Link href="/signup" className="hover:text-primary transition-colors">
-                  Get Started
+                  {i.getStarted}
                 </Link>
               </li>
               <li>
                 <Link href="/login" className="hover:text-primary transition-colors">
-                  Sign In
+                  {i.signIn}
                 </Link>
               </li>
               <li>
@@ -86,12 +88,12 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
                 >
-                  GitHub Repository
+                  {i.githubRepository}
                 </a>
               </li>
               <li>
                 <Link href="/onboarding/terms" className="hover:text-primary transition-colors font-medium">
-                  Terms of Service
+                  {i.termsOfService}
                 </Link>
               </li>
               <li>
@@ -101,7 +103,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
                 >
-                  Report Issues
+                  {i.reportIssues}
                 </a>
               </li>
             </motion.ul>
@@ -116,7 +118,7 @@ export function Footer() {
               transition={{ duration: 0.6, delay: 0.6 }}
               viewport={{ once: true }}
             >
-              Community
+              {i.community}
             </motion.h4>
             <motion.ul
               className="space-y-2 text-muted-foreground"
@@ -127,7 +129,7 @@ export function Footer() {
             >
               <li>
                 <Link href="/onboarding/terms" className="hover:text-primary transition-colors">
-                  Terms of Service
+                  {i.termsOfService}
                 </Link>
               </li>
               <li>
@@ -137,7 +139,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
                 >
-                  Contributing Guide
+                  {i.contributingGuide}
                 </a>
               </li>
               <li>
@@ -147,7 +149,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
                 >
-                  Discussions
+                  {i.discussions}
                 </a>
               </li>
               <li>
@@ -155,7 +157,7 @@ export function Footer() {
                   href="mailto:y4nn.dev@gmail.com"
                   className="hover:text-primary transition-colors"
                 >
-                  Contact Developer
+                  {i.contactDeveloper}
                 </a>
               </li>
               <li>
@@ -165,7 +167,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
                 >
-                  LinkedIn
+                  {i.linkedIn}
                 </a>
               </li>
             </motion.ul>
@@ -182,7 +184,8 @@ export function Footer() {
         >
           <div className="flex items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} FinTrack. Open source under MIT License.
+              {/* Simple concatenation approach */}
+              {i.copyrightPrefix} {currentYear} {i.copyrightSuffix}
             </p>
           </div>
 
@@ -192,14 +195,14 @@ export function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="GitHub Repository"
+              aria-label={i.githubAria}
             >
               <Github className="w-5 h-5" />
             </a>
             <a
               href="mailto:y4nn.dev@gmail.com"
               className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="Email Developer"
+              aria-label={i.emailAria}
             >
               <Mail className="w-5 h-5" />
             </a>
@@ -208,7 +211,7 @@ export function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="LinkedIn Profile"
+              aria-label={i.linkedInAria}
             >
               <Linkedin className="w-5 h-5" />
             </a>
