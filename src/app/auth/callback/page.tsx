@@ -5,8 +5,10 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Loader2 } from 'lucide-react'
+import { useIntlayer } from 'next-intlayer';
 
 export default function AuthCallback() {
+  const i = useIntlayer('auth-callback-page');
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +21,7 @@ export default function AuthCallback() {
 
         if (error) {
 //          console.error('Auth callback error:', error)
-          setError('Authentication failed. Please try again.')
+          setError(i.authenticationFailed)
           return
         }
 
@@ -66,7 +68,7 @@ export default function AuthCallback() {
             if (createError) {
 //              console.error('Error creating profile:', createError)
 //              console.error('Error details:', JSON.stringify(createError, null, 2))
-              setError(`Failed to create user profile: ${createError.message || 'Unknown error'}`)
+              setError(`${i.profileCreationFailed} ${createError.message || i.unknownError}`)
               return
             }
 
@@ -86,30 +88,30 @@ export default function AuthCallback() {
           } else {
             // Error fetching profile
 //            console.error('Error fetching profile:', profileError)
-            setError('Error loading user profile. Please try again.')
+            setError(i.profileLoadError)
             return
           }
         } else {
-          setError('No session found. Please try logging in again.')
+          setError(i.noSessionError)
         }
       } catch (err) {
 //        console.error('Unexpected error during auth callback:', err)
-        setError('An unexpected error occurred. Please try again.')
+        setError(i.unexpectedError)
       } finally {
         setLoading(false)
       }
     }
 
     handleAuthCallback()
-  }, [router])
+  }, [router, i])
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <h2 className="text-xl font-semibold mb-2">Completing Sign In</h2>
-          <p className="text-muted-foreground">Please wait while we set up your account...</p>
+          <h2 className="text-xl font-semibold mb-2">{i.loadingTitle}</h2>
+          <p className="text-muted-foreground">{i.loadingDescription}</p>
         </div>
       </div>
     )
@@ -120,13 +122,13 @@ export default function AuthCallback() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold mb-2 text-red-600">Authentication Error</h2>
+          <h2 className="text-xl font-semibold mb-2 text-red-600">{i.errorTitle}</h2>
           <p className="text-muted-foreground mb-4">{error}</p>
           <button
             onClick={() => router.push('/login')}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
           >
-            Try Again
+            {i.tryAgainButton}
           </button>
         </div>
       </div>
