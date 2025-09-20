@@ -17,27 +17,30 @@ import {
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { TrendingUp, Loader2 } from 'lucide-react';
 import { MonthlyData } from '@/lib/financial-calculations';
+import { useIntlayer } from 'next-intlayer';
 
 interface SpendingChartProps {
   monthlyData?: MonthlyData[]
   isLoading?: boolean
 }
 
-const chartConfig = {
-  income: {
-    label: 'Income',
-    color: 'hsl(var(--chart-1))',
-  },
-  expenses: {
-    label: 'Expenses',
-    color: 'hsl(var(--chart-2))',
-  },
-};
-
 export function SpendingChart({ monthlyData, isLoading = false }: SpendingChartProps) {
+  const i = useIntlayer('spending-chart');
+
+  const chartConfig = {
+    income: {
+      label: i.income,
+      color: 'hsl(var(--chart-1))',
+    },
+    expenses: {
+      label: i.expenses,
+      color: 'hsl(var(--chart-2))',
+    },
+  };
+
   // Transform monthly data for the chart - reverse order to start from current month
   const chartData = monthlyData?.map(data => ({
-    month: new Date(data.month + '-01').toLocaleDateString('en-US', { month: 'long' }),
+    month: new Date(data.month + '-01').toLocaleDateString(i.locale, { month: 'long' }),
     income: Math.round(data.income),
     expenses: Math.round(data.expenses)
   })).reverse() || []
@@ -47,9 +50,9 @@ export function SpendingChart({ monthlyData, isLoading = false }: SpendingChartP
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" /> Spending Trends
+            <TrendingUp className="h-5 w-5" /> {i.spendingTrends}
           </CardTitle>
-          <CardDescription>Income vs. Expenses over the last 6 months.</CardDescription>
+          <CardDescription>{i.incomeVsExpenses}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-64 w-full flex items-center justify-center">
@@ -65,13 +68,13 @@ export function SpendingChart({ monthlyData, isLoading = false }: SpendingChartP
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" /> Spending Trends
+            <TrendingUp className="h-5 w-5" /> {i.spendingTrends}
           </CardTitle>
-          <CardDescription>Income vs. Expenses over the last 6 months.</CardDescription>
+          <CardDescription>{i.incomeVsExpenses}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-64 w-full flex items-center justify-center text-muted-foreground">
-            No data available
+            {i.noData}
           </div>
         </CardContent>
       </Card>
@@ -82,9 +85,9 @@ export function SpendingChart({ monthlyData, isLoading = false }: SpendingChartP
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" /> Spending Trends
+          <TrendingUp className="h-5 w-5" /> {i.spendingTrends}
         </CardTitle>
-        <CardDescription>Income vs. Expenses over the last 6 months.</CardDescription>
+        <CardDescription>{i.incomeVsExpenses}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">
