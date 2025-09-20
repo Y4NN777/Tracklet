@@ -1,13 +1,11 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useIntlayer } from 'next-intlayer';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Form,
   FormControl,
@@ -23,28 +21,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/contexts/preferences-context';
 
-const accountSchema = z.object({
-  name: z.string().min(2, {
-    message: "Account name must be at least 2 characters.",
-  }),
-  type: z.enum(['checking', 'savings', 'credit', 'investment'], {
-    required_error: "Please select an account type.",
-  }),
-  balance: z.coerce.number({
-    required_error: "Balance is required.",
-  }),
-  currency: z.string().min(3, {
-    message: "Currency must be selected.",
-  }),
-});
-
-type AccountFormValues = z.infer<typeof accountSchema>
+type AccountFormValues = z.infer<ReturnType<typeof getAccountSchema>>;
 
 interface Account {
   id: string;
@@ -62,9 +44,28 @@ interface AccountFormProps {
   onClose?: () => void;
 }
 
+const getAccountSchema = (i: any) => z.object({
+  name: z.string().min(2, {
+    message: i.nameMinLength,
+  }),
+  type: z.enum(['checking', 'savings', 'credit', 'investment'], {
+    required_error: i.typeRequired,
+  }),
+  balance: z.coerce.number({
+    required_error: i.balanceRequired,
+  }),
+  currency: z.string().min(3, {
+    message: i.currencyRequired,
+  }),
+});
+
 export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }: AccountFormProps) {
+  const i = useIntlayer('account-form');
   const { toast } = useToast();
   const { currency } = useCurrency();
+
+  const accountSchema = getAccountSchema(i);
+
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
     defaultValues: {
@@ -104,15 +105,15 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
     try {
       await onSubmit(values);
       toast({
-        title: "Account added.",
-        description: "Your account has been added successfully.",
+        title: i.accountAddedTitle,
+        description: i.accountAddedDescription,
       })
       handleClose();
     } catch (error) {
-//      console.error('Account creation failed:', error);
+      // console.error('Account creation failed:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create account. Please try again.",
+        title: i.errorTitle,
+        description: error instanceof Error ? error.message : i.failedToCreateAccount,
         variant: "destructive",
       });
     }
@@ -122,11 +123,11 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingAccount ? 'Edit Account' : 'Add Account'}</DialogTitle>
+          <DialogTitle>{editingAccount ? i.editAccountTitle : i.addAccountTitle}</DialogTitle>
           <DialogDescription>
             {editingAccount
-              ? 'Update your account information.'
-              : 'Add a new financial account to track your money.'
+              ? i.updateAccountDescription
+              : i.addAccountDescription
             }
           </DialogDescription>
         </DialogHeader>
@@ -137,12 +138,12 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Account Name</FormLabel>
+                  <FormLabel>{i.accountNameLabel}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Main Checking, Emergency Savings" {...field} />
+                    <Input placeholder={i.accountNamePlaceholder} {...field} />
                   </FormControl>
                   <FormDescription>
-                    Give your account a descriptive name.
+                    {i.accountNameDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -153,21 +154,21 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Account Type</FormLabel>
+                  <FormLabel>{i.accountTypeLabel}</FormLabel>
                   <FormControl>
                     <select
                       {...field}
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <option value="">Select account type</option>
-                      <option value="checking">Checking - Primary spending account</option>
-                      <option value="savings">Savings - High-interest savings</option>
-                      <option value="credit">Credit Card - Credit accounts</option>
-                      <option value="investment">Investment - Retirement, stocks, etc.</option>
+                      <option value="">{i.selectAccountTypeOption}</option>
+                      <option value="checking">{i.checkingAccountOption}</option>
+                      <option value="savings">{i.savingsAccountOption}</option>
+                      <option value="credit">{i.creditCardOption}</option>
+                      <option value="investment">{i.investmentAccountOption}</option>
                     </select>
                   </FormControl>
                   <FormDescription>
-                    What type of financial account is this?
+                    {i.accountTypeDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -178,7 +179,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
               name="balance"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Current Balance</FormLabel>
+                  <FormLabel>{i.currentBalanceLabel}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -188,7 +189,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                     />
                   </FormControl>
                   <FormDescription>
-                    Your current account balance. Use negative values for debt.
+                    {i.currentBalanceDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -199,7 +200,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
               name="currency"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Currency</FormLabel>
+                  <FormLabel>{i.currencyLabel}</FormLabel>
                   <FormControl>
                     <select
                       {...field}
@@ -210,14 +211,14 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                     </select>
                   </FormControl>
                   <FormDescription>
-                    Currency is set based on your preferences and cannot be changed here.
+                    {i.currencyDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="submit">{editingAccount ? 'Update Account' : 'Add Account'}</Button>
+              <Button type="submit">{editingAccount ? i.updateAccountButton : i.addAccountButton}</Button>
             </DialogFooter>
           </form>
         </Form>
