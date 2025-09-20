@@ -19,8 +19,8 @@ const onboardingPageContent: DeclarationContent = {
     // Step Content
     step1Welcome: t({ en: "Welcome to FinTrack!", fr: "Bienvenue sur FinTrack !" }),
     step1Greeting: t({
-      en: (params: { name: string }) => `Hello ${params.name}! Let's set up your profile.`,
-      fr: (params: { name: string }) => `Bonjour ${params.name} ! Configurons votre profil.`,
+      en: (params: { name: string } = { name: '' }) => `Hello ${params.name}! Let's set up your profile.`,
+      fr: (params: { name: string } = { name: '' }) => `Bonjour ${params.name} ! Configurons votre profil.`,
     }),
     step1DefaultGreeting: t({ en: "Hello there! Let's set up your profile.", fr: "Bonjour ! Configurons votre profil." }),
 
@@ -44,12 +44,12 @@ const onboardingPageContent: DeclarationContent = {
 
     // General UI
     stepOf: t({
-      en: (params: { current: number, total: number }) => `Step ${params.current} of ${params.total}`,
-      fr: (params: { current: number, total: number }) => `Étape ${params.current} sur ${params.total}`,
+      en: (params: { current: number, total: number } = { current: 0, total: 0 }) => `Step ${params.current} of ${params.total}`,
+      fr: (params: { current: number, total: number } = { current: 0, total: 0 }) => `Étape ${params.current} sur ${params.total}`,
     }),
     percentComplete: t({
-      en: (params: { progress: number }) => `${params.progress}% complete`,
-      fr: (params: { progress: number }) => `${params.progress}% terminé`,
+      en: (params: { progress: number } = { progress: 0 }) => `${params.progress}% complete`,
+      fr: (params: { progress: number } = { progress: 0 }) => `${params.progress}% terminé`,
     }),
     loading: t({ en: "Loading...", fr: "Chargement..." }),
     back: t({ en: "Back", fr: "Retour" }),

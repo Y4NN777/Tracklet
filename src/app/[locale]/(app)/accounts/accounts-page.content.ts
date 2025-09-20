@@ -22,13 +22,13 @@ const accountsPageContent: DeclarationContent = {
     netWorthDescription: t({ en: "Your total financial position", fr: "Votre situation financière totale" }),
 
     // Account Grouping
-    accountsTitle: t({ en: (params: { type: string }) => `${params.type} Accounts`, fr: (params: { type: string }) => `Comptes ${params.type}` }),
-    accountCount: t({ en: (params: { count: number }) => `(${params.count} account${params.count !== 1 ? 's' : ''})`, fr: (params: { count: number }) => `(${params.count} compte${params.count !== 1 ? 's' : ''})` }),
-    total: t({ en: (params: { type: string }) => `Total ${params.type}`, fr: (params: { type: string }) => `Total ${params.type}` }),
+    accountsTitle: t({ en: (params: { type: string } = { type: '' }) => `${params.type} Accounts`, fr: (params: { type: string } = { type: '' }) => `Comptes ${params.type}` }),
+    accountCount: t({ en: (params: { count: number } = { count: 0 }) => `(${params.count} account${params.count !== 1 ? 's' : ''})`, fr: (params: { count: number } = { count: 0 }) => `(${params.count} compte${params.count !== 1 ? 's' : ''})` }),
+    total: t({ en: (params: { type: string } = { type: '' }) => `Total ${params.type}`, fr: (params: { type: string } = { type: '' }) => `Total ${params.type}` }),
 
     // Delete Dialog
     deleteDialogTitle: t({ en: "Delete Account", fr: "Supprimer le compte" }),
-    deleteDialogDescription: t({ en: (params: { name: string }) => `Are you sure you want to delete "${params.name}"? This action cannot be undone and will affect all associated transactions.`, fr: (params: { name:string }) => `Êtes-vous sûr de vouloir supprimer "${params.name}" ? Cette action est irréversible et affectera toutes les transactions associées.` }),
+    deleteDialogDescription: t({ en: (params: { name: string } = { name: '' }) => `Are you sure you want to delete "${params.name}"? This action cannot be undone and will affect all associated transactions.`, fr: (params: { name:string } = { name: '' }) => `Êtes-vous sûr de vouloir supprimer "${params.name}" ? Cette action est irréversible et affectera toutes les transactions associées.` }),
     cancelButton: t({ en: "Cancel", fr: "Annuler" }),
     deleteButton: t({ en: "Delete", fr: "Supprimer" }),
 

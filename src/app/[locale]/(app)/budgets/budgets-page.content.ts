@@ -13,14 +13,14 @@ const budgetsPageContent: DeclarationContent = {
     emptyBudgetsTitle: t({ en: "No budgets yet", fr: "Aucun budget pour le moment" }),
     emptyBudgetsDescription: t({ en: "Start managing your finances by creating your first budget.", fr: "Commencez à gérer vos finances en créant votre premier budget." }),
     createBudgetButton: t({ en: "Create Budget", fr: "Créer un budget" }),
-    deleteConfirmation: t({ en: (params: { name: string }) => `Are you sure you want to delete "${params.name}"? This action cannot be undone.`, fr: (params: { name: string }) => `Êtes-vous sûr de vouloir supprimer "${params.name}" ? Cette action est irréversible.` }),
+    deleteConfirmation: t({ en: (params: { name: string } = { name: '' }) => `Are you sure you want to delete "${params.name}"? This action cannot be undone.`, fr: (params: { name: string } = { name: '' }) => `Êtes-vous sûr de vouloir supprimer "${params.name}" ? Cette action est irréversible.` }),
 
     // Goals Section
     goalsTitle: t({ en: "Financial Goals", fr: "Objectifs financiers" }),
     newGoalButton: t({ en: "New Goal", fr: "Nouvel objectif" }),
-    goalTarget: t({ en: (params: { amount: string }) => `Target: ${params.amount}`, fr: (params: { amount: string }) => `Objectif : ${params.amount}` }),
-    goalProgress: t({ en: (params: { progress: string }) => `${params.progress}% complete`, fr: (params: { progress: string }) => `${params.progress}% atteint` }),
-    goalSaved: t({ en: (params: { amount: string }) => `${params.amount} saved`, fr: (params: { amount: string }) => `${params.amount} économisé` }),
+    goalTarget: t({ en: (params: { amount: string } = { amount: '' }) => `Target: ${params.amount}`, fr: (params: { amount: string } = { amount: '' }) => `Objectif : ${params.amount}` }),
+    goalProgress: t({ en: (params: { progress: string } = { progress: '' }) => `${params.progress}% complete`, fr: (params: { progress: string } = { progress: '' }) => `${params.progress}% atteint` }),
+    goalSaved: t({ en: (params: { amount: string } = { amount: '' }) => `${params.amount} saved`, fr: (params: { amount: string } = { amount: '' }) => `${params.amount} économisé` }),
     emptyGoalsTitle: t({ en: "No financial goals yet", fr: "Aucun objectif financier pour le moment" }),
     emptyGoalsDescription: t({ en: "Set your financial goals to stay motivated and track your progress.", fr: "Définissez vos objectifs financiers pour rester motivé et suivre vos progrès." }),
     createGoalButton: t({ en: "Create Goal", fr: "Créer un objectif" }),

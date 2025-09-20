@@ -25,7 +25,7 @@ export async function getSavingsOpportunitiesAction(
   prevState: SavingsState,
   formData: FormData
 ): Promise<SavingsState> {
-//  console.log('🔍 getSavingsOpportunitiesAction called with form data');
+//  console.log(' getSavingsOpportunitiesAction called with form data');
 
   const expenseCategories = formData.getAll('expenseCategory');
   const expenseAmounts = formData.getAll('expenseAmount');
@@ -67,7 +67,7 @@ export async function getSavingsOpportunitiesAction(
       result: result,
     };
   } catch (e) {
-//    console.error('❌ AI Error:', e);
+//    console.error(' AI Error:', e);
     const errorMessage = e instanceof Error ? e.message : 'Unknown error occurred';
     return {
       form: validatedFields.data,

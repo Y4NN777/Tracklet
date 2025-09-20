@@ -18,8 +18,10 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from '@/hooks/use-toast';
 import { usePreferencesContext } from '@/contexts/preferences-context';
 import { Loader2 } from 'lucide-react';
+import { useIntlayer } from 'next-intlayer';
 
 export default function SettingsPage() {
+  const i = useIntlayer('settings-page');
   const { toast } = useToast();
   const { preferences, updatePreferences, isLoading } = usePreferencesContext();
   const [saving, setSaving] = useState(false);
@@ -34,14 +36,14 @@ export default function SettingsPage() {
       }
 
       toast({
-        title: 'Settings saved',
-        description: 'Your preferences have been updated.',
+        title: i.settingsSaved,
+        description: i.preferencesUpdated,
       });
     } catch (error) {
 //      console.error('Failed to save preferences:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to save your preferences.',
+        title: i.error,
+        description: i.failedToSave,
         variant: 'destructive',
       });
     } finally {
@@ -70,15 +72,15 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 sm:space-y-8">
       <div>
-        <h3 className="text-lg font-medium">Appearance</h3>
+        <h3 className="text-lg font-medium">{i.appearanceTitle}</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Customize the look and feel of the app.
+          {i.appearanceDescription}
         </p>
         <Separator className="mt-4" />
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Theme</CardTitle>
-            <CardDescription>Select your preferred color scheme.</CardDescription>
+            <CardTitle>{i.themeTitle}</CardTitle>
+            <CardDescription>{i.themeDescription}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -88,27 +90,27 @@ export default function SettingsPage() {
                   onClick={() => updatePreference('theme', 'light')}
                   disabled={saving}
                 >
-                  Light
+                  {i.lightTheme}
                 </Button>
                 <Button
                   variant={preferences.theme === 'dark' ? 'default' : 'outline'}
                   onClick={() => updatePreference('theme', 'dark')}
                   disabled={saving}
                 >
-                  Dark
+                  {i.darkTheme}
                 </Button>
                 <Button
                   variant={preferences.theme === 'system' ? 'default' : 'outline'}
                   onClick={() => updatePreference('theme', 'system')}
                   disabled={saving}
                 >
-                  System
+                  {i.systemTheme}
                 </Button>
               </div>
               {saving && (
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Saving...
+                  {i.saving}
                 </div>
               )}
             </div>
@@ -117,9 +119,9 @@ export default function SettingsPage() {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium">Preferences</h3>
+        <h3 className="text-lg font-medium">{i.preferencesTitle}</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Configure your account settings and preferences.
+          {i.preferencesDescription}
         </p>
         <Separator className="mt-4" />
         {/* <Card className="mt-6">
@@ -149,23 +151,23 @@ export default function SettingsPage() {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium">Notifications</h3>
+        <h3 className="text-lg font-medium">{i.notificationsTitle}</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage how you receive alerts and updates.
+          {i.notificationsDescription}
         </p>
         <Separator className="mt-4" />
 
         {/* Budget Alerts */}
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Budget Alerts</CardTitle>
-            <CardDescription>Get notified when you're approaching or exceeding budget limits.</CardDescription>
+            <CardTitle>{i.budgetAlertsTitle}</CardTitle>
+            <CardDescription>{i.budgetAlertsDescription}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="budget-alerts-enabled">Enable Budget Alerts</Label>
-                <p className="text-sm text-muted-foreground">Receive notifications about budget spending.</p>
+                <Label htmlFor="budget-alerts-enabled">{i.enableBudgetAlertsLabel}</Label>
+                <p className="text-sm text-muted-foreground">{i.enableBudgetAlertsDescription}</p>
               </div>
               <Switch
                 id="budget-alerts-enabled"
@@ -177,8 +179,8 @@ export default function SettingsPage() {
 
             {(preferences.notifications?.budgetAlerts?.enabled ?? true) && (
               <div>
-                <Label className="text-sm font-medium">Alert Thresholds (%)</Label>
-                <p className="text-sm text-muted-foreground mb-3">Get notified at these spending percentages.</p>
+                <Label className="text-sm font-medium">{i.alertThresholdsLabel}</Label>
+                <p className="text-sm text-muted-foreground mb-3">{i.alertThresholdsDescription}</p>
                 <div className="grid grid-cols-3 gap-4">
                   {[80, 90, 100].map((threshold) => (
                     <label key={threshold} className="flex items-center space-x-2">
@@ -207,14 +209,14 @@ export default function SettingsPage() {
         {/* Goal Reminders */}
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Goal Reminders</CardTitle>
-            <CardDescription>Get reminded about your savings goals and deadlines.</CardDescription>
+            <CardTitle>{i.goalRemindersTitle}</CardTitle>
+            <CardDescription>{i.goalRemindersDescription}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="goal-reminders-enabled">Enable Goal Reminders</Label>
-                <p className="text-sm text-muted-foreground">Receive notifications about savings goals.</p>
+                <Label htmlFor="goal-reminders-enabled">{i.enableGoalRemindersLabel}</Label>
+                <p className="text-sm text-muted-foreground">{i.enableGoalRemindersDescription}</p>
               </div>
               <Switch
                 id="goal-reminders-enabled"
@@ -227,7 +229,7 @@ export default function SettingsPage() {
             {(preferences.notifications?.goalReminders?.enabled ?? true) && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="goal-frequency">Reminder Frequency</Label>
+                  <Label htmlFor="goal-frequency">{i.reminderFrequencyLabel}</Label>
                   <select
                     id="goal-frequency"
                     value={preferences.notifications?.goalReminders?.frequency ?? 'weekly'}
@@ -235,13 +237,13 @@ export default function SettingsPage() {
                     disabled={saving}
                     className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
                   >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
+                    <option value="daily">{i.dailyOption}</option>
+                    <option value="weekly">{i.weeklyOption}</option>
+                    <option value="monthly">{i.monthlyOption}</option>
                   </select>
                 </div>
                 <div>
-                  <Label htmlFor="goal-days-before">Days Before Deadline</Label>
+                  <Label htmlFor="goal-days-before">{i.daysBeforeDeadlineLabel}</Label>
                   <input
                     id="goal-days-before"
                     type="number"
@@ -261,14 +263,14 @@ export default function SettingsPage() {
         {/* Transaction Alerts */}
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Transaction Alerts</CardTitle>
-            <CardDescription>Get notified about significant or unusual transactions.</CardDescription>
+            <CardTitle>{i.transactionAlertsTitle}</CardTitle>
+            <CardDescription>{i.transactionAlertsDescription}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="transaction-alerts-enabled">Enable Transaction Alerts</Label>
-                <p className="text-sm text-muted-foreground">Receive notifications about transactions.</p>
+                <Label htmlFor="transaction-alerts-enabled">{i.enableTransactionAlertsLabel}</Label>
+                <p className="text-sm text-muted-foreground">{i.enableTransactionAlertsDescription}</p>
               </div>
               <Switch
                 id="transaction-alerts-enabled"
@@ -281,7 +283,7 @@ export default function SettingsPage() {
             {(preferences.notifications?.transactionAlerts?.enabled ?? true) && (
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="min-amount">Minimum Alert Amount</Label>
+                  <Label htmlFor="min-amount">{i.minAmountLabel}</Label>
                   <div className="relative mt-1">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
                     <input
@@ -295,13 +297,13 @@ export default function SettingsPage() {
                       className="w-full pl-8 rounded-md border border-input bg-background px-3 py-2 text-sm"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Get notified for transactions above this amount.</p>
+                  <p className="text-xs text-muted-foreground mt-1">{i.minAmountDescription}</p>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="unusual-spending">Detect Unusual Spending</Label>
-                    <p className="text-sm text-muted-foreground">Alert me about statistically unusual transactions.</p>
+                    <Label htmlFor="unusual-spending">{i.detectUnusualSpendingLabel}</Label>
+                    <p className="text-sm text-muted-foreground">{i.detectUnusualSpendingDescription}</p>
                   </div>
                   <Switch
                     id="unusual-spending"
@@ -318,14 +320,14 @@ export default function SettingsPage() {
         {/* Email Notifications */}
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Email Notifications</CardTitle>
-            <CardDescription>Receive notifications via email.</CardDescription>
+            <CardTitle>{i.emailNotificationsTitle}</CardTitle>
+            <CardDescription>{i.emailNotificationsDescription}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="email-notifications-enabled">Enable Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">Receive notifications via email.</p>
+                <Label htmlFor="email-notifications-enabled">{i.enableEmailNotificationsLabel}</Label>
+                <p className="text-sm text-muted-foreground">{i.emailNotificationsDescription}</p>
               </div>
               <Switch
                 id="email-notifications-enabled"
@@ -337,7 +339,7 @@ export default function SettingsPage() {
 
             {(preferences.notifications?.emailNotifications?.enabled ?? false) && (
               <div>
-                <Label htmlFor="email-digest">Email Digest Frequency</Label>
+                <Label htmlFor="email-digest">{i.emailDigestLabel}</Label>
                 <select
                   id="email-digest"
                   value={preferences.notifications?.emailNotifications?.digest ?? 'daily'}
@@ -345,9 +347,9 @@ export default function SettingsPage() {
                   disabled={saving}
                   className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
-                  <option value="immediate">Immediate</option>
-                  <option value="daily">Daily Digest</option>
-                  <option value="weekly">Weekly Digest</option>
+                  <option value="immediate">{i.immediateOption}</option>
+                  <option value="daily">{i.dailyDigestOption}</option>
+                  <option value="weekly">{i.weeklyDigestOption}</option>
                 </select>
               </div>
             )}

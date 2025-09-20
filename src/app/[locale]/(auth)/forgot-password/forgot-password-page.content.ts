@@ -16,8 +16,8 @@ const forgotPasswordPageContent: DeclarationContent = {
     // Success View
     successTitle: t({ en: "Check your email", fr: "Vérifiez vos e-mails" }),
     successDescription: t({
-      en: (params: { email: string }) => `We've sent a password reset link to ${params.email}`,
-      fr: (params: { email: string }) => `Nous avons envoyé un lien de réinitialisation de mot de passe à ${params.email}`,
+      en: (params: { email: string } = { email: '' }) => `We've sent a password reset link to ${params.email}`,
+      fr: (params: { email: string } = { email: '' }) => `Nous avons envoyé un lien de réinitialisation de mot de passe à ${params.email}`,
     }),
     noEmailAlert: t({ en: "Didn't receive the email? Check your spam folder or try resending the email.", fr: "Vous n'avez pas reçu l'e-mail ? Vérifiez votre dossier de spam ou essayez de renvoyer l'e-mail." }),
     tryAnotherEmailButton: t({ en: "Try another email", fr: "Essayer une autre adresse e-mail" }),
