@@ -1,13 +1,13 @@
- 'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useIntlayer } from 'next-intlayer';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Form,
   FormControl,
@@ -23,26 +23,25 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/contexts/preferences-context';
 
-const budgetSchema = z.object({
+const getBudgetSchema = (i: any) => z.object({
   name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: i.nameMinLength,
   }),
   amount: z.coerce.number()
-    .gt(0, { message: "Amount must be greater than 0." }),
+    .gt(0, { message: i.amountGreaterThanZero }),
   period: z.enum(['monthly', 'weekly', 'yearly'], {
-    required_error: "Please select a budget period.",
+    required_error: i.periodRequired,
   }),
   category_id: z.string().optional(),
   start_date: z.string().optional(),
 });
 
-type BudgetFormValues = z.infer<typeof budgetSchema>
+type BudgetFormValues = z.infer<ReturnType<typeof getBudgetSchema>>
 
 interface Budget {
   id: string;
@@ -66,8 +65,11 @@ interface BudgetFormProps {
 }
 
 export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: BudgetFormProps) {
+  const i = useIntlayer('budget-form');
   const { toast } = useToast();
   const { currency } = useCurrency();
+  const budgetSchema = getBudgetSchema(i);
+
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
@@ -115,11 +117,11 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingBudget ? 'Edit Budget' : 'Add Budget'}</DialogTitle>
+          <DialogTitle>{editingBudget ? i.editBudget : i.addBudget}</DialogTitle>
           <DialogDescription>
             {editingBudget
-              ? 'Update your budget information.'
-              : 'Add a new budget to track your finances.'
+              ? i.updateBudgetInfo
+              : i.addBudgetToTrack
             }
           </DialogDescription>
         </DialogHeader>
@@ -130,9 +132,9 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{i.name}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Name" {...field} />
+                    <Input placeholder={i.name} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,9 +145,9 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>{i.amount}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Amount" type="number" {...field} />
+                    <Input placeholder={i.amount} type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -156,20 +158,20 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
               name="period"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Budget Period</FormLabel>
+                  <FormLabel>{i.budgetPeriod}</FormLabel>
                   <FormControl>
                     <select
                       {...field}
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <option value="">Select period</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="monthly">Monthly</option>
-                      <option value="yearly">Yearly</option>
+                      <option value="">{i.selectPeriod}</option>
+                      <option value="weekly">{i.weekly}</option>
+                      <option value="monthly">{i.monthly}</option>
+                      <option value="yearly">{i.yearly}</option>
                     </select>
                   </FormControl>
                   <FormDescription>
-                    How often this budget resets.
+                    {i.periodDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -180,12 +182,12 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
               name="start_date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Start Date</FormLabel>
+                  <FormLabel>{i.startDate}</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
                   <FormDescription>
-                    When this budget period starts.
+                    {i.startDateDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -193,17 +195,17 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
             />
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Currency
+                {i.currency}
               </label>
               <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
                 {currency}
               </div>
               <p className="text-xs text-muted-foreground">
-                Currency is set based on your preferences and cannot be changed here.
+                {i.currencyDescription}
               </p>
             </div>
             <DialogFooter>
-              <Button type="submit">{editingBudget ? 'Update Budget' : 'Add Budget'}</Button>
+              <Button type="submit">{editingBudget ? i.updateBudget : i.addBudgetButton}</Button>
             </DialogFooter>
           </form>
         </Form>
