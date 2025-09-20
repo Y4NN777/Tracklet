@@ -13,21 +13,23 @@ import { Switch } from '@/components/ui/switch';
 import { Upload, Check, ArrowRight, ArrowLeft, Bot, Target, BarChart3, RefreshCw, PartyPopper } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { auth, db, supabase } from '@/lib/supabase';
-
-const ONBOARDING_STEPS = [
-  { id: 1, title: 'Welcome to FinTrack', description: 'Your AI-powered finance companion awaits' },
-  { id: 2, title: 'Discover FinTrack', description: 'Learn what makes your financial journey smarter' },
-  { id: 3, title: 'Profile Setup', description: 'Personalize your experience' },
-  { id: 4, title: 'Preferences', description: 'Customize your financial settings' },
-  { id: 5, title: 'You\'re All Set!', description: 'Ready to take control of your finances' }
-];
+import { useIntlayer } from 'next-intlayer';
 
 export default function OnboardingPage() {
+  const i = useIntlayer('onboarding-page');
   const router = useRouter();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+
+  const ONBOARDING_STEPS = [
+    { id: 1, title: i.step1Title, description: i.step1Description },
+    { id: 2, title: i.step2Title, description: i.step2Description },
+    { id: 3, title: i.step3Title, description: i.step3Description },
+    { id: 4, title: i.step4Title, description: i.step4Description },
+    { id: 5, title: i.step5Title, description: i.step5Description }
+  ];
 
   // Form data
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -44,7 +46,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { user, error } = await auth.getUser();
+      const { data: { user }, error } = await auth.getSession();
       if (error || !user) {
         router.push('/login');
         return;
@@ -89,9 +91,9 @@ export default function OnboardingPage() {
       setAvatarUrl(publicUrl);
       await db.updateUserProfile(user.id, { avatar_url: publicUrl });
 
-      toast({ title: 'Avatar uploaded!', description: 'Your profile picture has been saved.' });
+      toast({ title: i.avatarUploadSuccessTitle, description: i.avatarUploadSuccessDescription });
     } catch (error) {
-      toast({ title: 'Upload failed', description: 'Please try again.', variant: 'destructive' });
+      toast({ title: i.avatarUploadFailedTitle, description: i.avatarUploadFailedDescription, variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -117,12 +119,12 @@ export default function OnboardingPage() {
 //          try { await db.updateUserPreferences(user.id, preferences); } catch (e) { console.error(e); }
         }
 
-        toast({ title: 'Welcome to FinTrack!', description: 'Redirecting you to the dashboard...' });
+        toast({ title: i.welcomeToastTitle, description: i.welcomeToastDescription });
         await new Promise(resolve => setTimeout(resolve, 1500));
         router.push('/dashboard');
       } catch (error) {
 //        console.error('Onboarding completion failed:', error);
-        toast({ title: 'Setup failed', description: 'Redirecting you anyway.', variant: 'destructive' });
+        toast({ title: i.setupFailedTitle, description: i.setupFailedDescription, variant: 'destructive' });
         await new Promise(resolve => setTimeout(resolve, 1500));
         router.push('/dashboard');
       } finally {
@@ -149,15 +151,15 @@ export default function OnboardingPage() {
   const progress = (currentStep / totalSteps) * 100;
 
   if (!user) {
-    return <div>Loading...</div>;
+    return <div>{i.loading}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
         <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Step {currentStep} of {totalSteps}</span>
-          <span>{Math.round(progress)}% complete</span>
+          <span>{typeof i.stepOf === 'function' ? i.stepOf({ current: currentStep, total: totalSteps }) : `Step ${currentStep} of ${totalSteps}`}</span>
+          <span>{typeof i.percentComplete === 'function' ? i.percentComplete({ progress: Math.round(progress) }) : `${Math.round(progress)}% complete`}</span>
         </div>
         <Progress value={progress} className="w-full" />
       </div>
@@ -172,18 +174,22 @@ export default function OnboardingPage() {
             <div className="text-center space-y-4">
                 <Check className="w-12 h-12 text-primary mx-auto" />
               <div>
-                <h3 className="text-lg font-semibold">Welcome to FinTrack!</h3>
-                <p className="text-muted-foreground">Hello {user.user_metadata?.full_name || 'there'}! Let's set up your profile.</p>
+                <h3 className="text-lg font-semibold">{i.step1Welcome}</h3>
+                <p className="text-muted-foreground">
+                  {user.user_metadata?.full_name 
+                    ? (typeof i.step1Greeting === 'function' ? i.step1Greeting({ name: user.user_metadata.full_name }) : i.step1DefaultGreeting)
+                    : i.step1DefaultGreeting}
+                </p>
               </div>
             </div>
           )}
 
           {currentStep === 2 && (
             <div className="space-y-4">
-                <div className="flex items-center"><Bot className="w-6 h-6 mr-2" /> AI-Powered Insights</div>
-                <div className="flex items-center"><Target className="w-6 h-6 mr-2" /> Goal Tracking</div>
-                <div className="flex items-center"><BarChart3 className="w-6 h-6 mr-2" /> Smart Budgeting</div>
-                <div className="flex items-center"><RefreshCw className="w-6 h-6 mr-2" /> Cross-Device Sync</div>
+                <div className="flex items-center"><Bot className="w-6 h-6 mr-2" /> {i.step2AIPowered}</div>
+                <div className="flex items-center"><Target className="w-6 h-6 mr-2" /> {i.step2GoalTracking}</div>
+                <div className="flex items-center"><BarChart3 className="w-6 h-6 mr-2" /> {i.step2SmartBudgeting}</div>
+                <div className="flex items-center"><RefreshCw className="w-6 h-6 mr-2" /> {i.step2CrossDeviceSync}</div>
             </div>
           )}
 
@@ -195,12 +201,12 @@ export default function OnboardingPage() {
                   <AvatarFallback>{(fullName || user.email).charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <Button variant="outline" onClick={() => document.getElementById('avatar-upload')?.click()} disabled={isLoading}>
-                  <Upload className="w-4 h-4 mr-2" /> Upload Photo
+                  <Upload className="w-4 h-4 mr-2" /> {i.step3UploadPhoto}
                 </Button>
                 <Input id="avatar-upload" type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
                 <div className="w-full space-y-2">
-                  <Label htmlFor="full-name">Full Name</Label>
-                  <Input id="full-name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your full name" />
+                  <Label htmlFor="full-name">{i.step3FullName}</Label>
+                  <Input id="full-name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={i.step3FullNamePlaceholder} />
                 </div>
               </div>
             </div>
@@ -210,18 +216,18 @@ export default function OnboardingPage() {
             <div className="space-y-6">
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label>Theme</Label>
+                  <Label>{i.step4Theme}</Label>
                   <Select value={preferences.theme} onValueChange={(value) => setPreferences({...preferences, theme: value})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
-                      <SelectItem value="system">System</SelectItem>
+                      <SelectItem value="light">{i.step4ThemeLight}</SelectItem>
+                      <SelectItem value="dark">{i.step4ThemeDark}</SelectItem>
+                      <SelectItem value="system">{i.step4ThemeSystem}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Currency</Label>
+                  <Label>{i.step4Currency}</Label>
                   <Select value={preferences.currency} onValueChange={(value) => setPreferences({...preferences, currency: value})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -239,8 +245,8 @@ export default function OnboardingPage() {
             <div className="text-center space-y-4">
                 <Check className="w-12 h-12 text-green-600 mx-auto" />
               <div>
-                <h3 className="text-lg font-semibold">You\'re All Set!</h3>
-                <p className="text-muted-foreground">Welcome to FinTrack! Your personalized experience is ready.</p>
+                <h3 className="text-lg font-semibold">{i.step5AllSet}</h3>
+                <p className="text-muted-foreground">{i.step5Ready}</p>
               </div>
             </div>
           )}
@@ -249,14 +255,14 @@ export default function OnboardingPage() {
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          <ArrowLeft className="w-4 h-4 mr-2" /> {i.back}
         </Button>
         <div className="flex gap-2">
           {currentStep === 3 && (
-            <Button variant="ghost" onClick={handleSkip}>Skip for now</Button>
+            <Button variant="ghost" onClick={handleSkip}>{i.skipForNow}</Button>
           )}
           <Button onClick={handleNext} disabled={isLoading}>
-            {currentStep === 5 ? (isLoading ? 'Completing Setup...' : 'Get Started') : 'Continue'}
+            {currentStep === 5 ? (isLoading ? i.completingSetup : i.getStarted) : i.continue}
             {currentStep < 5 && <ArrowRight className="w-4 h-4 ml-2" />}
           </Button>
         </div>
