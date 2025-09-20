@@ -25,26 +25,28 @@ import { formatMarkdown } from '@/lib/markdown-utils';
 import { useCurrency } from '@/contexts/preferences-context';
 import { useState } from 'react';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import { useIntlayer } from 'next-intlayer';
 
-const SavingsSchema = z.object({
-  income: z.coerce.number().min(0, "Income must be a positive number."),
-  savings: z.coerce.number().min(0, "Savings must be a positive number."),
-  debt: z.coerce.number().min(0, "Debt must be a positive number.").optional(),
-  financialGoals: z.string().min(5, "Please describe your financial goals."),
+const getSavingsSchema = (i: any) => z.object({
+  income: z.coerce.number().min(0, i.incomeMin),
+  savings: z.coerce.number().min(0, i.savingsMin),
+  debt: z.coerce.number().min(0, i.debtMin).optional(),
+  financialGoals: z.string().min(5, i.financialGoalsMin),
   expenses: z.array(z.object({
-    category: z.string().min(1, 'Category is required'),
-    amount: z.coerce.number().min(0.01, 'Amount must be positive'),
-  })).min(1, "Please add at least one expense."),
-  currency: z.string().min(1, "Currency is required."),
+    category: z.string().min(1, i.categoryRequired),
+    amount: z.coerce.number().min(0.01, i.amountMin),
+  })).min(1, i.expensesMin),
+  currency: z.string().min(1, i.currencyRequired),
 });
 
-type SavingsFormValues = z.infer<typeof SavingsSchema>;
+type SavingsFormValues = z.infer<ReturnType<typeof getSavingsSchema>>;
 
 function SubmitButton() {
+  const i = useIntlayer('savings-form');
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? 'Analyzing...' : 'Get Recommendations'}
+      {pending ? i.analyzing : i.getRecommendations}
       <Sparkles className="ml-2 h-4 w-4" />
     </Button>
   );
@@ -66,12 +68,15 @@ const initialState: SavingsState = {
 };
 
 export function SavingsForm() {
+  const i = useIntlayer('savings-form');
   const [state, formAction] = useActionState(getSavingsOpportunitiesAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const { currency } = useCurrency();
   const [isExpanded, setIsExpanded] = useState(false);
   
+  const SavingsSchema = getSavingsSchema(i);
+
   const { control, handleSubmit, formState: { errors } } = useForm<SavingsFormValues>({
     resolver: zodResolver(SavingsSchema),
     defaultValues: initialState.form,
@@ -85,7 +90,7 @@ export function SavingsForm() {
   useEffect(() => {
     if (state.error) {
       toast({
-        title: 'Error',
+        title: i.error,
         description: state.error,
         variant: 'destructive',
       });
@@ -97,9 +102,9 @@ export function SavingsForm() {
       {!isExpanded && (
         <Card className="w-full">
         <CardHeader>
-          <CardTitle>AI Savings Advisor</CardTitle>
+          <CardTitle>{i.aiSavingsAdvisor}</CardTitle>
           <CardDescription>
-            Provide your financial details to get personalized savings tips.
+            {i.formDescription}
           </CardDescription>
         </CardHeader>
         <form ref={formRef} action={formAction}>
@@ -111,7 +116,7 @@ export function SavingsForm() {
                 control={control}
                 render={({ field }) => (
                   <div className="space-y-2">
-                    <Label htmlFor="income">Monthly Income</Label>
+                    <Label htmlFor="income">{i.monthlyIncome}</Label>
                     <Input id="income" type="number" placeholder="5000" {...field} />
                     {errors.income && <p className="text-sm text-destructive">{errors.income.message}</p>}
                   </div>
@@ -122,7 +127,7 @@ export function SavingsForm() {
                 control={control}
                 render={({ field }) => (
                   <div className="space-y-2">
-                    <Label htmlFor="savings">Total Savings</Label>
+                    <Label htmlFor="savings">{i.totalSavings}</Label>
                     <Input id="savings" type="number" placeholder="10000" {...field} />
                      {errors.savings && <p className="text-sm text-destructive">{errors.savings.message}</p>}
                   </div>
@@ -133,7 +138,7 @@ export function SavingsForm() {
                 control={control}
                 render={({ field }) => (
                   <div className="space-y-2">
-                    <Label htmlFor="debt">Total Debt</Label>
+                    <Label htmlFor="debt">{i.totalDebt}</Label>
                     <Input id="debt" type="number" placeholder="2500" {...field} />
                      {errors.debt && <p className="text-sm text-destructive">{errors.debt.message}</p>}
                   </div>
@@ -142,19 +147,19 @@ export function SavingsForm() {
             </div>
             
             <div>
-              <Label>Monthly Expenses</Label>
+              <Label>{i.monthlyExpenses}</Label>
               <div className="space-y-2 mt-2">
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex items-center gap-2">
                     <Controller
                         name={`expenses.${index}.category`}
                         control={control}
-                        render={({ field }) => <Input placeholder="Category (e.g., Rent)" {...field} name="expenseCategory" />}
+                        render={({ field }) => <Input placeholder={i.categoryPlaceholder} {...field} name="expenseCategory" />}
                     />
                     <Controller
                         name={`expenses.${index}.amount`}
                         control={control}
-                        render={({ field }) => <Input type="number" placeholder="Amount" {...field} name="expenseAmount" />}
+                        render={({ field }) => <Input type="number" placeholder={i.amount} {...field} name="expenseAmount" />}
                     />
                     <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                       <Trash2 className="h-4 w-4" />
@@ -165,7 +170,7 @@ export function SavingsForm() {
               </div>
               <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ category: '', amount: 0 })}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Add Expense
+                {i.addExpense}
               </Button>
             </div>
 
@@ -174,10 +179,10 @@ export function SavingsForm() {
               control={control}
               render={({ field }) => (
                 <div className="space-y-2">
-                  <Label htmlFor="financialGoals">Financial Goals</Label>
+                  <Label htmlFor="financialGoals">{i.financialGoals}</Label>
                   <Textarea
                     id="financialGoals"
-                    placeholder="e.g., Save for a house, pay off debt, invest for retirement."
+                    placeholder={i.financialGoalsPlaceholder}
                     rows={3}
                     {...field}
                   />
@@ -196,7 +201,7 @@ export function SavingsForm() {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold flex items-center gap-2">
               <Bot className="h-5 w-5" />
-              AI Recommendations
+              {i.aiRecommendations}
           </h3>
           {state.result && (
             <Button
@@ -208,12 +213,12 @@ export function SavingsForm() {
               {isExpanded ? (
                 <>
                   <Minimize2 className="h-4 w-4" />
-                  Collapse
+                  {i.collapse}
                 </>
               ) : (
                 <>
                   <Maximize2 className="h-4 w-4" />
-                  Expand
+                  {i.expand}
                 </>
               )}
             </Button>
@@ -222,7 +227,7 @@ export function SavingsForm() {
         {state.result ? (
             <Card className="bg-primary/5">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-primary"><ThumbsUp/> Here are your personalized tips!</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-primary"><ThumbsUp/> {i.personalizedTips}</CardTitle>
                 </CardHeader>
                 <CardContent className="prose prose-sm max-w-none text-foreground prose-headings:mb-4 prose-p:mb-3 prose-ul:mb-3 prose-ol:mb-3">
                   <div
@@ -233,10 +238,9 @@ export function SavingsForm() {
         ) : (
             <Alert>
               <Sparkles className="h-4 w-4" />
-              <AlertTitle>Waiting for input</AlertTitle>
+              <AlertTitle>{i.waitingForInput}</AlertTitle>
               <AlertDescription>
-                Your personalized savings opportunities will appear here once you
-                submit your financial details.
+                {i.waitingForInputDescription}
               </AlertDescription>
             </Alert>
         )}
