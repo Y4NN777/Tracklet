@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Bell, Check, Trash2 } from 'lucide-react';
 import {
@@ -13,8 +13,10 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNotifications } from '@/contexts/notification-context';
 import { formatDistanceToNow } from 'date-fns';
+import { useIntlayer } from 'next-intlayer';
 
 export function NotificationBell() {
+  const i = useIntlayer('notification-bell');
   const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification } = useNotifications();
   const [open, setOpen] = useState(false);
 
@@ -41,7 +43,7 @@ export function NotificationBell() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
           )}
-          <span className="sr-only">Notifications</span>
+          <span className="sr-only">{i.notifications}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
@@ -50,7 +52,7 @@ export function NotificationBell() {
         sideOffset={8}
       >
         <DropdownMenuLabel className="flex items-center justify-between">
-          <span>Notifications</span>
+          <span>{i.notifications}</span>
           {unreadCount > 0 && (
             <Button 
               variant="ghost" 
@@ -58,7 +60,7 @@ export function NotificationBell() {
               className="h-6 px-2 text-xs"
               onClick={handleMarkAllAsRead}
             >
-              Mark all as read
+              {i.markAllAsRead}
             </Button>
           )}
         </DropdownMenuLabel>
@@ -66,7 +68,7 @@ export function NotificationBell() {
         <ScrollArea className="h-80">
           {notifications.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              No notifications
+              {i.noNotifications}
             </div>
           ) : (
             <div className="space-y-1 p-1">
