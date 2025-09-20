@@ -4,7 +4,7 @@ import { t, type DeclarationContent } from "intlayer";
 const authLayoutContent: DeclarationContent = {
   key: "auth-layout",
   content: {
-    subtitle: t({ en: "Smart personal finance management powered by AI", fr: "Gestion intelligente des finances personnelles alimentée par l'IA" }),
+    subtitle: t({ en: "Manage your finances the smart way", fr: "Gerez vos finances de maniere intelligente" }),
   },
 };
 
