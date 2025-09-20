@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useIntlayer } from 'next-intlayer';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,22 +58,22 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const categorySchema = z.object({
+const getCategorySchema = (i: any) => z.object({
   name: z.string().min(2, {
-    message: "Category name must be at least 2 characters.",
+    message: i.nameMinLength,
   }),
   type: z.enum(['income', 'expense'], {
-    required_error: "Please select a category type.",
+    required_error: i.typeRequired,
   }),
   color: z.string().min(4, {
-    message: "Please select a color.",
+    message: i.colorRequired,
   }),
   icon: z.string().min(1, {
-    message: "Please select an icon.",
+    message: i.iconRequired,
   }),
 });
 
-type CategoryFormValues = z.infer<typeof categorySchema>
+type CategoryFormValues = z.infer<ReturnType<typeof getCategorySchema>>
 
 interface Category {
   id: string;
@@ -131,8 +132,11 @@ const predefinedColors = [
 ];
 
 export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose }: CategoryFormProps) {
+  const i = useIntlayer('category-form');
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  const categorySchema = getCategorySchema(i);
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -180,9 +184,9 @@ export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingCategory ? 'Edit Category' : 'Add Category'}</DialogTitle>
+          <DialogTitle>{editingCategory ? i.editCategory : i.addCategory}</DialogTitle>
           <DialogDescription>
-            {editingCategory ? 'Update your category details.' : 'Create a new category to organize your transactions.'}
+            {editingCategory ? i.updateCategoryDetails : i.createCategory}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -192,9 +196,9 @@ export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category Name</FormLabel>
+                  <FormLabel>{i.categoryName}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Food & Dining" {...field} />
+                    <Input placeholder={i.categoryNamePlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -206,18 +210,18 @@ export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type</FormLabel>
+                  <FormLabel>{i.type}</FormLabel>
                   <FormControl>
                     <select
                       {...field}
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <option value="expense">Expense</option>
-                      <option value="income">Income</option>
+                      <option value="expense">{i.expense}</option>
+                      <option value="income">{i.income}</option>
                     </select>
                   </FormControl>
                   <FormDescription>
-                    Choose whether this is an income or expense category.
+                    {i.typeDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -229,7 +233,7 @@ export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose
               name="icon"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Icon</FormLabel>
+                  <FormLabel>{i.icon}</FormLabel>
                   <FormControl>
                     <div className="grid grid-cols-10 gap-2 p-3 border rounded-md">
                       {predefinedIcons.map((iconName) => {
@@ -250,7 +254,7 @@ export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Choose an icon to represent this category.
+                    {i.iconDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -262,7 +266,7 @@ export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose
               name="color"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Color</FormLabel>
+                  <FormLabel>{i.color}</FormLabel>
                   <FormControl>
                     <div className="grid grid-cols-10 gap-2 p-3 border rounded-md">
                       {predefinedColors.map((color) => (
@@ -279,7 +283,7 @@ export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Choose a color for this category.
+                    {i.colorDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -288,10 +292,10 @@ export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleClose}>
-                Cancel
+                {i.cancel}
               </Button>
               <Button type="submit">
-                {editingCategory ? 'Update Category' : 'Add Category'}
+                {editingCategory ? i.updateCategory : i.addCategoryButton}
               </Button>
             </DialogFooter>
           </form>
