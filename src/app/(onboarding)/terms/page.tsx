@@ -19,8 +19,10 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { db, supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useIntlayer } from 'next-intlayer';
 
 function TermsAcceptanceContent() {
+  const i = useIntlayer('terms-page');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -78,8 +80,8 @@ function TermsAcceptanceContent() {
     // For authenticated users (OAuth flow), require all checkboxes
     if (isAuthenticated && (!acceptances.terms || !acceptances.privacy || !acceptances.dataProcessing)) {
       toast({
-        title: 'Please accept all terms',
-        description: 'You must accept all terms and conditions to continue.',
+        title: i.acceptAllToastTitle,
+        description: i.acceptAllToastDescription,
         variant: 'destructive',
       });
       return;
@@ -128,8 +130,8 @@ function TermsAcceptanceContent() {
 
       // Success - show toast and redirect
       toast({
-        title: 'Terms accepted!',
-        description: 'Welcome to FinTrack. Setting up your account...',
+        title: i.termsAcceptedToastTitle,
+        description: i.termsAcceptedToastDescription,
       });
 
       // Safe redirect with error handling
@@ -158,7 +160,7 @@ function TermsAcceptanceContent() {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
       toast({
-        title: 'Terms Acceptance Failed',
+        title: i.acceptanceFailedToastTitle,
         description: errorMessage,
         variant: 'destructive',
       });
@@ -177,7 +179,7 @@ function TermsAcceptanceContent() {
             <CardContent className="flex items-center justify-center h-64">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading...</p>
+                <p className="text-muted-foreground">{i.loading}</p>
               </div>
             </CardContent>
           </Card>
@@ -194,13 +196,13 @@ function TermsAcceptanceContent() {
             <div className="mx-auto bg-primary/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
               <Shield className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl">Terms and Conditions</CardTitle>
+            <CardTitle className="text-2xl">{i.title}</CardTitle>
             <CardDescription className="text-lg">
               {isAuthenticated === null
-                ? "Loading..."
+                ? i.loading
                 : isAuthenticated
-                  ? "Please review and accept our terms and conditions to continue"
-                  : "Please read our terms and conditions before creating your account"
+                  ? i.descriptionAuthenticated
+                  : i.descriptionUnauthenticated
               }
             </CardDescription>
           </CardHeader>
@@ -212,23 +214,23 @@ function TermsAcceptanceContent() {
                 <div className="flex items-start space-x-3">
                   <FileText className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">Terms of Service</h3>
+                    <h3 className="font-semibold text-lg mb-2">{i.termsOfServiceTitle}</h3>
                     <div className="text-sm text-muted-foreground space-y-3">
                       <p>
-                        <strong>1. Acceptance of Terms</strong><br />
-                        By accessing and using FinTrack, you accept and agree to be bound by the terms and provision of this agreement.
+                        <strong>{i.terms1Title}</strong><br />
+                        {i.terms1Content}
                       </p>
                       <p>
-                        <strong>2. Use License</strong><br />
-                        Permission is granted to temporarily use FinTrack for personal, non-commercial transitory viewing only.
+                        <strong>{i.terms2Title}</strong><br />
+                        {i.terms2Content}
                       </p>
                       <p>
-                        <strong>3. Disclaimer</strong><br />
-                        The materials on FinTrack are provided on an 'as is' basis. FinTrack makes no warranties, expressed or implied.
+                        <strong>{i.terms3Title}</strong><br />
+                        {i.terms3Content}
                       </p>
                       <p>
-                        <strong>4. Limitations</strong><br />
-                        In no event shall FinTrack be liable for any damages arising out of the use of our services.
+                        <strong>{i.terms4Title}</strong><br />
+                        {i.terms4Content}
                       </p>
                     </div>
                   </div>
@@ -240,23 +242,23 @@ function TermsAcceptanceContent() {
                 <div className="flex items-start space-x-3">
                   <Lock className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">Privacy Policy</h3>
+                    <h3 className="font-semibold text-lg mb-2">{i.privacyPolicyTitle}</h3>
                     <div className="text-sm text-muted-foreground space-y-3">
                       <p>
-                        <strong>1. Information We Collect</strong><br />
-                        We collect information you provide directly, such as when you create an account or use our services.
+                        <strong>{i.privacy1Title}</strong><br />
+                        {i.privacy1Content}
                       </p>
                       <p>
-                        <strong>2. How We Use Information</strong><br />
-                        We use the information to provide, maintain, and improve our services, and to communicate with you.
+                        <strong>{i.privacy2Title}</strong><br />
+                        {i.privacy2Content}
                       </p>
                       <p>
-                        <strong>3. Information Sharing</strong><br />
-                        We do not sell, trade, or otherwise transfer your personal information to third parties without your consent.
+                        <strong>{i.privacy3Title}</strong><br />
+                        {i.privacy3Content}
                       </p>
                       <p>
-                        <strong>4. Data Security</strong><br />
-                        We implement appropriate security measures to protect your personal information against unauthorized access.
+                        <strong>{i.privacy4Title}</strong><br />
+                        {i.privacy4Content}
                       </p>
                     </div>
                   </div>
@@ -268,23 +270,23 @@ function TermsAcceptanceContent() {
                 <div className="flex items-start space-x-3">
                   <Database className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">Data Processing Agreement</h3>
+                    <h3 className="font-semibold text-lg mb-2">{i.dataProcessingTitle}</h3>
                     <div className="text-sm text-muted-foreground space-y-3">
                       <p>
-                        <strong>1. Data Controller</strong><br />
-                        FinTrack acts as the data controller for personal data processed through our services.
+                        <strong>{i.data1Title}</strong><br />
+                        {i.data1Content}
                       </p>
                       <p>
-                        <strong>2. Legal Basis</strong><br />
-                        We process your data based on your consent and legitimate business interests.
+                        <strong>{i.data2Title}</strong><br />
+                        {i.data2Content}
                       </p>
                       <p>
-                        <strong>3. Data Retention</strong><br />
-                        We retain your data for as long as necessary to provide our services and comply with legal obligations.
+                        <strong>{i.data3Title}</strong><br />
+                        {i.data3Content}
                       </p>
                       <p>
-                        <strong>4. Your Rights</strong><br />
-                        You have the right to access, rectify, erase, and port your personal data.
+                        <strong>{i.data4Title}</strong><br />
+                        {i.data4Content}
                       </p>
                     </div>
                   </div>
@@ -304,10 +306,10 @@ function TermsAcceptanceContent() {
                   />
                   <div className="flex-1">
                     <label htmlFor="terms" className="text-sm font-medium cursor-pointer">
-                      I accept the Terms of Service
+                      {i.acceptTermsLabel}
                     </label>
                     <p className="text-xs text-muted-foreground mt-1">
-                      I agree to abide by FinTrack's terms and conditions of use.
+                      {i.acceptTermsDescription}
                     </p>
                   </div>
                 </div>
@@ -321,10 +323,10 @@ function TermsAcceptanceContent() {
                   />
                   <div className="flex-1">
                     <label htmlFor="privacy" className="text-sm font-medium cursor-pointer">
-                      I accept the Privacy Policy
+                      {i.acceptPrivacyLabel}
                     </label>
                     <p className="text-xs text-muted-foreground mt-1">
-                      I consent to the collection and processing of my personal data as described.
+                      {i.acceptPrivacyDescription}
                     </p>
                   </div>
                 </div>
@@ -338,10 +340,10 @@ function TermsAcceptanceContent() {
                   />
                   <div className="flex-1">
                     <label htmlFor="dataProcessing" className="text-sm font-medium cursor-pointer">
-                      I accept the Data Processing Agreement
+                      {i.acceptDataLabel}
                     </label>
                     <p className="text-xs text-muted-foreground mt-1">
-                      I understand how my financial data will be processed and stored.
+                      {i.acceptDataDescription}
                     </p>
                   </div>
                 </div>
@@ -353,7 +355,7 @@ function TermsAcceptanceContent() {
               <div className="space-y-4">
                 <div className="p-4 bg-muted/50 rounded-lg">
                   <p className="text-sm text-muted-foreground">
-                    By proceeding with account creation, you acknowledge that you have read and understood our terms and conditions.
+                    {i.unauthenticatedInfo}
                   </p>
                 </div>
               </div>
@@ -363,7 +365,7 @@ function TermsAcceptanceContent() {
             {isAuthenticated === null ? (
               // Loading state
               <div className="flex justify-center pt-6 border-t">
-                <div className="text-sm text-muted-foreground">Loading...</div>
+                <div className="text-sm text-muted-foreground">{i.loading}</div>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
@@ -374,7 +376,7 @@ function TermsAcceptanceContent() {
                   disabled={loading}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  {isAuthenticated ? 'Decline & Return to Login' : 'Back to Signup'}
+                  {isAuthenticated ? i.declineButton : i.backToSignupButton}
                 </Button>
                 <Button
                   onClick={handleAcceptAll}
@@ -382,8 +384,8 @@ function TermsAcceptanceContent() {
                   disabled={loading || (isAuthenticated && (!acceptances.terms || !acceptances.privacy || !acceptances.dataProcessing))}
                 >
                   {loading
-                    ? (isAuthenticated ? 'Accepting...' : 'Redirecting...')
-                    : (isAuthenticated ? 'Accept All & Continue' : 'I Have Read the Terms')
+                    ? (isAuthenticated ? i.acceptingButton : i.redirectingButton)
+                    : (isAuthenticated ? i.acceptAllButton : i.readTermsButton)
                   }
                   {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
@@ -391,7 +393,7 @@ function TermsAcceptanceContent() {
             )}
 
             <p className="text-xs text-muted-foreground text-center">
-              By continuing, you acknowledge that you have read and understood our terms and conditions.
+              {i.unauthenticatedInfo}
             </p>
           </CardContent>
         </Card>
@@ -409,7 +411,7 @@ export default function TermsAcceptancePage() {
            <CardContent className="flex items-center justify-center h-64">
              <div className="text-center">
                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-               <p className="text-muted-foreground">Loading...</p>
+               <p className="text-muted-foreground">{i.loading}</p>
              </div>
            </CardContent>
          </Card>
