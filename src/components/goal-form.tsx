@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useIntlayer } from 'next-intlayer';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Form,
   FormControl,
@@ -23,23 +23,22 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/contexts/preferences-context';
 
-const goalSchema = z.object({
+const getGoalSchema = (i: any) => z.object({
   name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: i.nameMinLength,
   }),
   targetAmount: z.coerce.number()
-    .gt(0, { message: "Target amount must be greater than 0." }),
+    .gt(0, { message: i.targetAmountGreaterThanZero }),
   currentAmount: z.coerce.number()
-    .min(0, { message: "Current amount must be 0 or greater." }),
+    .min(0, { message: i.currentAmountMin }),
 });
 
-type GoalFormValues = z.infer<typeof goalSchema>
+type GoalFormValues = z.infer<ReturnType<typeof getGoalSchema>>
 
 interface GoalFormProps {
   open: boolean;
@@ -48,8 +47,11 @@ interface GoalFormProps {
 }
 
 export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
+  const i = useIntlayer('goal-form');
   const { toast } = useToast();
   const { currency } = useCurrency();
+  const goalSchema = getGoalSchema(i);
+
   const form = useForm<GoalFormValues>({
     resolver: zodResolver(goalSchema),
     defaultValues: {
@@ -67,8 +69,8 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
   function onSubmitHandler(values: GoalFormValues) {
     onSubmit(values);
     toast({
-      title: "Goal added.",
-      description: "Your goal has been added successfully.",
+      title: i.goalAdded,
+      description: i.goalAddedSuccess,
     })
     handleClose();
   }
@@ -77,9 +79,9 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Goal</DialogTitle>
+          <DialogTitle>{i.addGoal}</DialogTitle>
           <DialogDescription>
-            Add a new financial goal to track your progress.
+            {i.addGoalDescription}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -89,9 +91,9 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{i.name}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Name" {...field} />
+                    <Input placeholder={i.name} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -102,9 +104,9 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
               name="targetAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Target Amount</FormLabel>
+                  <FormLabel>{i.targetAmount}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Target Amount" type="number" {...field} />
+                    <Input placeholder={i.targetAmount} type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -115,9 +117,9 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
               name="currentAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Current Amount</FormLabel>
+                  <FormLabel>{i.currentAmount}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Current Amount" type="number" {...field} />
+                    <Input placeholder={i.currentAmount} type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,17 +127,17 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
             />
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Currency
+                {i.currency}
               </label>
               <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
                 {currency}
               </div>
               <p className="text-xs text-muted-foreground">
-                Currency is set based on your preferences and cannot be changed here.
+                {i.currencyDescription}
               </p>
             </div>
             <DialogFooter>
-              <Button type="submit">Add Goal</Button>
+              <Button type="submit">{i.addGoalButton}</Button>
             </DialogFooter>
           </form>
         </Form>
