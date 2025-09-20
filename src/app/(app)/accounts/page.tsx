@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useIntlayer } from 'next-intlayer';
 
 interface Account {
   id: string;
@@ -54,6 +55,7 @@ const accountTypeColors = {
 };
 
 export default function AccountsPage() {
+  const i = useIntlayer('accounts-page');
   const [open, setOpen] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
@@ -201,8 +203,8 @@ export default function AccountsPage() {
       if (response.data) {
         setAccounts(prev => [response.data.account, ...prev]);
         toast({
-          title: 'Account added!',
-          description: 'Your account has been created successfully.',
+          title: i.accountAddedToastTitle,
+          description: i.accountAddedToastDescription,
         });
       } else if (response.error) {
         throw new Error(response.error);
@@ -210,8 +212,8 @@ export default function AccountsPage() {
     } catch (error) {
 //      console.error('Error creating account:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to add account. Please try again.',
+        title: i.errorToastTitle,
+        description: i.addAccountFailed,
         variant: 'destructive',
       });
       // Re-throw the error so the form can handle it
@@ -234,22 +236,22 @@ export default function AccountsPage() {
         setAccounts(prev => prev.map(acc => acc.id === editingAccount.id ? response.data.account : acc));
         setEditingAccount(null);
         toast({
-          title: 'Account updated!',
-          description: 'Your account has been updated successfully.',
+          title: i.accountUpdatedToastTitle,
+          description: i.accountUpdatedToastDescription,
         });
       } else if (response.error) {
 //        console.error('Failed to update account:', response.error);
         toast({
-          title: 'Error',
-          description: 'Failed to update account. Please try again.',
+          title: i.errorToastTitle,
+          description: i.updateAccountFailed,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error updating account:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update account. Please try again.',
+        title: i.errorToastTitle,
+        description: i.updateAccountFailed,
         variant: 'destructive',
       });
     }
@@ -263,22 +265,22 @@ export default function AccountsPage() {
         // DELETE returns 204 No Content, so no data but success
         setAccounts(prev => prev.filter(acc => acc.id !== accountId));
         toast({
-          title: 'Account deleted!',
-          description: 'Your account has been deleted successfully.',
+          title: i.accountDeletedToastTitle,
+          description: i.accountDeletedToastDescription,
         });
       } else if (response.error) {
 //        console.error('Failed to delete account:', response.error);
         toast({
-          title: 'Error',
-          description: 'Failed to delete account. Please try again.',
+          title: i.errorToastTitle,
+          description: i.deleteAccountFailed,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error deleting account:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete account. Please try again.',
+        title: i.errorToastTitle,
+        description: i.deleteAccountFailed,
         variant: 'destructive',
       });
     }
@@ -304,8 +306,8 @@ export default function AccountsPage() {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Accounts</CardTitle>
-            <CardDescription>Loading your accounts...</CardDescription>
+            <CardTitle>{i.title}</CardTitle>
+            <CardDescription>{i.loadingDescription}</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -319,25 +321,25 @@ export default function AccountsPage() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <CardTitle>Accounts</CardTitle>
-                <CardDescription>Manage your financial accounts and track your net worth.</CardDescription>
+                <CardTitle>{i.title}</CardTitle>
+                <CardDescription>{i.description}</CardDescription>
               </div>
               <Button onClick={() => setOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Add Account
+                {i.addAccountButton}
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center justify-center h-[400px] space-y-4">
               <Wallet className="h-12 w-12 text-muted-foreground" />
-              <h3 className="text-xl font-semibold">No accounts yet</h3>
+              <h3 className="text-xl font-semibold">{i.emptyTitle}</h3>
               <p className="text-muted-foreground text-center max-w-md">
-                Start tracking your finances by adding your bank accounts, credit cards, and investment accounts.
+                {i.emptyDescription}
               </p>
               <Button onClick={() => setOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Add Your First Account
+                {i.addFirstAccountButton}
               </Button>
             </div>
           </CardContent>
@@ -361,13 +363,13 @@ export default function AccountsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              Net Worth
+              {i.netWorthTitle}
             </CardTitle>
-            <CardDescription>Your total financial position</CardDescription>
+            <CardDescription>{i.netWorthDescription}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {netWorth.toLocaleString('en-US', {
+              {netWorth.toLocaleString(i.locale, {
                 style: 'currency',
                 currency: userCurrency
               })}
@@ -385,19 +387,19 @@ export default function AccountsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <IconComponent className={`h-5 w-5 ${accountTypeColors[type as keyof typeof accountTypeColors]}`} />
-                  <h2 className="text-xl font-semibold capitalize">{type} Accounts</h2>
+                  <h2 className="text-xl font-semibold capitalize">{typeof i.accountsTitle === 'function' ? i.accountsTitle({ type }) : `${type} Accounts`}</h2>
                   <span className="text-sm text-muted-foreground">
-                    ({typeAccounts.length} account{typeAccounts.length !== 1 ? 's' : ''})
+                    {typeof i.accountCount === 'function' ? i.accountCount({ count: typeAccounts.length }) : `(${typeAccounts.length} account${typeAccounts.length !== 1 ? 's' : ''})`}
                   </span>
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-semibold">
-                    {typeTotal.toLocaleString('en-US', {
+                    {typeTotal.toLocaleString(i.locale, {
                       style: 'currency',
                       currency: userCurrency
                     })}
                   </div>
-                  <div className="text-sm text-muted-foreground">Total {type}</div>
+                  <div className="text-sm text-muted-foreground">{typeof i.total === 'function' ? i.total({ type }) : `Total ${type}`}</div>
                 </div>
               </div>
 
@@ -438,25 +440,25 @@ export default function AccountsPage() {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Account</AlertDialogTitle>
+                                <AlertDialogTitle>{i.deleteDialogTitle}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete "{account.name}"? This action cannot be undone and will affect all associated transactions.
+                                  {typeof i.deleteDialogDescription === 'function' ? i.deleteDialogDescription({ name: account.name }) : `Are you sure you want to delete "${account.name}"? This action cannot be undone and will affect all associated transactions.`}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{i.cancelButton}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDeleteAccount(account.id)}
                                   className="bg-destructive hover:bg-destructive/90"
                                 >
-                                  Delete
+                                  {i.deleteButton}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
                           <div className="text-right ml-4">
                             <div className={`text-lg font-semibold ${(account.calculatedBalance ?? account.balance) < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                              {(account.calculatedBalance ?? account.balance).toLocaleString('en-US', {
+                              {(account.calculatedBalance ?? account.balance).toLocaleString(i.locale, {
                                 style: 'currency',
                                 currency: account.currency
                               })}
@@ -483,7 +485,7 @@ export default function AccountsPage() {
         <div className="flex justify-center">
           <Button onClick={() => setOpen(true)} size="lg">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Account
+            {i.addAccountButton}
           </Button>
         </div>
       </div>
