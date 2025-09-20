@@ -14,27 +14,29 @@ import {
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useIntlayer } from 'next-intlayer';
 import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/accounts', label: 'Accounts', icon: Wallet },
-  { href: '/transactions', label: 'Transactions', icon: ReceiptText },
-  { href: '/settings/categories', label: 'Categories', icon: Tag },
-  { href: '/budgets', label: 'Budgets & Goals', icon: Target },
-  { href: '/savings', label: 'Savings AI', icon: Sparkles },
-  { href: '/insights', label: 'Financial Insights', icon: Lightbulb },
-  { href: '/learning', label: 'Learning Center', icon: GraduationCap },
-  { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '/settings/profile', label: 'Profile', icon: User },
-];
-
 export function MainNav() {
+  const i = useIntlayer('main-nav');
   const pathname = usePathname();
+
+  const navItems = [
+    { href: '/dashboard', label: i.dashboard, icon: LayoutDashboard },
+    { href: '/accounts', label: i.accounts, icon: Wallet },
+    { href: '/transactions', label: i.transactions, icon: ReceiptText },
+    { href: '/settings/categories', label: i.categories, icon: Tag },
+    { href: '/budgets', label: i.budgetsAndGoals, icon: Target },
+    { href: '/savings', label: i.savingsAI, icon: Sparkles },
+    { href: '/insights', label: i.financialInsights, icon: Lightbulb },
+    { href: '/learning', label: i.learningCenter, icon: GraduationCap },
+    { href: '/settings', label: i.settings, icon: Settings },
+    { href: '/settings/profile', label: i.profile, icon: User },
+  ];
 
   return (
     <SidebarMenu>
