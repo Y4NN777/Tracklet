@@ -47,7 +47,7 @@ export function DeveloperStory() {
                     viewport={{ once: true }}
                   >
                     <Quote className="w-6 h-6 text-primary" />
-                    <h3 className="text-2xl font-bold">Built by a Developer, For others developers and everyone struggling with finances management</h3>
+                    <h3 className="text-2xl font-bold">Built by a developer carrying about his community problem, for other devs, friends, youth and everyone struggling with finances management</h3>
                   </motion.div>
 
                   <motion.p

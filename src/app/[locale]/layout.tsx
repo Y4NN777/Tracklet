@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import './globals.css';
+import '@/app/globals.css';
 import Script from 'next/script';
 import { Toaster } from "@/components/ui/toaster"
 import { cn } from '@/lib/utils';
@@ -8,19 +8,24 @@ import ErrorBoundary from '@/components/error-boundary';
 import { NotificationProvider } from '@/contexts/notification-context';
 import { PreferencesProvider } from '@/contexts/preferences-context';
 import { PreferencesThemeBridge } from '@/components/preferences-theme-bridge';
+import { IntlayerClientProvider } from 'next-intlayer';
 
 export const metadata: Metadata = {
   title: 'FinTrack',
   description: 'Smart personal finance management',
 };
 
-export default function RootLayout({
+export default async function RootLayout({ // <--- Added async
   children,
+  params // <--- params is now the Promise
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ locale: string }>; // <--- params is now a Promise
 }>) {
+  const { locale } = await params; // <--- Await params
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -32,7 +37,9 @@ export default function RootLayout({
             <PreferencesThemeBridge />
             <NotificationProvider>
               <ErrorBoundary>
-                {children}
+                <IntlayerClientProvider locale={locale}>
+                  {children}
+                </IntlayerClientProvider>
               </ErrorBoundary>
             </NotificationProvider>
             <Toaster />

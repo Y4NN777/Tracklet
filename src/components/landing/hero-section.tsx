@@ -1,11 +1,15 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { ArrowRight, Sparkles } from 'lucide-react'
-import Link from 'next/link'
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { useIntlayer } from 'next-intlayer';
 
 export function HeroSection() {
+  const { title, subtitle, getStarted, signIn, trustIndicator } = useIntlayer("hero-section");
+
   return (
     <section className="container mx-auto px-4 py-20 md:py-32">
       <div className="text-center max-w-4xl mx-auto">
@@ -16,9 +20,12 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          AI-Powered Personal
-          <br />
-          Finance Management
+          {title.map((line: string, index: number) => (
+            <React.Fragment key={index}>
+              {line}
+              {index < title.length - 1 && <br />}
+            </React.Fragment>
+          ))}
         </motion.h1>
 
         {/* Animated subtitle */}
@@ -28,8 +35,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          Take control of your finances with intelligent insights and smart recommendations.
-          Free, open source software built by developers for everyone.
+          {subtitle}
         </motion.p>
 
         {/* Animated CTA buttons */}
@@ -41,14 +47,14 @@ export function HeroSection() {
         >
           <Button asChild size="lg" className="text-lg px-8 py-6">
             <Link href="/signup">
-              Get Started Free
+              {getStarted}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
 
           <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6">
             <Link href="/login">
-              Sign In
+              {signIn}
               <Sparkles className="ml-2 h-5 w-5" />
             </Link>
           </Button>
@@ -61,7 +67,7 @@ export function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.6 }}
         >
-          Join thousands of users managing their finances smarter
+          {trustIndicator}
         </motion.p>
       </div>
     </section>

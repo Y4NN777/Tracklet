@@ -7,14 +7,17 @@ import { TrustIndicators } from '@/components/landing/trust-indicators'
 import { FAQSection } from '@/components/landing/faq-section'
 import { Footer } from '@/components/landing/footer'
 import { LandingThemeSwitcher } from '@/components/landing/landing-theme-switcher'
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { LandingThemeProvider } from '@/contexts/landing-theme-context'
 
 export default function LandingPage() {
   return (
     <LandingThemeProvider>
       <div className="min-h-screen bg-background">
-        {/* Landing Page Theme Switcher */}
-        <LandingThemeSwitcher />
+        <div className="absolute top-20 right-4 z-50 flex flex-col gap-2">
+          <LandingThemeSwitcher />
+          <LanguageSwitcher />
+        </div>
 
         {/* Tech Credibility Infinite Scroll */}
         <TechScroll />

@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { intlayerMiddleware } from "next-intlayer/middleware";
 
 export async function middleware(req: NextRequest) {
+  const intlayerResponse = intlayerMiddleware(req);
+  if (intlayerResponse) {
+    return intlayerResponse;
+  }
+
   const { pathname } = req.nextUrl
 
   // Public routes that don't require authentication
