@@ -17,8 +17,10 @@ import {
 import { CreditCard, LogOut, Settings, User } from 'lucide-react';
 import { auth, supabase, db } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useIntlayer } from 'next-intlayer';
 
 export function UserNav() {
+  const i = useIntlayer('user-nav');
   const router = useRouter();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
@@ -68,8 +70,8 @@ export function UserNav() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const displayName = user?.user_metadata?.full_name || profile?.full_name || user?.email?.split('@')[0] || 'User';
-  const displayEmail = user?.email || 'user@example.com';
+  const displayName = user?.user_metadata?.full_name || profile?.full_name || user?.email?.split('@')[0] || i.userFallback;
+  const displayEmail = user?.email || i.userEmailFallback;
   // Use profile avatar_url first, then fall back to user metadata
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
   const initials = displayName.charAt(0).toUpperCase();
@@ -81,22 +83,22 @@ export function UserNav() {
       if (error) {
 //        console.error('Logout error:', error);
         toast({
-          title: 'Error',
-          description: 'Failed to log out. Please try again.',
+          title: i.errorTitle,
+          description: i.logoutError,
           variant: 'destructive',
         });
         return;
       }
 
       toast({
-        title: 'Logged out',
-        description: 'You have been successfully logged out.',
+        title: i.loggedOutTitle,
+        description: i.loggedOutDescription,
       });
     } catch (error) {
 //      console.error('Unexpected logout error:', error);
       toast({
-        title: 'Error',
-        description: 'An unexpected error occurred during logout.',
+        title: i.errorTitle,
+        description: i.unexpectedLogoutError,
         variant: 'destructive',
       });
     }
@@ -106,7 +108,7 @@ export function UserNav() {
     return (
       <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
         <Avatar className="h-8 w-8">
-          <AvatarFallback>...</AvatarFallback>
+          <AvatarFallback>{i.loading}</AvatarFallback>
         </Avatar>
       </Button>
     );
@@ -137,19 +139,19 @@ export function UserNav() {
             <Link href="/settings/profile">
               <Button variant="ghost" className="w-full justify-start">
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>{i.profile}</span>
               </Button>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCard className="mr-2 h-4 w-4" />
-            <span>Billing</span>
+            <span>{i.billing}</span>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/settings">
               <Button variant="ghost" className="w-full justify-start">
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>{i.settings}</span>
               </Button>
             </Link>
           </DropdownMenuItem>
@@ -157,7 +159,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{i.logout}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
