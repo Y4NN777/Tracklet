@@ -13,8 +13,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Mail, Lock, User, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { auth, db } from '@/lib/supabase';
+import { useIntlayer } from 'next-intlayer';
 
 export default function SignupPage() {
+  const i = useIntlayer('signup-page');
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -30,15 +32,15 @@ export default function SignupPage() {
 
   const validateForm = () => {
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(i.passwordsDoNotMatch);
       return false;
     }
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
+      setError(i.passwordTooShort);
       return false;
     }
     if (!formData.agreeToTerms) {
-      setError('You must agree to the terms and conditions');
+      setError(i.mustAgreeToTerms);
       return false;
     }
     return true;
@@ -63,14 +65,14 @@ export default function SignupPage() {
       });
 
       if (error) {
-        setError(error.message || 'An unexpected error occurred');
+        setError(error.message || i.unexpectedError);
         return;
       }
 
       if (data?.user) {
         toast({
-          title: 'Account created!',
-          description: 'Welcome! Let\'s set up your profile.',
+          title: i.accountCreatedToastTitle,
+          description: i.accountCreatedToastDescription,
         });
 
         // Add delay to let toast be visible before navigation
@@ -78,7 +80,7 @@ export default function SignupPage() {
         router.push('/onboarding');
       }
     } catch (err) {
-      setError('Failed to create account. Please try again.');
+      setError(i.accountCreationFailed);
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +99,7 @@ export default function SignupPage() {
       // The OAuth flow will redirect to Google, then back to /auth/callback
       // The callback page will handle creating the user profile and redirecting
     } catch (err) {
-      setError('Failed to sign up with Google. Please try again.');
+      setError(i.googleSignupFailed);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -106,9 +108,9 @@ export default function SignupPage() {
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+        <CardTitle className="text-2xl font-bold">{i.title}</CardTitle>
         <CardDescription>
-          Enter your information to get started with FinTrack
+          {i.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -121,13 +123,13 @@ export default function SignupPage() {
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="name">{i.fullNameLabel}</Label>
             <div className="relative">
               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="name"
                 type="text"
-                placeholder="John Doe"
+                placeholder={i.fullNamePlaceholder}
                 className="pl-10"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -138,13 +140,13 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{i.emailLabel}</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={i.emailPlaceholder}
                 className="pl-10"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -155,13 +157,13 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{i.passwordLabel}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={i.passwordPlaceholder}
                 className="pl-10"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -170,18 +172,18 @@ export default function SignupPage() {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Must be at least 8 characters long
+              {i.passwordHint}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">{i.confirmPasswordLabel}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="••••••••"
+                placeholder={i.passwordPlaceholder}
                 className="pl-10"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
@@ -204,12 +206,12 @@ export default function SignupPage() {
               htmlFor="terms"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              I agree to the{' '}
+              {i.agreeTo}{' '}
               <Link
                 href={`/terms?return_to=${encodeURIComponent('/signup')}`}
                 className="text-primary hover:underline"
               >
-                terms and conditions
+                {i.termsAndConditions}
               </Link>
             </label>
           </div>
@@ -222,10 +224,10 @@ export default function SignupPage() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
+                {i.creatingAccountButton}
               </>
             ) : (
-              'Create account'
+              i.createAccountButton
             )}
           </Button>
         </form>
@@ -235,7 +237,7 @@ export default function SignupPage() {
             <Separator />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+            <span className="bg-card px-2 text-muted-foreground">{i.orContinueWith}</span>
           </div>
         </div>
 
@@ -248,7 +250,7 @@ export default function SignupPage() {
           {isGoogleLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Connecting to Google...
+              {i.connectingGoogleButton}
             </>
           ) : (
             <>
@@ -270,16 +272,16 @@ export default function SignupPage() {
                   fill="#EA4335"
                 ></path>
               </svg>
-              Continue with Google
+              {i.googleButton}
             </>
           )}
         </Button>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         <div className="text-sm text-muted-foreground text-center">
-          Already have an account?{' '}
+          {i.alreadyHaveAccount}{' '}
           <Link href="/login" className="text-primary hover:underline font-medium">
-            Sign in
+            {i.signInLink}
           </Link>
         </div>
       </CardFooter>
