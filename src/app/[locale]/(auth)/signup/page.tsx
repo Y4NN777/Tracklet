@@ -32,15 +32,15 @@ export default function SignupPage() {
 
   const validateForm = () => {
     if (formData.password !== formData.confirmPassword) {
-      setError(i.passwordsDoNotMatch);
+      setError(i.passwordsDoNotMatch.key);
       return false;
     }
     if (formData.password.length < 8) {
-      setError(i.passwordTooShort);
+      setError(i.passwordTooShort.key);
       return false;
     }
     if (!formData.agreeToTerms) {
-      setError(i.mustAgreeToTerms);
+      setError(i.mustAgreeToTerms.key);
       return false;
     }
     return true;
@@ -65,14 +65,14 @@ export default function SignupPage() {
       });
 
       if (error) {
-        setError(error.message || i.unexpectedError);
+        setError(error.message || i.unexpectedError.key);
         return;
       }
 
       if (data?.user) {
         toast({
-          title: i.accountCreatedToastTitle,
-          description: i.accountCreatedToastDescription,
+          title: i.accountCreatedToastTitle.key,
+          description: i.accountCreatedToastDescription.key,
         });
 
         // Add delay to let toast be visible before navigation
@@ -80,7 +80,7 @@ export default function SignupPage() {
         router.push('/onboarding');
       }
     } catch (err) {
-      setError(i.accountCreationFailed);
+      setError(i.accountCreationFailed.key);
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +99,7 @@ export default function SignupPage() {
       // The OAuth flow will redirect to Google, then back to /auth/callback
       // The callback page will handle creating the user profile and redirecting
     } catch (err) {
-      setError(i.googleSignupFailed);
+      setError(i.googleSignupFailed.key);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -129,7 +129,7 @@ export default function SignupPage() {
               <Input
                 id="name"
                 type="text"
-                placeholder={i.fullNamePlaceholder}
+                placeholder={i.fullNamePlaceholder.key}
                 className="pl-10"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -146,7 +146,7 @@ export default function SignupPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder={i.emailPlaceholder}
+                placeholder={i.emailPlaceholder.key}
                 className="pl-10"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -163,7 +163,7 @@ export default function SignupPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder={i.passwordPlaceholder}
+                placeholder={i.passwordPlaceholder.key}
                 className="pl-10"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -183,7 +183,7 @@ export default function SignupPage() {
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder={i.passwordPlaceholder}
+                placeholder={i.passwordPlaceholder.key}
                 className="pl-10"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}

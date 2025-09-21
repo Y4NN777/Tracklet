@@ -69,8 +69,8 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
   function onSubmitHandler(values: GoalFormValues) {
     onSubmit(values);
     toast({
-      title: i.goalAdded,
-      description: i.goalAddedSuccess,
+      title: i.goalAdded.key,
+      description: i.goalAddedSuccess.key,
     })
     handleClose();
   }
@@ -93,7 +93,7 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
                 <FormItem>
                   <FormLabel>{i.name}</FormLabel>
                   <FormControl>
-                    <Input placeholder={i.name} {...field} />
+                    <Input placeholder={i.namePlaceholder.key} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,7 +106,7 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
                 <FormItem>
                   <FormLabel>{i.targetAmount}</FormLabel>
                   <FormControl>
-                    <Input placeholder={i.targetAmount} type="number" {...field} />
+                    <Input placeholder={i.targetAmountPlaceholder.key} type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -119,7 +119,7 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
                 <FormItem>
                   <FormLabel>{i.currentAmount}</FormLabel>
                   <FormControl>
-                    <Input placeholder={i.currentAmount} type="number" {...field} />
+                    <Input placeholder={i.currentAmountPlaceholder.key} type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

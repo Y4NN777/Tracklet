@@ -33,11 +33,11 @@ export default function ForgotPasswordPage() {
       
       setIsSuccess(true);
       toast({
-        title: i.emailSentToastTitle,
-        description: i.emailSentToastDescription,
+        title: i.emailSentToastTitle.key,
+        description: i.emailSentToastDescription.key,
       });
     } catch (err) {
-      setError(i.sendFailedError);
+      setError(i.sendFailedError.key);
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +114,7 @@ export default function ForgotPasswordPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder={i.emailPlaceholder}
+                placeholder={i.emailPlaceholder.key}
                 className="pl-10"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

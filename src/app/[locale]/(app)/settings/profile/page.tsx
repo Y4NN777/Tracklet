@@ -139,14 +139,14 @@ export default function ProfilePage() {
       }
 
       toast({
-        title: i.profileUpdatedToastTitle,
-        description: i.profileUpdatedToastDescription,
+        title: i.profileUpdatedToastTitle.key,
+        description: i.profileUpdatedToastDescription.key,
       });
     } catch (err) {
 //      console.error('Profile update error:', err);
       toast({
-        title: i.errorToastTitle,
-        description: err instanceof Error ? err.message : i.profileUpdateFailed,
+        title: i.errorToastTitle.key,
+        description: err instanceof Error ? err.message : i.profileUpdateFailed.key,
         variant: 'destructive',
       });
     } finally {
@@ -161,8 +161,8 @@ export default function ProfilePage() {
     // Validate passwords
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
-        title: i.errorToastTitle,
-        description: i.passwordMismatch,
+        title: i.errorToastTitle.key,
+        description: i.passwordMismatch.key,
         variant: 'destructive',
       });
       setIsPasswordLoading(false);
@@ -171,8 +171,8 @@ export default function ProfilePage() {
 
     if (passwordData.newPassword.length < 8) {
       toast({
-        title: i.errorToastTitle,
-        description: i.passwordTooShort,
+        title: i.errorToastTitle.key,
+        description: i.passwordTooShort.key,
         variant: 'destructive',
       });
       setIsPasswordLoading(false);
@@ -182,8 +182,8 @@ export default function ProfilePage() {
     // Check if user is OAuth (no password to change)
     if (user?.app_metadata?.provider !== 'email') {
       toast({
-        title: i.oauthPasswordChangeTitle,
-        description: i.oauthPasswordChangeDescription,
+        title: i.oauthPasswordChangeTitle.key,
+        description: i.oauthPasswordChangeDescription.key,
         variant: 'default',
       });
       setIsPasswordLoading(false);
@@ -197,16 +197,16 @@ export default function ProfilePage() {
       if (error) {
 //        console.error('Password update error:', error);
         toast({
-          title: i.errorToastTitle,
-          description: i.passwordUpdateFailed,
+          title: i.errorToastTitle.key,
+          description: i.passwordUpdateFailed.key,
           variant: 'destructive',
         });
         return;
       }
 
       toast({
-        title: i.passwordUpdatedToastTitle,
-        description: i.passwordUpdatedToastDescription,
+        title: i.passwordUpdatedToastTitle.key,
+        description: i.passwordUpdatedToastDescription.key,
       });
 
       // Reset password fields
@@ -218,8 +218,8 @@ export default function ProfilePage() {
     } catch (err) {
 //      console.error('Unexpected password update error:', err);
       toast({
-        title: i.errorToastTitle,
-        description: i.unexpectedError,
+        title: i.errorToastTitle.key,
+        description: i.unexpectedError.key,
         variant: 'destructive',
       });
     } finally {
@@ -231,8 +231,8 @@ export default function ProfilePage() {
     // Account deletion is currently disabled
     // This will be implemented in a future update
     toast({
-      title: i.deleteFeatureComingSoon,
-      description: i.deleteFeatureDescription,
+      title: i.deleteFeatureComingSoon.key,
+      description: i.deleteFeatureDescription.key,
     });
   };
 
@@ -462,7 +462,7 @@ export default function ProfilePage() {
               <Input
                 id="current-password"
                 type="password"
-                placeholder={i.passwordPlaceholder}
+                placeholder={i.passwordPlaceholder.key}
                 value={passwordData.currentPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                 disabled={isPasswordLoading}
@@ -473,7 +473,7 @@ export default function ProfilePage() {
               <Input
                 id="new-password"
                 type="password"
-                placeholder={i.passwordPlaceholder}
+                placeholder={i.passwordPlaceholder.key}
                 value={passwordData.newPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                 disabled={isPasswordLoading}
@@ -484,7 +484,7 @@ export default function ProfilePage() {
               <Input
                 id="confirm-password"
                 type="password"
-                placeholder={i.passwordPlaceholder}
+                placeholder={i.passwordPlaceholder.key}
                 value={passwordData.confirmPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                 disabled={isPasswordLoading}

@@ -46,7 +46,8 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user }, error } = await auth.getSession();
+      const { session, error } = await auth.getSession();
+      const user = session?.user;
       if (error || !user) {
         router.push('/login');
         return;
@@ -206,7 +207,7 @@ export default function OnboardingPage() {
                 <Input id="avatar-upload" type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
                 <div className="w-full space-y-2">
                   <Label htmlFor="full-name">{i.step3FullName}</Label>
-                  <Input id="full-name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={i.step3FullNamePlaceholder} />
+                  <Input id="full-name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={i.step3FullNamePlaceholder.key} />
                 </div>
               </div>
             </div>

@@ -41,14 +41,14 @@ export default function LoginPage() {
 
       if (data.user) {
         toast({
-          title: i.welcomeBackToastTitle,
-          description: i.welcomeBackToastDescription,
+          title: i.welcomeBackToastTitle.key,
+          description: i.welcomeBackToastDescription.key,
         });
 
         router.push('/');
       }
     } catch (err) {
-      setError(i.unexpectedError);
+      setError(i.unexpectedError.key);
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +67,7 @@ export default function LoginPage() {
       // The OAuth flow will redirect to Google, then back to /auth/callback
       // No need to do anything else here - the callback page will handle the rest
     } catch (err) {
-      setError(i.googleLoginFailed);
+      setError(i.googleLoginFailed.key);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -97,7 +97,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder={i.emailPlaceholder}
+                placeholder={i.emailPlaceholder.key}
                 className="pl-10"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -122,7 +122,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder={i.passwordPlaceholder}
+                placeholder={i.passwordPlaceholder.key}
                 className="pl-10"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -197,7 +197,7 @@ export default function LoginPage() {
         <div className="text-sm text-muted-foreground text-center">
           {i.noAccount}{' '}
           <Link href="/signup" className="text-primary hover:underline font-medium">
-            {i.signUpLink}
+            {i.signInLink}
           </Link>
         </div>
       </CardFooter>

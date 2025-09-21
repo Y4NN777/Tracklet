@@ -28,15 +28,15 @@ import { Maximize2, Minimize2 } from 'lucide-react';
 import { useIntlayer } from 'next-intlayer';
 
 const getSavingsSchema = (i: any) => z.object({
-  income: z.coerce.number().min(0, i.incomeMin),
-  savings: z.coerce.number().min(0, i.savingsMin),
-  debt: z.coerce.number().min(0, i.debtMin).optional(),
-  financialGoals: z.string().min(5, i.financialGoalsMin),
+  income: z.coerce.number().min(0, i.incomeMin.key),
+  savings: z.coerce.number().min(0, i.savingsMin.key),
+  debt: z.coerce.number().min(0, i.debtMin.key).optional(),
+  financialGoals: z.string().min(5, i.financialGoalsMin.key),
   expenses: z.array(z.object({
-    category: z.string().min(1, i.categoryRequired),
-    amount: z.coerce.number().min(0.01, i.amountMin),
-  })).min(1, i.expensesMin),
-  currency: z.string().min(1, i.currencyRequired),
+    category: z.string().min(1, i.categoryRequired.key),
+    amount: z.coerce.number().min(0.01, i.amountMin.key),
+  })).min(1, i.expensesMin.key),
+  currency: z.string().min(1, i.currencyRequired.key),
 });
 
 type SavingsFormValues = z.infer<ReturnType<typeof getSavingsSchema>>;
@@ -90,7 +90,7 @@ export function SavingsForm() {
   useEffect(() => {
     if (state.error) {
       toast({
-        title: i.error,
+        title: i.error.key,
         description: state.error,
         variant: 'destructive',
       });
@@ -154,12 +154,12 @@ export function SavingsForm() {
                     <Controller
                         name={`expenses.${index}.category`}
                         control={control}
-                        render={({ field }) => <Input placeholder={i.categoryPlaceholder} {...field} name="expenseCategory" />}
+                        render={({ field }) => <Input placeholder={i.categoryPlaceholder.key} {...field} name="expenseCategory" />}
                     />
                     <Controller
                         name={`expenses.${index}.amount`}
                         control={control}
-                        render={({ field }) => <Input type="number" placeholder={i.amount} {...field} name="expenseAmount" />}
+                        render={({ field }) => <Input type="number" placeholder={i.amountPlaceholder.key} {...field} name="expenseAmount" />}
                     />
                     <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                       <Trash2 className="h-4 w-4" />
@@ -182,7 +182,7 @@ export function SavingsForm() {
                   <Label htmlFor="financialGoals">{i.financialGoals}</Label>
                   <Textarea
                     id="financialGoals"
-                    placeholder={i.financialGoalsPlaceholder}
+                    placeholder={i.financialGoalsPlaceholder.key}
                     rows={3}
                     {...field}
                   />

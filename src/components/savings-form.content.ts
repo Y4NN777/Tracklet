@@ -29,6 +29,7 @@ const savingsFormContent: DeclarationContent = {
     monthlyExpenses: t({ en: "Monthly Expenses", fr: "Dépenses mensuelles" }),
     categoryPlaceholder: t({ en: "Category (e.g., Rent)", fr: "Catégorie (ex: Loyer)" }),
     amount: t({ en: "Amount", fr: "Montant" }),
+    amountPlaceholder: t({ en: "e.g. 500", fr: "ex. 500" }),
     addExpense: t({ en: "Add Expense", fr: "Ajouter une dépense" }),
     financialGoals: t({ en: "Financial Goals", fr: "Objectifs financiers" }),
     financialGoalsPlaceholder: t({ en: "e.g., Save for a house, pay off debt, invest for retirement.", fr: "ex: Économiser pour une maison, rembourser des dettes, investir pour la retraite." }),

@@ -18,8 +18,11 @@ const goalFormContent: DeclarationContent = {
 
     // Form Fields
     name: t({ en: "Name", fr: "Nom" }),
+    namePlaceholder: t({ en: "e.g. New Car", fr: "ex. Nouvelle voiture" }),
     targetAmount: t({ en: "Target Amount", fr: "Montant cible" }),
+    targetAmountPlaceholder: t({ en: "e.g. 20000", fr: "ex. 20000" }),
     currentAmount: t({ en: "Current Amount", fr: "Montant actuel" }),
+    currentAmountPlaceholder: t({ en: "e.g. 5000", fr: "ex. 5000" }),
     currency: t({ en: "Currency", fr: "Devise" }),
     currencyDescription: t({ en: "Currency is set based on your preferences and cannot be changed here.", fr: "La devise est définie en fonction de vos préférences et ne peut pas être modifiée ici." }),
 

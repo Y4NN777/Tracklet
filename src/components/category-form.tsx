@@ -198,7 +198,7 @@ export function CategoryForm({ open, setOpen, onSubmit, editingCategory, onClose
                 <FormItem>
                   <FormLabel>{i.categoryName}</FormLabel>
                   <FormControl>
-                    <Input placeholder={i.categoryNamePlaceholder} {...field} />
+                    <Input placeholder={i.categoryNamePlaceholder.key} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

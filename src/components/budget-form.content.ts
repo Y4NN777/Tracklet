@@ -16,7 +16,9 @@ const budgetFormContent: DeclarationContent = {
 
     // Form Fields
     name: t({ en: "Name", fr: "Nom" }),
+    namePlaceholder: t({ en: "e.g. Groceries", fr: "ex. Épicerie" }),
     amount: t({ en: "Amount", fr: "Montant" }),
+    amountPlaceholder: t({ en: "e.g. 500", fr: "ex. 500" }),
     budgetPeriod: t({ en: "Budget Period", fr: "Période du budget" }),
     selectPeriod: t({ en: "Select period", fr: "Sélectionnez la période" }),
     weekly: t({ en: "Weekly", fr: "Hebdomadaire" }),

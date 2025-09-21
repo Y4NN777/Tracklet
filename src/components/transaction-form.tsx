@@ -39,16 +39,16 @@ import { supabase } from '@/lib/supabase';
 
 const getTransactionSchema = (i: any) => z.object({
   description: z.string().min(2, {
-    message: i.descriptionMinLength,
+    message: i.descriptionMinLength.key,
   }),
   amount: z.coerce.number()
-    .gt(0, { message: i.amountGreaterThanZero }),
+    .gt(0, { message: i.amountGreaterThanZero.key }),
   type: z.enum(['income', 'expense', 'transfer'], {
-    required_error: i.typeRequired,
+    required_error: i.typeRequired.key,
   }),
   category_id: z.string().optional(),
   account_id: z.string().min(1, {
-    message: i.accountRequired,
+    message: i.accountRequired.key,
   }),
   date: z.date(),
 });
@@ -269,7 +269,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                 <FormItem>
                   <FormLabel>{i.description}</FormLabel>
                   <FormControl>
-                    <Input placeholder={i.description} {...field} />
+                    <Input placeholder={i.descriptionPlaceholder.key} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -282,7 +282,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                 <FormItem>
                   <FormLabel>{i.amount}</FormLabel>
                   <FormControl>
-                    <Input placeholder={i.amount} type="number" {...field} />
+                    <Input placeholder={i.amountPlaceholder.key} type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

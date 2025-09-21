@@ -228,7 +228,7 @@ export function LearningChat() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={i.placeholder}
+                placeholder={i.placeholder.key}
                 disabled={isLoading}
                 className="flex-1"
               />

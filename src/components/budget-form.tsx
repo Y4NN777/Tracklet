@@ -134,7 +134,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
                 <FormItem>
                   <FormLabel>{i.name}</FormLabel>
                   <FormControl>
-                    <Input placeholder={i.name} {...field} />
+                    <Input placeholder={i.namePlaceholder.key} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -147,7 +147,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
                 <FormItem>
                   <FormLabel>{i.amount}</FormLabel>
                   <FormControl>
-                    <Input placeholder={i.amount} type="number" {...field} />
+                    <Input placeholder={i.amountPlaceholder.key} type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

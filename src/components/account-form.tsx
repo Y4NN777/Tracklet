@@ -140,7 +140,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                 <FormItem>
                   <FormLabel>{i.accountNameLabel}</FormLabel>
                   <FormControl>
-                    <Input placeholder={i.accountNamePlaceholder} {...field} />
+                    <Input placeholder={i.accountNamePlaceholder.key} {...field} />
                   </FormControl>
                   <FormDescription>
                     {i.accountNameDescription}

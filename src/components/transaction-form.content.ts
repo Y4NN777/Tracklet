@@ -17,7 +17,9 @@ const transactionFormContent: DeclarationContent = {
 
     // Form Fields
     description: t({ en: "Description", fr: "Description" }),
+    descriptionPlaceholder: t({ en: "e.g. Salary", fr: "ex. Salaire" }),
     amount: t({ en: "Amount", fr: "Montant" }),
+    amountPlaceholder: t({ en: "e.g. 3000", fr: "ex. 3000" }),
     transactionType: t({ en: "Transaction Type", fr: "Type de transaction" }),
     selectTransactionType: t({ en: "Select transaction type", fr: "Sélectionnez le type de transaction" }),
     income: t({ en: "Income", fr: "Revenu" }),

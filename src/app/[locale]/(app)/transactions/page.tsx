@@ -134,22 +134,22 @@ export default function TransactionsPage() {
         // Refresh transactions list
         await fetchTransactions();
         toast({
-          title: i.transactionAddedToastTitle,
-          description: i.transactionAddedToastDescription,
+          title: i.transactionAddedToastTitle.key,
+          description: i.transactionAddedToastDescription.key,
         });
       } else if (response.error) {
 //        console.error('Failed to add transaction:', response.error);
         toast({
-          title: i.errorToastTitle,
-          description: i.addTransactionFailed,
+          title: i.errorToastTitle.key,
+          description: i.addTransactionFailed.key,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error adding transaction:', error);
       toast({
-        title: i.errorToastTitle,
-        description: i.addTransactionFailed,
+        title: i.errorToastTitle.key,
+        description: i.addTransactionFailed.key,
         variant: 'destructive',
       });
     }
@@ -178,22 +178,22 @@ export default function TransactionsPage() {
         await fetchTransactions();
         setEditingTransaction(null);
         toast({
-          title: i.transactionUpdatedToastTitle,
-          description: i.transactionUpdatedToastDescription,
+          title: i.transactionUpdatedToastTitle.key,
+          description: i.transactionUpdatedToastDescription.key,
         });
       } else if (response.error) {
 //        console.error('Failed to update transaction:', response.error);
         toast({
-          title: i.errorToastTitle,
-          description: i.updateTransactionFailed,
+          title: i.errorToastTitle.key,
+          description: i.updateTransactionFailed.key,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error updating transaction:', error);
       toast({
-        title: i.errorToastTitle,
-        description: i.updateTransactionFailed,
+        title: i.errorToastTitle.key,
+        description: i.updateTransactionFailed.key,
         variant: 'destructive',
       });
     }
@@ -207,22 +207,22 @@ export default function TransactionsPage() {
         // DELETE returns 204 No Content, so no data but success
         setTransactions(prev => prev.filter(transaction => transaction.id !== transactionId));
         toast({
-          title: i.transactionDeletedToastTitle,
-          description: i.transactionDeletedToastDescription,
+          title: i.transactionDeletedToastTitle.key,
+          description: i.transactionDeletedToastDescription.key,
         });
       } else if (response.error) {
 //        console.error('Failed to delete transaction:', response.error);
         toast({
-          title: i.errorToastTitle,
-          description: i.deleteTransactionFailed,
+          title: i.errorToastTitle.key,
+          description: i.deleteTransactionFailed.key,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error deleting transaction:', error);
       toast({
-        title: i.errorToastTitle,
-        description: i.deleteTransactionFailed,
+        title: i.errorToastTitle.key,
+        description: i.deleteTransactionFailed.key,
         variant: 'destructive',
       });
     }
@@ -237,13 +237,13 @@ export default function TransactionsPage() {
     try {
       exportToCSV(filteredTransactions, 'transactions', userCurrency);
       toast({
-        title: i.exportSuccessToastTitle,
-        description: i.exportCSVSuccess,
+        title: i.exportSuccessToastTitle.key,
+        description: i.exportCSVSuccess.key,
       });
     } catch (error) {
       toast({
-        title: i.exportFailedToastTitle,
-        description: i.exportFailedToastDescription,
+        title: i.exportFailedToastTitle.key,
+        description: i.exportFailedToastDescription.key,
         variant: 'destructive',
       });
     }
@@ -253,13 +253,13 @@ export default function TransactionsPage() {
     try {
       await exportToXLSX(filteredTransactions, 'transactions', userCurrency);
       toast({
-        title: i.exportSuccessToastTitle,
-        description: i.exportXLSXSuccess,
+        title: i.exportSuccessToastTitle.key,
+        description: i.exportXLSXSuccess.key,
       });
     } catch (error) {
       toast({
-        title: i.exportFailedToastTitle,
-        description: i.exportFailedToastDescription,
+        title: i.exportFailedToastTitle.key,
+        description: i.exportFailedToastDescription.key,
         variant: 'destructive',
       });
     }
@@ -269,13 +269,13 @@ export default function TransactionsPage() {
     try {
       exportToPDF(filteredTransactions, 'transactions', userCurrency);
       toast({
-        title: i.exportSuccessToastTitle,
-        description: i.exportPDFSuccess,
+        title: i.exportSuccessToastTitle.key,
+        description: i.exportPDFSuccess.key,
       });
     } catch (error) {
       toast({
-        title: i.exportFailedToastTitle,
-        description: i.exportFailedToastDescription,
+        title: i.exportFailedToastTitle.key,
+        description: i.exportFailedToastDescription.key,
         variant: 'destructive',
       });
     }
@@ -400,7 +400,7 @@ export default function TransactionsPage() {
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1">
             <Input
-              placeholder={i.searchPlaceholder}
+              placeholder={i.searchPlaceholder.key}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full"
@@ -409,7 +409,7 @@ export default function TransactionsPage() {
           <div className="w-full sm:w-48">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger>
-                <SelectValue placeholder={i.categoryFilterPlaceholder} />
+                <SelectValue placeholder={i.categoryFilterPlaceholder.key} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
