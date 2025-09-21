@@ -35,10 +35,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardService, DashboardData, DashboardMetrics } from '@/lib/dashboard-service';
 import { useCurrency } from '@/contexts/preferences-context';
 import { useIntlayer } from 'next-intlayer';
-import dashboardPageContent from './dashboard-page.content';
 
 export default function DashboardPage() {
-  const i = useIntlayer(dashboardPageContent.key);
+  const i = useIntlayer('dashboard-page');
   const router = useRouter();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
@@ -75,7 +74,7 @@ export default function DashboardPage() {
       setBudgetAlerts(alerts);
     } catch (err) {
 //      console.error('Failed to load dashboard data:', err);
-      setError(err instanceof Error ? err.message : i('failedToLoad'));
+      setError(err instanceof Error ? err.message : i.failedToLoad);
     } finally {
       setIsLoading(false);
     }
@@ -95,13 +94,13 @@ export default function DashboardPage() {
   if (!hasData && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
-        <h2 className="text-2xl font-bold">{i('welcomeToFinTrack')}</h2>
+        <h2 className="text-2xl font-bold">{i.welcomeToFinTrack}</h2>
         <p className="text-muted-foreground text-center max-w-md">
-          {i('startTracking')}
+          {i.startTracking}
         </p>
         <Button onClick={() => router.push('/accounts')}>
           <PlusCircle className="mr-2 h-4 w-4" />
-          {i('addAccount')}
+          {i.addAccount}
         </Button>
       </div>
     );
@@ -111,12 +110,12 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
         <AlertTriangle className="h-12 w-12 text-destructive" />
-        <h2 className="text-2xl font-bold">{i('errorLoadingDashboard')}</h2>
+        <h2 className="text-2xl font-bold">{i.errorLoadingDashboard}</h2>
         <p className="text-muted-foreground text-center max-w-md">
           {error}
         </p>
         <Button onClick={loadDashboardData}>
-          {i('tryAgain')}
+          {i.tryAgain}
         </Button>
       </div>
     );
@@ -211,7 +210,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{i('netWorth')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{i.netWorth}</CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -226,14 +225,14 @@ export default function DashboardPage() {
               {isLoading ? (
                 <Skeleton className="h-3 w-32" />
               ) : (
-                i('totalAcrossAccounts')
+                i.totalAcrossAccounts
               )}
             </p>
           </CardContent>
         </Card>
         <Card className="sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{i('monthlyIncome')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{i.monthlyIncome}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -248,14 +247,14 @@ export default function DashboardPage() {
               {isLoading ? (
                 <Skeleton className="h-3 w-32" />
               ) : (
-                i('thisMonthsEarnings')
+                i.thisMonthsEarnings
               )}
             </p>
           </CardContent>
         </Card>
         <Card className="sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{i('monthlyExpenses')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{i.monthlyExpenses}</CardTitle>
             <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -270,14 +269,14 @@ export default function DashboardPage() {
               {isLoading ? (
                 <Skeleton className="h-3 w-32" />
               ) : (
-                `${metrics?.savingsRate ? metrics.savingsRate.toFixed(1) : '0'}${i('savingsRate')}`
+                `${metrics?.savingsRate ? metrics.savingsRate.toFixed(1) : '0'}${i.savingsRate}`
               )}
             </p>
           </CardContent>
         </Card>
         <Card className="sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{i('totalSavings')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{i.totalSavings}</CardTitle>
             <PiggyBank className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -292,7 +291,7 @@ export default function DashboardPage() {
               {isLoading ? (
                 <Skeleton className="h-3 w-32" />
               ) : (
-                i('yourFinancialCushion')
+                i.yourFinancialCushion
               )}
             </p>
           </CardContent>
@@ -307,9 +306,9 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" /> {i('budgetStatus')}
+              <Target className="h-5 w-5" /> {i.budgetStatus}
             </CardTitle>
-            <CardDescription>{i('spendingAgainstBudgets')}</CardDescription>
+            <CardDescription>{i.spendingAgainstBudgets}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {isLoading ? (
@@ -338,7 +337,7 @@ export default function DashboardPage() {
                   />
                   {budget.isOverBudget && (
                     <p className="text-xs text-destructive">
-                      {i('overBudgetBy')} {formatUserCurrency(Math.abs(budget.remaining))}
+                      {i.overBudgetBy} {formatUserCurrency(Math.abs(budget.remaining))}
                     </p>
                   )}
                 </div>
@@ -346,8 +345,8 @@ export default function DashboardPage() {
             ) : (
               <div className="text-center text-muted-foreground py-8">
                 <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>{i('noBudgets')}</p>
-                <p className="text-sm">{i('createBudgets')}</p>
+                <p>{i.noBudgets}</p>
+                <p className="text-sm">{i.createBudgets}</p>
               </div>
             )}
           </CardContent>
@@ -356,8 +355,8 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{i('recentTransactions')}</CardTitle>
-          <CardDescription>{i('latestFinancialActivities')}</CardDescription>
+          <CardTitle>{i.recentTransactions}</CardTitle>
+          <CardDescription>{i.latestFinancialActivities}</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -379,9 +378,9 @@ export default function DashboardPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{i('description')}</TableHead>
-                  <TableHead>{i('category')}</TableHead>
-                  <TableHead className="text-right">{i('amount')}</TableHead>
+                  <TableHead>{i.description}</TableHead>
+                  <TableHead>{i.category}</TableHead>
+                  <TableHead className="text-right">{i.amount}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -390,7 +389,7 @@ export default function DashboardPage() {
                     <TableCell className="font-medium">{txn.description}</TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {txn.categories?.name || i('uncategorized')}
+                        {txn.categories?.name || i.uncategorized}
                       </Badge>
                     </TableCell>
                     <TableCell
@@ -408,8 +407,8 @@ export default function DashboardPage() {
           ) : (
             <div className="text-center text-muted-foreground py-8">
               <PlusCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>{i('noTransactions')}</p>
-              <p className="text-sm">{i('addFirstTransaction')}</p>
+              <p>{i.noTransactions}</p>
+              <p className="text-sm">{i.addFirstTransaction}</p>
             </div>
           )}
         </CardContent>
@@ -417,4 +416,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
