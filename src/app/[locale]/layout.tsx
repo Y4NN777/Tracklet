@@ -15,29 +15,32 @@ export const metadata: Metadata = {
   description: 'Smart personal finance management',
 };
 
-export default async function RootLayout({ // <--- Added async
+export default async function RootLayout({
   children,
-  params // <--- params is now the Promise
+  params
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ locale: string }>; // <--- params is now a Promise
+  params: Promise<{ locale: string }>;
 }>) {
-  const { locale } = await params; // <--- Await params
+  const { locale } = await params;
+  
+  // Ensure locale is a valid string and fallback to default
+  const validLocale = typeof locale === 'string' && locale ? locale : 'en';
 
   return (
-    <html lang={locale}>
+    <html lang={validLocale}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
       </head>
-      <body className={cn('font-body antialiased')}  suppressHydrationWarning={true}>
+      <body className={cn('font-body antialiased')} suppressHydrationWarning={true}>
         <ThemeProvider>
           <PreferencesProvider>
             <PreferencesThemeBridge />
             <NotificationProvider>
               <ErrorBoundary>
-                <IntlayerClientProvider locale={locale}>
+                <IntlayerClientProvider locale={validLocale}>
                   {children}
                 </IntlayerClientProvider>
               </ErrorBoundary>
