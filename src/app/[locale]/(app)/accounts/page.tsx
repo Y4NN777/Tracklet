@@ -490,7 +490,13 @@ export default function AccountsPage() {
         </div>
       </div>
 
-      <AccountForm open={open} setOpen={setOpen} onSubmit={handleAddAccount} />
+      <AccountForm
+        open={open}
+        setOpen={setOpen}
+        onSubmit={editingAccount ? handleUpdateAccount : handleAddAccount}
+        editingAccount={editingAccount}
+        onClose={handleClose}
+      />
     </>
   );
 }
