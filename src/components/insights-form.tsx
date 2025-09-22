@@ -25,26 +25,28 @@ import { formatMarkdown } from '@/lib/markdown-utils';
 import { useCurrency } from '@/contexts/preferences-context';
 import { useState } from 'react';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import { useIntlayer } from 'next-intlayer';
 
-const InsightsSchema = z.object({
-  income: z.coerce.number().min(0, "Income must be a positive number."),
-  savings: z.coerce.number().min(0, "Savings must be a positive number."),
-  debt: z.coerce.number().min(0, "Debt must be a positive number.").optional(),
-  financialGoals: z.string().min(5, "Please describe your financial goals."),
+const getInsightsSchema = (i: any) => z.object({
+  income: z.coerce.number().min(0, i.incomeMin.key),
+  savings: z.coerce.number().min(0, i.savingsMin.key),
+  debt: z.coerce.number().min(0, i.debtMin.key).optional(),
+  financialGoals: z.string().min(5, i.financialGoalsMin.key),
   expenses: z.array(z.object({
-    category: z.string().min(1, 'Category is required'),
-    amount: z.coerce.number().min(0.01, 'Amount must be positive'),
-  })).min(1, "Please add at least one expense."),
-  currency: z.string().min(1, "Currency is required."),
+    category: z.string().min(1, i.categoryRequired.key),
+    amount: z.coerce.number().min(0.01, i.amountMin.key),
+  })).min(1, i.expensesMin.key),
+  currency: z.string().min(1, i.currencyRequired.key),
 });
 
-type InsightsFormValues = z.infer<typeof InsightsSchema>;
+type InsightsFormValues = z.infer<ReturnType<typeof getInsightsSchema>>;
 
 function SubmitButton() {
+  const i = useIntlayer('insights-form');
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? 'Generating...' : 'Get Insights'}
+      {pending ? i.generating : i.getInsights}
       <Lightbulb className="ml-2 h-4 w-4" />
     </Button>
   );
@@ -60,18 +62,22 @@ const initialState: InsightsState = {
       { category: "", amount: 0 },
     ],
     currency: "USD",
+    locale: "en",
   },
   error: undefined,
   result: undefined,
 };
 
 export function InsightsForm() {
+  const i = useIntlayer('insights-form');
   const [state, formAction] = useActionState(getFinancialInsightsAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const { currency } = useCurrency();
   const [isExpanded, setIsExpanded] = useState(false);
   
+  const InsightsSchema = getInsightsSchema(i);
+
   const { control, handleSubmit, formState: { errors } } = useForm<InsightsFormValues>({
     resolver: zodResolver(InsightsSchema),
     defaultValues: initialState.form,
@@ -85,25 +91,26 @@ export function InsightsForm() {
   useEffect(() => {
     if (state.error) {
       toast({
-        title: 'Error',
+        title: i.error.key,
         description: state.error,
         variant: 'destructive',
       });
     }
-  }, [state.error, toast]);
+  }, [state.error, toast, i.error]);
 
   return (
     <div className={`grid gap-8 ${isExpanded ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
       {!isExpanded && (
         <Card className="w-full">
         <CardHeader>
-          <CardTitle>Financial Insights</CardTitle>
+          <CardTitle>{i.financialInsights}</CardTitle>
           <CardDescription>
-            Provide your financial details to receive AI-powered insights.
+            {i.formDescription}
           </CardDescription>
         </CardHeader>
         <form ref={formRef} action={formAction}>
           <input type="hidden" name="currency" value={currency} />
+          <input type="hidden" name="locale" value={i.locale} />
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Controller
@@ -111,7 +118,7 @@ export function InsightsForm() {
                 control={control}
                 render={({ field }) => (
                   <div className="space-y-2">
-                    <Label htmlFor="income">Monthly Income</Label>
+                    <Label htmlFor="income">{i.monthlyIncome}</Label>
                     <Input id="income" type="number" placeholder="5000" {...field} />
                     {errors.income && <p className="text-sm text-destructive">{errors.income.message}</p>}
                   </div>
@@ -122,7 +129,7 @@ export function InsightsForm() {
                 control={control}
                 render={({ field }) => (
                   <div className="space-y-2">
-                    <Label htmlFor="savings">Total Savings</Label>
+                    <Label htmlFor="savings">{i.totalSavings}</Label>
                     <Input id="savings" type="number" placeholder="10000" {...field} />
                      {errors.savings && <p className="text-sm text-destructive">{errors.savings.message}</p>}
                   </div>
@@ -133,7 +140,7 @@ export function InsightsForm() {
                 control={control}
                 render={({ field }) => (
                   <div className="space-y-2">
-                    <Label htmlFor="debt">Total Debt</Label>
+                    <Label htmlFor="debt">{i.totalDebt}</Label>
                     <Input id="debt" type="number" placeholder="2500" {...field} />
                      {errors.debt && <p className="text-sm text-destructive">{errors.debt.message}</p>}
                   </div>
@@ -142,19 +149,19 @@ export function InsightsForm() {
             </div>
             
             <div>
-              <Label>Monthly Expenses</Label>
+              <Label>{i.monthlyExpenses}</Label>
               <div className="space-y-2 mt-2">
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex items-center gap-2">
                     <Controller
                         name={`expenses.${index}.category`}
                         control={control}
-                        render={({ field }) => <Input placeholder="Category (e.g., Rent)" {...field} name="expenseCategory" />}
+                        render={({ field }) => <Input placeholder={i.categoryPlaceholder.key} {...field} name="expenseCategory" />}
                     />
                     <Controller
                         name={`expenses.${index}.amount`}
                         control={control}
-                        render={({ field }) => <Input type="number" placeholder="Amount" {...field} name="expenseAmount" />}
+                        render={({ field }) => <Input type="number" placeholder={i.amountPlaceholder.key} {...field} name="expenseAmount" />}
                     />
                     <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                       <Trash2 className="h-4 w-4" />
@@ -165,7 +172,7 @@ export function InsightsForm() {
               </div>
               <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ category: '', amount: 0 })}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Add Expense
+                {i.addExpense}
               </Button>
             </div>
 
@@ -174,10 +181,10 @@ export function InsightsForm() {
               control={control}
               render={({ field }) => (
                 <div className="space-y-2">
-                  <Label htmlFor="financialGoals">Financial Goals</Label>
+                  <Label htmlFor="financialGoals">{i.financialGoals}</Label>
                   <Textarea
                     id="financialGoals"
-                    placeholder="e.g., Save for a house, pay off debt, invest for retirement."
+                    placeholder={i.financialGoalsPlaceholder.key}
                     rows={3}
                     {...field}
                   />
@@ -196,7 +203,7 @@ export function InsightsForm() {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold flex items-center gap-2">
               <Bot className="h-5 w-5" />
-              AI Generated Insights
+              {i.aiGeneratedInsights}
           </h3>
           {state.result && (
             <Button
@@ -208,12 +215,12 @@ export function InsightsForm() {
               {isExpanded ? (
                 <>
                   <Minimize2 className="h-4 w-4" />
-                  Collapse
+                  {i.collapse}
                 </>
               ) : (
                 <>
                   <Maximize2 className="h-4 w-4" />
-                  Expand
+                  {i.expand}
                 </>
               )}
             </Button>
@@ -223,7 +230,7 @@ export function InsightsForm() {
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Spending Patterns</CardTitle>
+                  <CardTitle>{i.spendingPatterns}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div
@@ -234,7 +241,7 @@ export function InsightsForm() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Potential Savings</CardTitle>
+                  <CardTitle>{i.potentialSavings}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div
@@ -245,7 +252,7 @@ export function InsightsForm() {
               </Card>
                <Card>
                 <CardHeader>
-                  <CardTitle>Investment Opportunities</CardTitle>
+                  <CardTitle>{i.investmentOpportunities}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div
@@ -258,10 +265,9 @@ export function InsightsForm() {
         ) : (
             <Alert>
               <Lightbulb className="h-4 w-4" />
-              <AlertTitle>Waiting for input</AlertTitle>
+              <AlertTitle>{i.waitingForInput}</AlertTitle>
               <AlertDescription>
-                Your personalized financial insights will appear here once you
-                submit your details.
+                {i.waitingForInputDescription}
               </AlertDescription>
             </Alert>
         )}
