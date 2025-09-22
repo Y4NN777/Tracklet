@@ -1,4 +1,3 @@
-
 import { t, type DeclarationContent } from "intlayer";
 
 const categoriesSettingsPageContent: DeclarationContent = {
@@ -17,15 +16,20 @@ const categoriesSettingsPageContent: DeclarationContent = {
     emptyDescription: t({ en: "Create categories to organize your income and expenses for better financial tracking.", fr: "Créez des catégories pour organiser vos revenus et dépenses pour un meilleur suivi financier." }),
     addFirstCategoryButton: t({ en: "Create Your First Category", fr: "Créez votre première catégorie" }),
 
-    // Category Grouping
-    categoriesTitle: t({ en: (params: { type: string }) => `${params.type} Categories`, fr: (params: { type: string }) => `Catégories de ${params.type}` }),
-    categoryCount: t({ en: (params: { count: number }) => `(${params.count} categor${params.count !== 1 ? 'ies' : 'y'})`, fr: (params: { count: number }) => `(${params.count} catégorie${params.count !== 1 ? 's' : ''})` }),
-    emptyGroupTitle: t({ en: (params: { type: string }) => `No ${params.type} categories`, fr: (params: { type: string }) => `Aucune catégorie de ${params.type}` }),
-    emptyGroupDescription: t({ en: (params: { type: string }) => `Add your first ${params.type} category to get started.`, fr: (params: { type: string }) => `Ajoutez votre première catégorie de ${params.type} pour commencer.` }),
+    // Category Grouping - Static strings (handle dynamic parts in component)
+    incomeCategories: t({ en: "Income Categories", fr: "Catégories de revenus" }),
+    expenseCategories: t({ en: "Expense Categories", fr: "Catégories de dépenses" }),
+    category: t({ en: "category", fr: "catégorie" }),
+    categories: t({ en: "categories", fr: "catégories" }),
+    noIncomeCategories: t({ en: "No income categories", fr: "Aucune catégorie de revenus" }),
+    noExpenseCategories: t({ en: "No expense categories", fr: "Aucune catégorie de dépenses" }),
+    addFirstIncomeCategory: t({ en: "Add your first income category to get started.", fr: "Ajoutez votre première catégorie de revenus pour commencer." }),
+    addFirstExpenseCategory: t({ en: "Add your first expense category to get started.", fr: "Ajoutez votre première catégorie de dépenses pour commencer." }),
 
     // Delete Dialog
     deleteDialogTitle: t({ en: "Delete Category", fr: "Supprimer la catégorie" }),
-    deleteDialogDescription: t({ en: (params: { name: string }) => `Are you sure you want to delete "${params.name}"? This action cannot be undone.`, fr: (params: { name: string }) => `Êtes-vous sûr de vouloir supprimer "${params.name}" ? Cette action est irréversible.` }),
+    deleteConfirmation: t({ en: "Are you sure you want to delete", fr: "Êtes-vous sûr de vouloir supprimer" }),
+    deleteWarning: t({ en: "? This action cannot be undone.", fr: " ? Cette action est irréversible." }),
     cancelButton: t({ en: "Cancel", fr: "Annuler" }),
     deleteButton: t({ en: "Delete", fr: "Supprimer" }),
 

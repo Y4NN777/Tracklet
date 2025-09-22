@@ -111,6 +111,28 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const { toast } = useToast();
 
+  // Helper functions to handle dynamic content
+  const getCategoryTitle = (type: string) => {
+    return type === 'income' ? i.incomeCategories.key : i.expenseCategories.key;
+  };
+
+  const getCategoryCount = (count: number) => {
+    const categoryWord = count === 1 ? i.category.key : i.categories.key;
+    return `(${count} ${categoryWord})`;
+  };
+
+  const getEmptyGroupTitle = (type: string) => {
+    return type === 'income' ? i.noIncomeCategories.key : i.noExpenseCategories.key;
+  };
+
+  const getEmptyGroupDescription = (type: string) => {
+    return type === 'income' ? i.addFirstIncomeCategory.key : i.addFirstExpenseCategory.key;
+  };
+
+  const getDeleteDialogDescription = (name: string) => {
+    return `${i.deleteConfirmation.key} "${name}"${i.deleteWarning.key}`;
+  };
+
   // Fetch categories on component mount
   useEffect(() => {
     fetchCategories();
@@ -139,22 +161,22 @@ export default function CategoriesPage() {
       if (response.data) {
         setCategories(prev => [response.data.category, ...prev]);
         toast({
-          title: i.categoryAddedToastTitle,
-          description: i.categoryAddedToastDescription,
+          title: i.categoryAddedToastTitle.key,
+          description: i.categoryAddedToastDescription.key,
         });
       } else if (response.error) {
 //        console.error('Failed to add category:', response.error);
         toast({
-          title: i.errorToastTitle,
-          description: i.addCategoryFailed,
+          title: i.errorToastTitle.key,
+          description: i.addCategoryFailed.key,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error adding category:', error);
       toast({
-        title: i.errorToastTitle,
-        description: i.addCategoryFailed,
+        title: i.errorToastTitle.key,
+        description: i.addCategoryFailed.key,
         variant: 'destructive',
       });
     }
@@ -175,22 +197,22 @@ export default function CategoriesPage() {
         setCategories(prev => prev.map(cat => cat.id === editingCategory.id ? response.data.category : cat));
         setEditingCategory(null);
         toast({
-          title: i.categoryUpdatedToastTitle,
-          description: i.categoryUpdatedToastDescription,
+          title: i.categoryUpdatedToastTitle.key,
+          description: i.categoryUpdatedToastDescription.key,
         });
       } else if (response.error) {
 //        console.error('Failed to update category:', response.error);
         toast({
-          title: i.errorToastTitle,
-          description: i.updateCategoryFailed,
+          title: i.errorToastTitle.key,
+          description: i.updateCategoryFailed.key,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error updating category:', error);
       toast({
-        title: i.errorToastTitle,
-        description: i.updateCategoryFailed,
+        title: i.errorToastTitle.key,
+        description: i.updateCategoryFailed.key,
         variant: 'destructive',
       });
     }
@@ -204,22 +226,22 @@ export default function CategoriesPage() {
         // DELETE returns 204 No Content, so no data but success
         setCategories(prev => prev.filter(cat => cat.id !== categoryId));
         toast({
-          title: i.categoryDeletedToastTitle,
-          description: i.categoryDeletedToastDescription,
+          title: i.categoryDeletedToastTitle.key,
+          description: i.categoryDeletedToastDescription.key,
         });
       } else if (response.error) {
 //        console.error('Failed to delete category:', response.error);
         toast({
-          title: i.errorToastTitle,
-          description: i.deleteCategoryFailed,
+          title: i.errorToastTitle.key,
+          description: i.deleteCategoryFailed.key,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error deleting category:', error);
       toast({
-        title: i.errorToastTitle,
-        description: i.deleteCategoryFailed,
+        title: i.errorToastTitle.key,
+        description: i.deleteCategoryFailed.key,
         variant: 'destructive',
       });
     }
@@ -273,9 +295,9 @@ export default function CategoriesPage() {
         {Object.entries(categoriesByType).map(([type, typeCategories]) => (
           <div key={type} className="space-y-4">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold capitalize">{typeof i.categoriesTitle === 'function' ? i.categoriesTitle({ type }) : `${type} Categories`}</h2>
+              <h2 className="text-xl font-semibold capitalize">{getCategoryTitle(type)}</h2>
               <span className="text-sm text-muted-foreground">
-                {typeof i.categoryCount === 'function' ? i.categoryCount({ count: typeCategories.length }) : `(${typeCategories.length} categor${typeCategories.length !== 1 ? 'ies' : 'y'})`}
+                {getCategoryCount(typeCategories.length)}
               </span>
             </div>
 
@@ -322,7 +344,7 @@ export default function CategoriesPage() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>{i.deleteDialogTitle}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              {typeof i.deleteDialogDescription === 'function' ? i.deleteDialogDescription({ name: category.name }) : `Are you sure you want to delete "${category.name}"? This action cannot be undone.`}
+                              {getDeleteDialogDescription(category.name)}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -341,8 +363,8 @@ export default function CategoriesPage() {
                 </Card>
               )}
               emptyState={{
-                title: typeof i.emptyGroupTitle === 'function' ? i.emptyGroupTitle({ type }) : `No ${type} categories`,
-                description: typeof i.emptyGroupDescription === 'function' ? i.emptyGroupDescription({ type }) : `Add your first ${type} category to get started.`,
+                title: getEmptyGroupTitle(type),
+                description: getEmptyGroupDescription(type),
               }}
             />
           </div>
