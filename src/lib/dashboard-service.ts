@@ -106,9 +106,7 @@ class DashboardService {
         account.calculatedBalance = balance
         netWorth += balance
 
-        // Assume savings accounts are those with 'savings' in name or type
-        if (account.name?.toLowerCase().includes('savings') ||
-            account.type?.toLowerCase().includes('savings')) {
+        if (account.is_savings) {
           totalSavings += balance
         }
       }
@@ -167,8 +165,7 @@ class DashboardService {
           const balance = await calculateAccountBalance(account.id, this.userId!)
           netWorth += balance
 
-          if (account.name?.toLowerCase().includes('savings') ||
-              account.type?.toLowerCase().includes('savings')) {
+          if (account.is_savings) {
             totalSavings += balance
           }
         }
