@@ -70,11 +70,10 @@ export function UserNav() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const displayName = user?.user_metadata?.full_name || profile?.full_name || user?.email?.split('@')[0] || i.userFallback;
-  const displayEmail = user?.email || i.userEmailFallback;
+  const displayName = user?.user_metadata?.full_name || profile?.full_name || user?.email?.split('@')[0] || 'User';  const displayEmail = user?.email || i.userEmailFallback;
   // Use profile avatar_url first, then fall back to user metadata
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
-  const initials = displayName.charAt(0).toUpperCase();
+  const initials = (displayName || 'U').charAt(0).toUpperCase();
 
   const handleLogout = async () => {
     try {
