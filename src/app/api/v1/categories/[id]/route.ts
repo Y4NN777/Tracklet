@@ -51,9 +51,17 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -82,7 +90,7 @@ export async function PATCH(
       .from('categories')
       .update(updateData)
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -112,9 +120,17 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -143,7 +159,7 @@ export async function PUT(
         icon: icon || '📊'
       })
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -172,9 +188,17 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -183,7 +207,7 @@ export async function DELETE(
       .from('categories')
       .delete()
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
 
     if (error) {
 //      console.error('Error deleting category:', error)
