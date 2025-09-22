@@ -13,6 +13,7 @@ const InsightsSchema = z.object({
     amount: z.coerce.number().min(0.01),
   })).min(1, "Please add at least one expense."),
   currency: z.string().min(1, "Currency is required."),
+  locale: z.string().min(1, "Locale is required."),
 });
 
 export type InsightsState = {
@@ -42,6 +43,7 @@ export async function getFinancialInsightsAction(
     financialGoals: formData.get("financialGoals"),
     expenses,
     currency: formData.get("currency") || "USD",
+    locale: formData.get("locale") || "en",
   };
 
   const validatedFields = InsightsSchema.safeParse(formValues);
@@ -60,6 +62,7 @@ export async function getFinancialInsightsAction(
       ...validatedFields.data,
       financialGoals: validatedFields.data.financialGoals.split('\n').filter(g => g.trim() !== ''),
       currency: validatedFields.data.currency,
+      locale: validatedFields.data.locale,
     }
     const result = await getFinancialInsights(aiInput);
     return {
