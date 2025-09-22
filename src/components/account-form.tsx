@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/contexts/preferences-context';
 
@@ -57,6 +58,7 @@ const getAccountSchema = (i: any) => z.object({
   currency: z.string().min(3, {
     message: i.currencyRequired,
   }),
+  is_savings: z.boolean().optional(),
 });
 
 export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }: AccountFormProps) {
@@ -73,6 +75,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
       type: "checking",
       balance: 0,
       currency: currency,
+      is_savings: false,
     },
   })
 
@@ -84,6 +87,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
         type: editingAccount.type,
         balance: editingAccount.balance,
         currency: currency,
+        is_savings: (editingAccount as any).is_savings || false,
       });
     } else {
       form.reset({
@@ -91,6 +95,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
         type: "checking",
         balance: 0,
         currency: currency,
+        is_savings: false,
       });
     }
   }, [editingAccount, form, currency]);
@@ -214,6 +219,28 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                     {i.currencyDescription}
                   </FormDescription>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="is_savings"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      {i.isSavingsAccountLabel}
+                    </FormLabel>
+                    <FormDescription>
+                      {i.isSavingsAccountDescription}
+                    </FormDescription>
+                  </div>
                 </FormItem>
               )}
             />

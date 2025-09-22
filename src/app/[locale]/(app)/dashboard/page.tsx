@@ -269,7 +269,7 @@ export default function DashboardPage() {
               {isLoading ? (
                 <Skeleton className="h-3 w-32" />
               ) : (
-                `${metrics?.savingsRate ? metrics.savingsRate.toFixed(1) : '0'}${i.savingsRate}`
+                 i.monthlyExpenses
               )}
             </p>
           </CardContent>
