@@ -37,8 +37,8 @@ const getBudgetSchema = (i: any) => z.object({
   period: z.enum(['monthly', 'weekly', 'yearly'], {
     required_error: i.periodRequired,
   }),
-  category_id: z.string().optional(),
-  start_date: z.string().optional(),
+  category_id: z.string().min(1, { message: i.categoryRequired }),
+  start_date: z.string().min(1, { message: i.startDateRequired }),
 });
 
 type BudgetFormValues = z.infer<ReturnType<typeof getBudgetSchema>>
@@ -62,9 +62,10 @@ interface BudgetFormProps {
   onSubmit: (values: BudgetFormValues) => void;
   editingBudget?: Budget | null;
   onClose?: () => void;
+  categories: any[];
 }
 
-export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: BudgetFormProps) {
+export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose, categories }: BudgetFormProps) {
   const i = useIntlayer('budget-form');
   const { toast } = useToast();
   const { currency } = useCurrency();
@@ -77,7 +78,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
       amount: 0,
       period: undefined,
       category_id: "",
-      start_date: "",
+      start_date: new Date().toISOString().split('T')[0],
     },
   })
 
@@ -89,7 +90,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
         amount: editingBudget.amount,
         period: editingBudget.period as 'monthly' | 'weekly' | 'yearly',
         category_id: editingBudget.category_id || "",
-        start_date: editingBudget.start_date || "",
+        start_date: editingBudget.start_date ? new Date(editingBudget.start_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       });
     } else {
       form.reset({
@@ -97,7 +98,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
         amount: 0,
         period: undefined,
         category_id: "",
-        start_date: undefined,
+        start_date: new Date().toISOString().split('T')[0],
       });
     }
   }, [editingBudget, form]);
@@ -108,9 +109,21 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
     if (onClose) onClose();
   }
 
-  function onSubmitHandler(values: BudgetFormValues) {
-    onSubmit(values);
-    handleClose();
+  async function onSubmitHandler(values: BudgetFormValues) {
+    try {
+      await onSubmit(values);
+      toast({
+        title: i.budgetAdded,
+        description: i.budgetAddedSuccess,
+      });
+      handleClose();
+    } catch (error) {
+      toast({
+        title: i.error,
+        description: error instanceof Error ? error.message : i.failedToAddBudget,
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -172,6 +185,32 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose }: 
                   </FormControl>
                   <FormDescription>
                     {i.periodDescription}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{i.category}</FormLabel>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">{i.selectCategory}</option>
+                      {categories.map(category => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </FormControl>
+                  <FormDescription>
+                    {i.categoryDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

@@ -50,6 +50,7 @@ export default function BudgetsPage() {
   const [openGoal, setOpenGoal] = useState(false);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const { toast } = useToast();
@@ -63,9 +64,10 @@ export default function BudgetsPage() {
   const fetchBudgetsAndGoals = async () => {
     setLoading(true);
     try {
-      const [budgetsResponse, goalsResponse] = await Promise.all([
+      const [budgetsResponse, goalsResponse, categoriesResponse] = await Promise.all([
         api.getBudgets({ include_progress: true }),
-        api.getGoals({ include_progress: true })
+        api.getGoals({ include_progress: true }),
+        api.getCategories(),
       ]);
 
       if (budgetsResponse.data) {
@@ -78,6 +80,12 @@ export default function BudgetsPage() {
         setGoals(goalsResponse.data.goals || []);
       } else if (goalsResponse.error) {
 //        console.error('Error fetching goals:', goalsResponse.error);
+      }
+
+      if (categoriesResponse.data) {
+        setCategories(categoriesResponse.data.categories || []);
+      } else if (categoriesResponse.error) {
+//        console.error('Error fetching categories:', categoriesResponse.error);
       }
     } catch (error) {
 //      console.error('Error fetching budgets and goals:', error);
@@ -329,6 +337,7 @@ export default function BudgetsPage() {
         onSubmit={editingBudget ? handleUpdateBudget : handleAddBudget}
         editingBudget={editingBudget}
         onClose={handleCloseBudget}
+        categories={categories}
       />
       <GoalForm open={openGoal} setOpen={setOpenGoal} onSubmit={handleAddGoal} />
     </>

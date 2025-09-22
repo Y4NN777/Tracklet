@@ -7,6 +7,7 @@ const budgetFormContent: DeclarationContent = {
     nameMinLength: t({ en: "Name must be at least 2 characters.", fr: "Le nom doit comporter au moins 2 caractères." }),
     amountGreaterThanZero: t({ en: "Amount must be greater than 0.", fr: "Le montant doit être supérieur à 0." }),
     periodRequired: t({ en: "Please select a budget period.", fr: "Veuillez sélectionner une période budgétaire." }),
+    startDateRequired: t({ en: "Start date is required.", fr: "La date de début est requise." }),
 
     // Dialog
     editBudget: t({ en: "Edit Budget", fr: "Modifier le budget" }),
@@ -33,6 +34,17 @@ const budgetFormContent: DeclarationContent = {
     // Buttons
     updateBudget: t({ en: "Update Budget", fr: "Mettre à jour le budget" }),
     addBudgetButton: t({ en: "Add Budget", fr: "Ajouter un budget" }),
+
+    // Category Field
+    category: t({ en: "Category", fr: "Catégorie" }),
+    selectCategory: t({ en: "Select a category", fr: "Sélectionnez une catégorie" }),
+    categoryDescription: t({ en: "Which category does this budget belong to?", fr: "À quelle catégorie ce budget appartient-il ?" }),
+
+    // Toast Notifications
+    budgetAdded: t({ en: "Budget Added", fr: "Budget ajouté" }),
+    budgetAddedSuccess: t({ en: "Your new budget has been successfully created.", fr: "Votre nouveau budget a été créé avec succès." }),
+    error: t({ en: "Error", fr: "Erreur" }),
+    failedToAddBudget: t({ en: "Failed to add budget. Please try again.", fr: "Échec de l'ajout du budget. Veuillez réessayer." }),
   },
 };
 
