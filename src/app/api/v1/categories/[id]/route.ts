@@ -7,9 +7,17 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Extract JWT token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (sessionError || !session) {
+    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+
+    // Validate token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -18,7 +26,7 @@ export async function GET(
       .from('categories')
       .select('*')
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single()
 
     if (error) {
