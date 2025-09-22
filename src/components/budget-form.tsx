@@ -76,7 +76,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose, ca
     defaultValues: {
       name: "",
       amount: 0,
-      period: undefined,
+      period: 'monthly',
       category_id: "",
       start_date: new Date().toISOString().split('T')[0],
     },
@@ -96,7 +96,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose, ca
       form.reset({
         name: "",
         amount: 0,
-        period: undefined,
+        period: 'monthly',
         category_id: "",
         start_date: new Date().toISOString().split('T')[0],
       });
@@ -139,7 +139,7 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose, ca
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-4">
+          <form id="budget-form" onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -243,11 +243,11 @@ export function BudgetForm({ open, setOpen, onSubmit, editingBudget, onClose, ca
                 {i.currencyDescription}
               </p>
             </div>
-            <DialogFooter>
-              <Button type="submit">{editingBudget ? i.updateBudget : i.addBudgetButton}</Button>
-            </DialogFooter>
           </form>
         </Form>
+        <DialogFooter>
+          <Button type="submit" form="budget-form">{editingBudget ? i.updateBudget : i.addBudgetButton}</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
