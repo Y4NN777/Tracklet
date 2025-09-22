@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, type, balance, currency } = body
+    const { name, type, balance, currency, is_savings } = body
 
     // Validate required fields
     if (!name || !type) {
@@ -74,7 +74,8 @@ export async function POST(request: NextRequest) {
         name,
         type,
         balance: parseFloat(balance || 0),
-        currency: currency || 'USD'
+        currency: currency || 'USD',
+        is_savings: is_savings || false,
       }])
       .select()
       .single()

@@ -67,7 +67,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
-    const { name, type, balance, currency } = body
+    const { name, type, balance, currency, is_savings } = body
 
     // Validate account type if provided
     if (type && !['checking', 'savings', 'credit', 'investment'].includes(type)) {
@@ -80,6 +80,7 @@ export async function PATCH(
     if (type !== undefined) updateData.type = type
     if (balance !== undefined) updateData.balance = parseFloat(balance)
     if (currency !== undefined) updateData.currency = currency
+    if (is_savings !== undefined) updateData.is_savings = is_savings
 
     // Check if any fields were provided
     if (Object.keys(updateData).length === 0) {
