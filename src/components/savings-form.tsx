@@ -62,6 +62,7 @@ const initialState: SavingsState = {
       { category: "", amount: 0 },
     ],
     currency: "USD",
+    locale: "en",
   },
   error: undefined,
   result: undefined,
@@ -109,6 +110,7 @@ export function SavingsForm() {
         </CardHeader>
         <form ref={formRef} action={formAction}>
           <input type="hidden" name="currency" value={currency} />
+          <input type="hidden" name="locale" value={i.locale} />
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Controller
