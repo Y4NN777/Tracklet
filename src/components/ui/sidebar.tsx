@@ -580,12 +580,17 @@ const SidebarMenuButton = React.forwardRef<
     return (
       <Tooltip>
         <TooltipTrigger asChild>{button}</TooltipTrigger>
-          <TooltipContent
-            side="right"
-            align="center"
-            hidden={state !== "collapsed" || isMobile}
-            {...(tooltip ? Object.fromEntries(Object.entries(tooltip).filter(([key]) => key !== 'key')) : {})}
-        />
+            <TooltipContent
+              side="right"
+              align="center"
+              hidden={state !== "collapsed" || isMobile}
+              {...(tooltip && typeof tooltip === 'object' ? {
+                children: tooltip.children,
+                className: tooltip.className,
+                style: tooltip.style,
+                // ajoutez d'autres propriétés spécifiques au tooltip si nécessaire
+              } : {})}
+            />
       </Tooltip>
     )
   }

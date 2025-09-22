@@ -8,7 +8,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { getLearningResponse, type LearningQuery, type LearningResponse } from '@/ai/flows/learning-chat';
 import { formatMarkdown } from '@/lib/markdown-utils';
 import { useCurrency } from '@/contexts/preferences-context';
-import { useIntlayer } from 'next-intlayer';
 
 interface Message {
   id: string;
@@ -18,24 +17,93 @@ interface Message {
   suggestions?: string[];
 }
 
+const learningThemes = [
+  {
+    id: 'budgeting',
+    title: { en: 'Budgeting Basics', fr: 'Bases de la Budgétisation' },
+    description: {
+      en: 'Learn fundamental budgeting concepts and techniques',
+      fr: 'Apprenez les concepts fondamentaux de budgétisation'
+    }
+  },
+  {
+    id: 'saving',
+    title: { en: 'Saving Strategies', fr: 'Stratégies d\'Épargne' },
+    description: {
+      en: 'Discover effective saving methods and habits',
+      fr: 'Découvrez des méthodes d\'épargne efficaces'
+    }
+  },
+  {
+    id: 'housing',
+    title: { en: 'Housing & Rent', fr: 'Logement & Loyer' },
+    description: {
+      en: 'Understand housing costs and financing options',
+      fr: 'Comprenez les coûts de logement et options de financement'
+    }
+  },
+  {
+    id: 'investment',
+    title: { en: 'Investment Basics', fr: 'Bases de l\'Investissement' },
+    description: {
+      en: 'Learn about investment types and strategies',
+      fr: 'Apprenez les types d\'investissement et stratégies'
+    }
+  },
+  {
+    id: 'debt',
+    title: { en: 'Debt Management', fr: 'Gestion de la Dette' },
+    description: {
+      en: 'Master debt repayment and credit management',
+      fr: 'Maîtrisez le remboursement de dettes et gestion du crédit'
+    }
+  },
+  {
+    id: 'goals',
+    title: { en: 'Goal Setting', fr: 'Fixation d\'Objectifs' },
+    description: {
+      en: 'Set and achieve your financial goals',
+      fr: 'Définissez et atteignez vos objectifs financiers'
+    }
+  },
+  {
+    id: 'planning',
+    title: { en: 'Financial Planning', fr: 'Planification Financière' },
+    description: {
+      en: 'Comprehensive financial planning and wealth building',
+      fr: 'Planification financière complète et constitution de patrimoine'
+    }
+  }
+];
+
 export function LearningChat() {
-  const i = useIntlayer('learning-chat');
   const { currency, formatCurrency } = useCurrency();
+  const getWelcomeMessage = (lang: 'en' | 'fr') => {
+    if (lang === 'fr') {
+      return {
+        text: 'Bonjour! Je suis votre assistant d\'apprentissage FinTrack. Je peux vous aider à apprendre la finance personnelle. Que voulez-vous explorer aujourd\'hui?',
+        suggestions: ['Bases de la Budgétisation', 'Stratégies d\'Épargne', 'Bases de l\'Investissement']
+      };
+    }
+    return {
+      text: 'Hello! I\'m your FinTrack Learning Assistant. I can help you learn about personal finance. What would you like to explore today?',
+      suggestions: ['Budgeting Basics', 'Saving Strategies', 'Investment Basics']
+    };
+  };
 
-  const learningThemes = [
-    { id: 'budgeting', title: i.budgetingBasicsTitle, description: i.budgetingBasicsDescription },
-    { id: 'saving', title: i.savingStrategiesTitle, description: i.savingStrategiesDescription },
-    { id: 'housing', title: i.housingAndRentTitle, description: i.housingAndRentDescription },
-    { id: 'investment', title: i.investmentBasicsTitle, description: i.investmentBasicsDescription },
-    { id: 'debt', title: i.debtManagementTitle, description: i.debtManagementDescription },
-    { id: 'goals', title: i.goalSettingTitle, description: i.goalSettingDescription },
-    { id: 'planning', title: i.financialPlanningTitle, description: i.financialPlanningDescription },
-  ];
-
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 'welcome',
+      text: getWelcomeMessage('en').text,
+      sender: 'ai',
+      timestamp: new Date(),
+      suggestions: getWelcomeMessage('en').suggestions
+    }
+  ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [language, setLanguage] = useState<'en' | 'fr'>('en');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -46,17 +114,14 @@ export function LearningChat() {
     scrollToBottom();
   }, [messages]);
 
+  // Update welcome message when language changes
   useEffect(() => {
-    setMessages([
-      {
-        id: 'welcome',
-        text: i.welcome,
-        sender: 'ai',
-        timestamp: new Date(),
-        suggestions: i.welcomeSuggestions,
-      }
-    ]);
-  }, [i.locale]);
+    setMessages(prev => prev.map(msg =>
+      msg.id === 'welcome'
+        ? { ...msg, text: getWelcomeMessage(language).text, suggestions: getWelcomeMessage(language).suggestions }
+        : msg
+    ));
+  }, [language]);
 
   const sendMessage = async (messageText: string, theme?: string) => {
     if (!messageText.trim()) return;
@@ -76,7 +141,7 @@ export function LearningChat() {
       const query: LearningQuery = {
         message: messageText,
         theme: theme || selectedTheme || undefined,
-        language: i.locale as 'en' | 'fr',
+        language: language,
         currency: currency
       };
 
@@ -96,7 +161,7 @@ export function LearningChat() {
 //      console.error('Learning chat error:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: i.errorMessage,
+        text: 'I apologize, but I encountered an error. Please try again.',
         sender: 'ai',
         timestamp: new Date()
       };
@@ -113,7 +178,10 @@ export function LearningChat() {
 
   const handleThemeClick = (theme: typeof learningThemes[0]) => {
     setSelectedTheme(theme.id);
-    const message = `${i.tellMeAbout} ${theme.title}`;
+    const themeTitle = typeof theme.title === 'object' ? theme.title[language] : theme.title;
+    const message = language === 'fr'
+      ? `Parlez-moi de ${themeTitle}`
+      : `Tell me about ${themeTitle}`;
     sendMessage(message, theme.id);
   };
 
@@ -126,7 +194,7 @@ export function LearningChat() {
       {/* Theme Selection */}
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle className="text-lg">{i.learningTopics}</CardTitle>
+          <CardTitle className="text-lg">Learning Topics</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -140,10 +208,10 @@ export function LearningChat() {
               >
                 <div className="w-full">
                   <div className="font-medium text-sm leading-tight">
-                    {theme.title}
+                    {typeof theme.title === 'object' ? theme.title[language] : theme.title}
                   </div>
                   <div className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                    {theme.description}
+                    {typeof theme.description === 'object' ? theme.description[language] : theme.description}
                   </div>
                 </div>
               </Button>
@@ -156,7 +224,28 @@ export function LearningChat() {
       <Card className="flex-1 flex flex-col">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">{i.learningAssistant}</CardTitle>
+            <CardTitle className="text-lg">Learning Assistant</CardTitle>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">Language:</span>
+              <div className="flex rounded-md border">
+                <Button
+                  variant={language === 'en' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setLanguage('en')}
+                  className="rounded-r-none"
+                >
+                  EN
+                </Button>
+                <Button
+                  variant={language === 'fr' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setLanguage('fr')}
+                  className="rounded-l-none"
+                >
+                  FR
+                </Button>
+              </div>
+            </div>
           </div>
         </CardHeader>
 
@@ -182,11 +271,11 @@ export function LearningChat() {
                     />
                     {message.suggestions && message.suggestions.length > 0 && (
                       <div className="mt-3 space-y-2">
-                        <div className="text-xs opacity-70">{i.suggestedTopics}</div>
+                        <div className="text-xs opacity-70">Suggested topics:</div>
                         <div className="flex flex-wrap gap-2">
                           {message.suggestions.map((suggestion, index) => (
                             <Button
-                              key={`${suggestion}-${index}`}
+                              key={index}
                               variant="outline"
                               size="sm"
                               className="text-xs h-7"
@@ -212,7 +301,7 @@ export function LearningChat() {
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
-                      <span className="text-sm">{i.thinking}</span>
+                      <span className="text-sm">Thinking...</span>
                     </div>
                   </div>
                 </div>
@@ -228,12 +317,16 @@ export function LearningChat() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={i.placeholder.key}
+                placeholder={
+                  language === 'fr'
+                    ? "Posez-moi une question sur la finance personnelle..."
+                    : "Ask me anything about personal finance..."
+                }
                 disabled={isLoading}
                 className="flex-1"
               />
               <Button type="submit" disabled={isLoading || !input.trim()}>
-                {i.send}
+                Send
               </Button>
             </form>
           </div>
