@@ -549,7 +549,13 @@ export default function TransactionsPage() {
         />
       </CardContent>
       </Card>
-      <TransactionForm open={open} setOpen={setOpen} onSubmit={handleAddTransaction} />
+      <TransactionForm
+        open={open}
+        setOpen={setOpen}
+        onSubmit={editingTransaction ? handleUpdateTransaction : handleAddTransaction}
+        editingTransaction={editingTransaction}
+        onClose={handleCloseTransaction}
+      />
     </>
   );
 }
