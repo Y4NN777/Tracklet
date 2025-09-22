@@ -23,6 +23,7 @@ const SavingsOpportunitiesInputSchema = z.object({
   debt: z.number().describe('The user\'s total debt.'),
   financialGoals: z.array(z.string()).describe('A list of the user\'s financial goals.'),
   currency: z.string().describe('The user\'s preferred currency code (e.g., USD, EUR, GBP).'),
+  locale: z.string().describe('The user\'s preferred language (e.g., en, fr).'),
 });
 export type SavingsOpportunitiesInput = z.infer<typeof SavingsOpportunitiesInputSchema>;
 
@@ -44,6 +45,8 @@ const prompt = ai.definePrompt({
   prompt: `You are a personal finance advisor for FinTrack, a modern financial management app designed for users in Africa and other emerging markets. Provide personalized, contextual savings recommendations that work within the local financial environment.
 
   You are providing advice within the FinTrack app ecosystem. Reference the app's specific features and capabilities instead of suggesting external tools or generic apps.
+
+  Please provide your response in the following language: {{{locale}}}.
 
   User Financial Profile:
   - Monthly Income: {{{income}}} {{{currency}}}

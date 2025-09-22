@@ -20,6 +20,7 @@ const FinancialInsightsInputSchema = z.object({
   debt: z.number().describe('The user\'s total debt.'),
   financialGoals: z.array(z.string()).describe('A list of the user\'s financial goals.'),
   currency: z.string().describe('The user\'s preferred currency code (e.g., USD, EUR, GBP).'),
+  locale: z.string().describe('The user\'s preferred language (e.g., en, fr).'),
 });
 export type FinancialInsightsInput = z.infer<typeof FinancialInsightsInputSchema>;
 
@@ -41,6 +42,8 @@ const financialInsightsPrompt = ai.definePrompt({
   prompt: `You are a personal finance advisor for FinTrack, a modern financial management app designed for users in Africa and other emerging markets. Analyze the user's financial data and provide contextual, practical insights that consider their local financial environment.
 
   You are providing advice within the FinTrack app, so reference the app's features instead of suggesting external tools. Consider the African context where banking systems, mobile money, and financial habits may differ from Western norms.
+
+  Please provide your response in the following language: {{{locale}}}.
 
   User Financial Data:
   - Monthly Income: {{{income}}} {{{currency}}}
