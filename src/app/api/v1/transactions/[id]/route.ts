@@ -36,6 +36,10 @@ export async function GET(
           id,
           name,
           type
+        ),
+        budgets (
+          id,
+          name
         )
       `)
       .eq('id', id)

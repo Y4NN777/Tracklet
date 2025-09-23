@@ -518,6 +518,14 @@ export default function TransactionsPage() {
                             <span className="truncate max-w-[80px] sm:max-w-none">{transaction.categories.name}</span>
                           </>
                         )}
+                        {transaction.budgets && (
+                          <>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="truncate max-w-[80px] sm:max-w-none bg-blue-100 text-blue-800 px-1 rounded text-xs">
+                              {transaction.budgets.name}
+                            </span>
+                          </>
+                        )}
                         {transaction.accounts && (
                           <>
                             <span className="hidden sm:inline">•</span>

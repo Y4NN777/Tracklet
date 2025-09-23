@@ -74,6 +74,10 @@ interface Transaction {
     name: string;
     type: string;
   };
+  budgets?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface TransactionFormProps {
