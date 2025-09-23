@@ -30,15 +30,15 @@ import { useCurrency } from '@/contexts/preferences-context';
 
 const getBudgetSchema = (i: any) => z.object({
   name: z.string().min(2, {
-    message: i.nameMinLength,
+    message: i.nameMinLength.key,
   }),
   amount: z.coerce.number()
-    .gt(0, { message: i.amountGreaterThanZero }),
+    .gt(0, { message: i.amountGreaterThanZero.key }),
   period: z.enum(['monthly', 'weekly', 'yearly'], {
-    required_error: i.periodRequired,
+    required_error: i.periodRequired.key,
   }),
-  category_id: z.string().min(1, { message: i.categoryRequired }),
-  start_date: z.string().min(1, { message: i.startDateRequired }),
+  category_id: z.string().min(1, { message: i.categoryRequired.key }),
+  start_date: z.string().min(1, { message: i.startDateRequired.key }),
 });
 
 type BudgetFormValues = z.infer<ReturnType<typeof getBudgetSchema>>

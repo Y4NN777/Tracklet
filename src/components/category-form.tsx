@@ -60,16 +60,16 @@ import { useToast } from '@/hooks/use-toast';
 
 const getCategorySchema = (i: any) => z.object({
   name: z.string().min(2, {
-    message: i.nameMinLength,
+    message: i.nameMinLength.key,
   }),
   type: z.enum(['income', 'expense'], {
-    required_error: i.typeRequired,
+    required_error: i.typeRequired.key,
   }),
   color: z.string().min(4, {
-    message: i.colorRequired,
+    message: i.colorRequired.key,
   }),
   icon: z.string().min(1, {
-    message: i.iconRequired,
+    message: i.iconRequired.key,
   }),
 });
 

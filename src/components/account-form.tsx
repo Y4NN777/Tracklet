@@ -47,16 +47,16 @@ interface AccountFormProps {
 
 const getAccountSchema = (i: any) => z.object({
   name: z.string().min(2, {
-    message: i.nameMinLength,
+    message: i.nameMinLength.key,
   }),
   type: z.enum(['checking', 'savings', 'credit', 'investment'], {
-    required_error: i.typeRequired,
+    required_error: i.typeRequired.key,
   }),
   balance: z.coerce.number({
-    required_error: i.balanceRequired,
+    required_error: i.balanceRequired.key,
   }),
   currency: z.string().min(3, {
-    message: i.currencyRequired,
+    message: i.currencyRequired.key,
   }),
   is_savings: z.boolean().optional(),
 });
