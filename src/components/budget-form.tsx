@@ -37,8 +37,8 @@ const getBudgetSchema = (i: any) => z.object({
   period: z.enum(['monthly', 'weekly', 'yearly'], {
     required_error: i.periodRequired.key,
   }),
-  category_id: z.string().min(1, { message: i.categoryRequired.key }),
-  start_date: z.string().min(1, { message: i.startDateRequired.key }),
+  category_id: z.string().min(1, { message: i.categoryRequired }),
+  start_date: z.string().min(1, { message: i.startDateRequired }),
 });
 
 type BudgetFormValues = z.infer<ReturnType<typeof getBudgetSchema>>
