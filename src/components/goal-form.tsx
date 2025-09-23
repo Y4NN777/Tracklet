@@ -41,12 +41,12 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
 
   const getGoalSchema = (i: any) => z.object({
     name: z.string().min(2, {
-      message: i.nameMinLength,
+      message: i.nameMinLength.key,
     }),
     targetAmount: z.coerce.number()
-      .gt(0, { message: i.targetAmountGreaterThanZero }),
+      .gt(0, { message: i.targetAmountGreaterThanZero.key }),
     currentAmount: z.coerce.number()
-      .min(0, { message: i.currentAmountMin }),
+      .min(0, { message: i.currentAmountMin.key }),
   });
 
   type GoalFormValues = z.infer<ReturnType<typeof getGoalSchema>>

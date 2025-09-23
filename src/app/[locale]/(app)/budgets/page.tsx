@@ -261,7 +261,7 @@ export default function BudgetsPage() {
               budget={budget}
               onEdit={() => handleEditBudget(budget)}
               onDelete={() => {
-                const confirmDelete = window.confirm(typeof i.deleteConfirmation === 'function' ? i.deleteConfirmation({ name: budget.name }) : `Are you sure you want to delete "${budget.name}"? This action cannot be undone.`);
+                const confirmDelete = window.confirm(`${i.deleteConfirmation} "${budget.name}"? ${i.deleteWarning}`);
                 if (confirmDelete) {
                   handleDeleteBudget(budget.id);
                 }
@@ -297,16 +297,16 @@ export default function BudgetsPage() {
                   <CardHeader>
                     <CardTitle>{goal.name}</CardTitle>
                     <CardDescription>
-                      {typeof i.goalTarget === 'function' ? i.goalTarget({ amount: formatCurrency(goal.target_amount) }) : `Target: ${formatCurrency(goal.target_amount)}`}
+                      {i.goalTarget}: {formatCurrency(goal.target_amount)}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                      <Progress value={progress} className="h-3" />
-                     <p className="text-sm mt-2 text-muted-foreground">{typeof i.goalProgress === 'function' ? i.goalProgress({ progress: progress.toFixed(1) }) : `${progress.toFixed(1)}% complete`}</p>
+                     <p className="text-sm mt-2 text-muted-foreground">{progress.toFixed(1)}% {i.goalProgress}</p>
                   </CardContent>
                    <CardFooter className="flex justify-end text-sm">
                     <p>
-                      <span className="font-bold">{formatCurrency(goal.current_amount)}</span> {typeof i.goalSaved === 'function' ? i.goalSaved({ amount: formatCurrency(goal.current_amount) }) : 'saved'}
+                      <span className="font-bold">{formatCurrency(goal.current_amount)}</span> {i.goalSaved}
                     </p>
                   </CardFooter>
                 </Card>
