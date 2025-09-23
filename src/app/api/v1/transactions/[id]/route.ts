@@ -80,7 +80,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
-    const { amount, description, type, date, category_id, account_id } = body
+    const { amount, description, type, date, category_id, account_id, budget_id } = body
 
     // Validate transaction type if provided
     if (type && !['income', 'expense', 'transfer'].includes(type)) {
@@ -95,6 +95,7 @@ export async function PATCH(
     if (date !== undefined) updateData.date = date
     if (category_id !== undefined) updateData.category_id = category_id
     if (account_id !== undefined) updateData.account_id = account_id
+    if (budget_id !== undefined) updateData.budget_id = budget_id
 
     // Check if any fields were provided
     if (Object.keys(updateData).length === 0) {
@@ -164,7 +165,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { amount, description, type, date, category_id, account_id } = body
+    const { amount, description, type, date, category_id, account_id, budget_id } = body
 
     // PUT requires ALL required fields
     if (!amount || !description || !type || !date) {
@@ -186,7 +187,8 @@ export async function PUT(
         type,
         date,
         category_id,
-        account_id
+        account_id,
+        budget_id: budget_id || null
       })
       .eq('id', id)
       .eq('user_id', user.id)

@@ -50,6 +50,7 @@ const getTransactionSchema = (i: any) => z.object({
   account_id: z.string().min(1, {
     message: i.accountRequired.key,
   }),
+  budget_id: z.string().optional(), // Optional budget assignment
   date: z.date(),
 });
 
@@ -103,9 +104,10 @@ interface Category {
 export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, onClose }: TransactionFormProps) {
   const i = useIntlayer('transaction-form');
   const { toast } = useToast();
-  const { currency } = useCurrency();
+  const { currency, formatCurrency } = useCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [budgets, setBudgets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const transactionSchema = getTransactionSchema(i);
@@ -118,6 +120,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
       type: undefined,
       category_id: "",
       account_id: "",
+      budget_id: "",
       date: new Date(),
     },
   })
@@ -138,6 +141,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
         type: editingTransaction.type,
         category_id: editingTransaction.categories?.id || "",
         account_id: editingTransaction.accounts?.id || "",
+        budget_id: (editingTransaction as any).budget_id || "",
         date: new Date(editingTransaction.date),
       });
     } else {
@@ -147,6 +151,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
         type: undefined,
         category_id: "",
         account_id: "",
+        budget_id: "",
         date: new Date(),
       });
     }
@@ -189,9 +194,10 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
   const fetchAccountsAndCategories = async () => {
     setLoading(true);
     try {
-      const [accountsResponse, categoriesResponse] = await Promise.all([
+      const [accountsResponse, categoriesResponse, budgetsResponse] = await Promise.all([
         api.getAccounts(),
-        api.getCategories()
+        api.getCategories(),
+        api.getBudgets()
       ]);
 
       if (accountsResponse.data) {
@@ -230,8 +236,14 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
       } else if (categoriesResponse.error) {
 //        console.error('Error fetching categories:', categoriesResponse.error);
       }
+
+      if (budgetsResponse.data) {
+        setBudgets(budgetsResponse.data.budgets || []);
+      } else if (budgetsResponse.error) {
+//        console.error('Error fetching budgets:', budgetsResponse.error);
+      }
     } catch (error) {
-//      console.error('Error fetching accounts and categories:', error);
+//      console.error('Error fetching accounts, categories, and budgets:', error);
     } finally {
       setLoading(false);
     }
@@ -341,6 +353,33 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
             />
             <FormField
               control={form.control}
+              name="budget_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{i.budgetOptional}</FormLabel>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={loading}
+                    >
+                      <option value="">{i.selectBudget}</option>
+                      {budgets.map((budget) => (
+                        <option key={budget.id} value={budget.id}>
+                          {budget.name} ({budget.categories?.name || 'General'}) - {formatCurrency(budget.amount || 0)}
+                        </option>
+                      ))}
+                    </select>
+                  </FormControl>
+                  <FormDescription>
+                    {i.chooseBudget}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="account_id"
               render={({ field }) => (
                 <FormItem>
@@ -348,7 +387,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                   <FormControl>
                     <select
                       {...field}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={loading}
                     >
                       <option value="">{i.selectAccount}</option>

@@ -42,6 +42,10 @@ export async function GET(request: NextRequest) {
           id,
           name,
           type
+        ),
+        budgets (
+          id,
+          name
         )
       `)
       .eq('user_id', user.id)
@@ -98,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { amount, description, type, date, category_id, account_id } = body
+    const { amount, description, type, date, category_id, account_id, budget_id } = body
 
     // Validate required fields
     if (!amount || !type || !date) {
@@ -119,7 +123,8 @@ export async function POST(request: NextRequest) {
         type,
         date,
         category_id,
-        account_id
+        account_id,
+        budget_id: budget_id || null  // Optional budget assignment
       }])
       .select(`
         *,

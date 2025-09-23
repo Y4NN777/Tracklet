@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MoreHorizontal } from "lucide-react"
+import { useCurrency } from "@/contexts/preferences-context"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -181,6 +182,7 @@ export function BudgetCard({
   onDelete?: () => void
   onClick?: () => void
 }) {
+  const { formatCurrency } = useCurrency()
   const progress = (budget.spent / budget.amount) * 100
   const remaining = budget.amount - budget.spent
 
@@ -191,13 +193,13 @@ export function BudgetCard({
   return (
     <MobileDataCard
       title={budget.name}
-      subtitle={`${budget.spent?.toFixed(2) || '0.00'} / ${budget.amount?.toFixed(2) || '0.00'} spent`}
+      subtitle={`${formatCurrency(budget.spent || 0)} / ${formatCurrency(budget.amount || 0)} spent`}
       badge={{
         text: `${progress.toFixed(0)}%`,
         variant: progress > 90 ? "destructive" : "default"
       }}
       metadata={[
-        { label: "Remaining", value: `$${remaining.toFixed(2)}` },
+        { label: "Remaining", value: formatCurrency(remaining) },
         { label: "Category", value: budget.categories?.name || budget.category || "General" },
         { label: "Period", value: budget.period || "monthly" }
       ]}

@@ -128,14 +128,17 @@ export async function POST(request: NextRequest) {
 
 // Helper function to calculate budget progress
 async function calculateBudgetProgress(budget: any, userId: string) {
-  const { data: transactions, error } = await supabase
+  // Query transactions assigned to this specific budget
+  let query = supabase
     .from('transactions')
     .select('amount')
     .eq('user_id', userId)
     .eq('type', 'expense')
-    .eq('category_id', budget.category_id)
+    .eq('budget_id', budget.id)  // Only count transactions assigned to this budget
     .gte('date', budget.start_date)
     .lte('date', budget.end_date || new Date().toISOString().split('T')[0])
+
+  const { data: transactions, error } = await query
 
   if (error) {
 //    console.error('Error calculating budget progress:', error)
