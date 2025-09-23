@@ -1,0 +1,33 @@
+name: Run Notifications
+on:
+  schedule:
+    - cron: '0 */1 * * *'  # Every hour at minute 0
+  workflow_dispatch:        # Manual trigger button in GitHub
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Notifications
+        run: |
+          # Use environment variables from GitHub secrets
+          API_URL="${{ secrets.VERCEL_URL }}"
+          SECRET="${{ secrets.NOTIFICATION_JOB_SECRET }}"
+
+          echo "Triggering notifications for: $API_URL"
+
+          # Make the API call
+          response=$(curl -s -w "\nHTTPSTATUS:%{http_code}" \
+            -X POST "$API_URL" \
+            -H "Authorization: Bearer $SECRET")
+
+          # Extract status code
+          http_code=$(echo "$response" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          body=$(echo "$response" | sed -e 's/HTTPSTATUS:.*//g')
+
+          if [ "$http_code" = "200" ]; then
+            echo " OK:  Success: $body"
+          else
+            echo " Failed (HTTP $http_code): $body"
+            exit 1
+          fi
