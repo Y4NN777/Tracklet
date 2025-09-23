@@ -28,28 +28,29 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/contexts/preferences-context';
 
-const getGoalSchema = (i: any) => z.object({
-  name: z.string().min(2, {
-    message: i.nameMinLength,
-  }),
-  targetAmount: z.coerce.number()
-    .gt(0, { message: i.targetAmountGreaterThanZero }),
-  currentAmount: z.coerce.number()
-    .min(0, { message: i.currentAmountMin }),
-});
-
-type GoalFormValues = z.infer<ReturnType<typeof getGoalSchema>>
-
 interface GoalFormProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  onSubmit: (values: GoalFormValues) => void;
+  onSubmit: (values: any) => void;
 }
 
 export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
   const i = useIntlayer('goal-form');
   const { toast } = useToast();
   const { currency } = useCurrency();
+
+  const getGoalSchema = (i: any) => z.object({
+    name: z.string().min(2, {
+      message: i.nameMinLength,
+    }),
+    targetAmount: z.coerce.number()
+      .gt(0, { message: i.targetAmountGreaterThanZero }),
+    currentAmount: z.coerce.number()
+      .min(0, { message: i.currentAmountMin }),
+  });
+
+  type GoalFormValues = z.infer<ReturnType<typeof getGoalSchema>>
+
   const goalSchema = getGoalSchema(i);
 
   const form = useForm<GoalFormValues>({
@@ -69,8 +70,8 @@ export function GoalForm({ open, setOpen, onSubmit }: GoalFormProps) {
   function onSubmitHandler(values: GoalFormValues) {
     onSubmit(values);
     toast({
-      title: i.goalAdded.key,
-      description: i.goalAddedSuccess.key,
+      title: i.goalAdded,
+      description: i.goalAddedSuccess,
     })
     handleClose();
   }
