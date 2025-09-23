@@ -2,6 +2,11 @@
 
 A fully open-source personal finance management application designed to help users track spending, set budgets, and achieve financial goals with optional AI-powered insights.
 
+
+**IMPORTANT** : Hybrid Alpha/Beta Testing
+This project is currently in a hybrid testing phase to address newly discovered bugs. I am conducting internal "alpha" testing for core stability and critical fixes, while also inviting external users to participate in "beta" testing for real-world feedback via GitHub issues. 
+All bug reports and feature requests should be submitted through the GitHub Issues tab. Your feedback is crucial for improving the stability and functionality of the software.
+
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.0-38B2AC.svg)](https://tailwindcss.com)
