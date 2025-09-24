@@ -111,10 +111,9 @@ export function NotificationBell() {
                     </p>
                     {notification.notification_types && (
                       <span
-                        className="text-xs px-2 py-1 rounded-full"
+                        className="text-xs px-2 py-1 rounded-full text-white"
                         style={{
-                          backgroundColor: notification.notification_types.color + '20',
-                          color: notification.notification_types.color
+                          backgroundColor: notification.notification_types.color
                         }}
                       >
                         {notification.notification_types.display_name}

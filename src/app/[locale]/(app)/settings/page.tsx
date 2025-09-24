@@ -285,7 +285,7 @@ export default function SettingsPage() {
                 <div>
                   <Label htmlFor="min-amount">{i.minAmountLabel}</Label>
                   <div className="relative mt-1">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">{preferences.currency || 'XOF'}</span>
                     <input
                       id="min-amount"
                       type="number"
@@ -294,7 +294,7 @@ export default function SettingsPage() {
                       value={preferences.notifications?.transactionAlerts?.minAmount ?? 100}
                       onChange={(e) => updateNotificationPreference('transactionAlerts', 'minAmount', parseFloat(e.target.value))}
                       disabled={saving}
-                      className="w-full pl-8 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className="w-full pl-12 rounded-md border border-input bg-background px-3 py-2 text-sm"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{i.minAmountDescription}</p>

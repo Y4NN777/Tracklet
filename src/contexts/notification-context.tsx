@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
 
 interface NotificationType {
   name: string;
@@ -45,6 +46,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+  const { toast } = useToast();
 
   const unreadCount = notifications.filter(n => !n.read_at).length;
 
@@ -239,10 +241,21 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       });
 
       if (response.ok) {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+        setNotifications(prev => prev.filter(n => n.id !== id));
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to delete notification. Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-//      console.error('Error removing notification:', error);
+      console.error('Error removing notification:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete notification. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

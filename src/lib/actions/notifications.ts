@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { formatCurrency } from '@/lib/financial-calculations'
 
 export interface NotificationPreferences {
   budgetAlerts: {
@@ -45,6 +46,7 @@ export async function checkBudgetAlerts(userId: string) {
     }
 
     const thresholds = preferences.budgetAlerts.thresholds || [80, 90, 100]
+    const userCurrency = profile.preferences?.currency || 'XOF'
 
     // Get all budgets for the user
     const { data: budgets, error: budgetsError } = await supabase
@@ -56,6 +58,7 @@ export async function checkBudgetAlerts(userId: string) {
         period,
         start_date,
         end_date,
+        category_id,
         categories (
           id,
           name
@@ -87,7 +90,7 @@ export async function checkBudgetAlerts(userId: string) {
             // Create notification
             await createNotification(userId, 'budget_alert', {
               title: `Budget Alert: ${budget.name}`,
-              message: `You've spent ${percentage.toFixed(1)}% of your ${budget.name} budget (${spent.toFixed(2)} / ${budget.amount.toFixed(2)})`,
+              message: `You've spent ${percentage.toFixed(1)}% of your ${budget.name} budget (${formatCurrency(spent, userCurrency)} / ${formatCurrency(budget.amount, userCurrency)})`,
               data: {
                 budget_id: budget.id,
                 threshold,
@@ -231,6 +234,7 @@ export async function checkTransactionAlerts(userId: string, transactionId?: str
 
     const minAmount = preferences.transactionAlerts.minAmount || 100
     const unusualEnabled = preferences.transactionAlerts.unusualSpending
+    const userCurrency = profile.preferences?.currency || 'XOF'
 
     // Get the transaction(s) to check
     let query = supabase
@@ -277,7 +281,7 @@ export async function checkTransactionAlerts(userId: string, transactionId?: str
         if (!exists) {
           await createNotification(userId, 'transaction_alert', {
             title: `Large Transaction Alert`,
-            message: `You made a $${transaction.amount.toFixed(2)} expense: "${transaction.description}"`,
+            message: `You made a ${formatCurrency(transaction.amount, userCurrency)} expense: "${transaction.description}"`,
             data: {
               transaction_id: transaction.id,
               amount: transaction.amount,
@@ -302,7 +306,7 @@ export async function checkTransactionAlerts(userId: string, transactionId?: str
           if (!exists) {
             await createNotification(userId, 'transaction_alert', {
               title: `Unusual Spending Detected`,
-              message: `Unusual expense of $${transaction.amount.toFixed(2)} for "${transaction.description}" in ${(transaction.categories as any)?.name || 'Uncategorized'}`,
+              message: `Unusual expense of ${formatCurrency(transaction.amount, userCurrency)} for "${transaction.description}" in ${(transaction.categories as any)?.name || 'Uncategorized'}`,
               data: {
                 transaction_id: transaction.id,
                 amount: transaction.amount,
@@ -326,31 +330,47 @@ export async function checkTransactionAlerts(userId: string, transactionId?: str
  * Calculate current spending for a budget
  */
 async function calculateBudgetSpending(userId: string, budget: any): Promise<number> {
-  const { start_date, end_date, category_id } = budget
+  const { start_date, end_date, category_id, id: budgetId, name: budgetName } = budget
+
+  console.log(`Calculating spending for budget ${budgetId} (${budgetName}): start=${start_date}, end=${end_date}, category=${category_id}`)
+
+  // Hybrid assignment: expenses in category OR directly assigned to budget
+  const conditions = []
+  if (category_id) {
+    conditions.push(`category_id.eq.${category_id}`)
+  }
+  if (budgetId) {
+    conditions.push(`budget_id.eq.${budgetId}`)
+  }
+
+  if (conditions.length === 0) {
+    console.warn(`Budget ${budgetId} has no category or budget assignment criteria`)
+    return 0
+  }
 
   let query = supabase
     .from('transactions')
     .select('amount')
     .eq('user_id', userId)
     .eq('type', 'expense')
+    .or(conditions.join(','))
     .gte('date', start_date)
 
   if (end_date) {
     query = query.lte('date', end_date)
   }
 
-  if (category_id) {
-    query = query.eq('category_id', category_id)
-  }
-
   const { data, error } = await query
 
   if (error) {
-//    console.error('Error calculating budget spending:', error)
+    console.error('Error calculating budget spending:', error)
     return 0
   }
 
-  return data.reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
+  const total = data.reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
+  console.log(`Budget ${budgetId} spending: ${total} from ${data.length} transactions (hybrid: ${conditions.join(' OR ')})`)
+
+  return total
 }
 
 /**

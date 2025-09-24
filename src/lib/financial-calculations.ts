@@ -215,13 +215,25 @@ export async function calculateBudgetProgress(
     return null
   }
 
-  // Get transactions for this budget's category and period
+  // Get transactions for this budget (hybrid: category OR direct assignment)
+  const conditions = []
+  if (budget.category_id) {
+    conditions.push(`category_id.eq.${budget.category_id}`)
+  }
+  if (budget.id) {
+    conditions.push(`budget_id.eq.${budget.id}`)
+  }
+
+  if (conditions.length === 0) {
+    return null // No tracking criteria
+  }
+
   const { data: transactions, error: transactionError } = await supabase
     .from('transactions')
     .select('amount')
     .eq('user_id', userId)
     .eq('type', 'expense')
-    .eq('category_id', budget.category_id)
+    .or(conditions.join(','))
     .gte('date', budget.start_date)
     .lte('date', budget.end_date || new Date().toISOString().split('T')[0])
 
@@ -334,8 +346,8 @@ export async function generateFinancialInsights(userId: string): Promise<string[
 // UTILITY FUNCTIONS
 // =========================================
 
-export function formatCurrency(amount: number, currency: string = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(amount: number, currency: string = 'XOF', locale: string = 'fr-FR'): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency
   }).format(amount)
