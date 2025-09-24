@@ -91,15 +91,55 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid transaction type' }, { status: 400 })
     }
 
+    // Validate category_id if provided
+    if (category_id) {
+      // console.log('Validating category_id:', category_id)
+      const { data: categoryExists, error: categoryError } = await supabase
+        .from('categories')
+        .select('id, name')
+        .eq('id', category_id)
+        .eq('user_id', user.id)
+        .single()
+
+      if (categoryError || !categoryExists) {
+        // console.error('Category validation failed:', { categoryError, categoryExists, category_id })
+        return NextResponse.json({
+          error: 'Selected category does not exist or is not accessible'
+        }, { status: 400 })
+      }
+      // console.log('Category validation passed:', categoryExists)
+    }
+
+    // Validate account_id if provided
+    if (account_id) {
+      // console.log('Validating account_id:', account_id)
+      const { data: accountExists, error: accountError } = await supabase
+        .from('accounts')
+        .select('id, name')
+        .eq('id', account_id)
+        .eq('user_id', user.id)
+        .single()
+
+      if (accountError || !accountExists) {
+        // console.error('Account validation failed:', { accountError, accountExists, account_id })
+        return NextResponse.json({
+          error: 'Selected account does not exist or is not accessible'
+        }, { status: 400 })
+      }
+      // console.log('Account validation passed:', accountExists)
+    }
+
     // Build update object with only provided fields
     const updateData: any = {}
     if (amount !== undefined) updateData.amount = parseFloat(amount)
     if (description !== undefined) updateData.description = description
     if (type !== undefined) updateData.type = type
     if (date !== undefined) updateData.date = date
-    if (category_id !== undefined) updateData.category_id = category_id
-    if (account_id !== undefined) updateData.account_id = account_id
-    if (budget_id !== undefined) updateData.budget_id = budget_id
+    if (category_id !== undefined && category_id !== '') updateData.category_id = category_id || null
+    if (account_id !== undefined && account_id !== '') updateData.account_id = account_id || null
+    if (budget_id !== undefined && budget_id !== '') updateData.budget_id = budget_id || null
+
+    // console.log('Update data prepared:', updateData)
 
     // Check if any fields were provided
     if (Object.keys(updateData).length === 0) {
@@ -131,7 +171,14 @@ export async function PATCH(
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
       }
-//      console.error('Error updating transaction:', error)
+
+      // Check for foreign key constraint violations
+      if (error.code === '23503') {
+        return NextResponse.json({
+          error: 'Invalid reference - the selected category or account may not exist'
+        }, { status: 400 })
+      }
+
       return NextResponse.json({ error: 'Failed to update transaction' }, { status: 500 })
     }
 

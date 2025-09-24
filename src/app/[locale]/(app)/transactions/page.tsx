@@ -173,6 +173,8 @@ export default function TransactionsPage() {
         ...values,
         date: values.date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD
         category_id: values.category_id || null, // Convert empty string to null
+        account_id: values.account_id || null, // Convert empty string to null
+        budget_id: values.budget_id || null, // Convert empty string to null
       };
 
       const response = await api.updateTransaction(editingTransaction.id, transactionData);
