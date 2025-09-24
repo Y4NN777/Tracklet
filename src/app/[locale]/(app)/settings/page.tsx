@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Separator } from "@/components/ui/separator"
 import {
   Card,
@@ -23,8 +23,19 @@ import { useIntlayer } from 'next-intlayer';
 export default function SettingsPage() {
   const i = useIntlayer('settings-page');
   const { toast } = useToast();
-  const { preferences, updatePreferences, isLoading } = usePreferencesContext();
+  const { preferences, updatePreferences, isLoading, syncError } = usePreferencesContext();
   const [saving, setSaving] = useState(false);
+
+  // Show sync error toast
+  useEffect(() => {
+    if (syncError) {
+      toast({
+        title: "Sync Warning",
+        description: syncError,
+        variant: 'destructive',
+      });
+    }
+  }, [syncError, toast]);
 
   const updatePreference = async (key: string, value: any) => {
     setSaving(true);
@@ -40,7 +51,7 @@ export default function SettingsPage() {
         description: i.preferencesUpdated,
       });
     } catch (error) {
-//      console.error('Failed to save preferences:', error);
+ //      console.error('Failed to save preferences:', error);
       toast({
         title: i.error,
         description: i.failedToSave,

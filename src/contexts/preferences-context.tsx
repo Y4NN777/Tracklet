@@ -9,6 +9,7 @@ interface PreferencesContextType {
   updatePreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
   isLoading: boolean;
   isLoggedIn: boolean;
+  syncError: string | null;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);

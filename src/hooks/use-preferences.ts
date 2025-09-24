@@ -59,6 +59,7 @@ export function usePreferences() {
   const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   // Load preferences from localStorage
   const loadLocalPreferences = useCallback((): UserPreferences => {
@@ -85,8 +86,10 @@ export function usePreferences() {
 
     try {
       await db.updateUserPreferences(user.id, prefs);
+      setSyncError(null); // Clear any previous error
     } catch (error) {
-//      console.warn('Failed to sync preferences with database:', error);
+      console.warn('Failed to sync preferences with database:', error);
+      setSyncError('Failed to save preferences. Changes may not persist across sessions.');
     }
   }, [user]);
 
@@ -102,7 +105,9 @@ export function usePreferences() {
         saveLocalPreferences(dbPrefs);
       }
     } catch (error) {
-//      console.warn('Failed to load preferences from database:', error);
+      console.warn('Failed to load preferences from database:', error);
+      // On mobile, this might fail - user will see localStorage preferences
+      // Consider showing a toast to inform user of potential sync issues
     }
   }, [user, saveLocalPreferences]);
 
@@ -175,6 +180,7 @@ export function usePreferences() {
     updatePreferences,
     isLoading,
     isLoggedIn: !!user,
-    user
+    user,
+    syncError
   };
 }

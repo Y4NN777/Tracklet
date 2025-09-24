@@ -73,11 +73,18 @@ class ApiClient {
       Object.assign(requestHeaders, authHeaders);
     }
 
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
     try {
       const response = await fetch(url, {
         ...restOptions,
         headers: requestHeaders,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json().catch(() => ({}));
 
@@ -89,7 +96,15 @@ class ApiClient {
 
       return { data };
     } catch (error) {
-//      console.error('API request failed:', error);
+      clearTimeout(timeoutId);
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        return {
+          error: 'Request timeout - please check your connection and try again',
+        };
+      }
+
+ //      console.error('API request failed:', error);
       return {
         error: error instanceof Error ? error.message : 'Network error',
       };
