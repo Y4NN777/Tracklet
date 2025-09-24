@@ -15,6 +15,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface MobileDataCardProps {
   title: string
@@ -33,6 +44,12 @@ interface MobileDataCardProps {
     label: string
     onClick: () => void
     variant?: "default" | "destructive"
+    confirmDialog?: {
+      title: string
+      description: string
+      confirmLabel?: string
+      cancelLabel?: string
+    }
   }>
   onClick?: () => void
   className?: string
@@ -121,15 +138,46 @@ export function MobileDataCard({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {actions.map((action, index) => (
-                  <DropdownMenuItem
-                    key={index}
-                    onClick={action.onClick}
-                    className={action.variant === "destructive" ? "text-destructive" : ""}
-                  >
-                    {action.label}
-                  </DropdownMenuItem>
-                ))}
+                {actions.map((action, index) => {
+                  if (action.confirmDialog) {
+                    return (
+                      <AlertDialog key={index}>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                            className={action.variant === "destructive" ? "text-destructive" : ""}
+                          >
+                            {action.label}
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{action.confirmDialog.title}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {action.confirmDialog.description}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{action.confirmDialog.cancelLabel || "Cancel"}</AlertDialogCancel>
+                            <AlertDialogAction onClick={action.onClick}>
+                              {action.confirmDialog.confirmLabel || "Confirm"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    );
+                  }
+
+                  return (
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={action.onClick}
+                      className={action.variant === "destructive" ? "text-destructive" : ""}
+                    >
+                      {action.label}
+                    </DropdownMenuItem>
+                  );
+                })}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -188,7 +236,17 @@ export function BudgetCard({
 
   const actions = []
   if (onEdit) actions.push({ label: "Edit", onClick: onEdit })
-  if (onDelete) actions.push({ label: "Delete", onClick: onDelete, variant: "destructive" as const })
+  if (onDelete) actions.push({
+    label: "Delete",
+    onClick: onDelete,
+    variant: "destructive" as const,
+    confirmDialog: {
+      title: "Delete Budget",
+      description: `Are you sure you want to delete "${budget.name}"? This action cannot be undone.`,
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel"
+    }
+  })
 
   return (
     <MobileDataCard

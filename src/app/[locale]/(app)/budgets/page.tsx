@@ -260,12 +260,7 @@ export default function BudgetsPage() {
               key={budget.id}
               budget={budget}
               onEdit={() => handleEditBudget(budget)}
-              onDelete={() => {
-                const confirmDelete = window.confirm(`${i.deleteConfirmation} "${budget.name}"? ${i.deleteWarning}`);
-                if (confirmDelete) {
-                  handleDeleteBudget(budget.id);
-                }
-              }}
+              onDelete={() => handleDeleteBudget(budget.id)}
             />
           )}
           emptyState={{
