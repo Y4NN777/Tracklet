@@ -159,7 +159,10 @@ export function MobileDataCard({
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>{action.confirmDialog.cancelLabel || "Cancel"}</AlertDialogCancel>
-                            <AlertDialogAction onClick={action.onClick}>
+                            <AlertDialogAction
+                              onClick={action.onClick}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
                               {action.confirmDialog.confirmLabel || "Confirm"}
                             </AlertDialogAction>
                           </AlertDialogFooter>
