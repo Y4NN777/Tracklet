@@ -135,13 +135,11 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-//      console.error('Error deleting notification:', error)
+     console.error('Error deleting notification:', error)
       return NextResponse.json({ error: 'Failed to delete notification' }, { status: 500 })
     }
 
-    return NextResponse.json({
-      message: 'Notification deleted successfully'
-    }, { status: 204 })
+    return new NextResponse(null, { status: 204 })
 
   } catch (error) {
 //    console.error('Unexpected error:', error)

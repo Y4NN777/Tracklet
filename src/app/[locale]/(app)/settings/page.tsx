@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Separator } from "@/components/ui/separator"
 import {
   Card,
@@ -25,7 +25,8 @@ export default function SettingsPage() {
   const { toast } = useToast();
   const { preferences, updatePreferences, isLoading, syncError } = usePreferencesContext();
   const [saving, setSaving] = useState(false);
-
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [pendingMinAmount, setPendingMinAmount] = useState<number | string | null>(null);
   // Show sync error toast
   useEffect(() => {
     if (syncError) {
@@ -36,6 +37,15 @@ export default function SettingsPage() {
       });
     }
   }, [syncError, toast]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
 
   const updatePreference = async (key: string, value: any) => {
     setSaving(true);
@@ -71,6 +81,37 @@ export default function SettingsPage() {
     const updatedNotifications = { ...preferences.notifications, [category]: updatedCategory };
     updatePreference('notifications', updatedNotifications);
   };
+
+  const handleMinAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    
+    // Handle empty input - allow it but don't save yet
+    if (inputValue === '') {
+      setPendingMinAmount('');
+      return;
+    }
+    
+    const numericValue = parseFloat(inputValue);
+    
+    // Only proceed if we have a valid positive number
+    if (isNaN(numericValue) || numericValue < 0) {
+      return; // Ignore invalid input
+    }
+    
+    setPendingMinAmount(numericValue);
+
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    const timer = setTimeout(() => {
+      updateNotificationPreference('transactionAlerts', 'minAmount', numericValue);
+      setPendingMinAmount(null);
+    }, 1000);
+
+    setDebounceTimer(timer);
+  }, [debounceTimer, updateNotificationPreference]);
+
 
   if (isLoading) {
     return (
@@ -302,13 +343,19 @@ export default function SettingsPage() {
                       type="number"
                       min="0"
                       step="0.01"
-                      value={preferences.notifications?.transactionAlerts?.minAmount ?? 100}
-                      onChange={(e) => updateNotificationPreference('transactionAlerts', 'minAmount', parseFloat(e.target.value))}
+                      value={pendingMinAmount !== null ? pendingMinAmount : (preferences.notifications?.transactionAlerts?.minAmount ?? 100)}
+                      onChange={handleMinAmountChange}
                       disabled={saving}
                       className="w-full pl-12 rounded-md border border-input bg-background px-3 py-2 text-sm"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{i.minAmountDescription}</p>
+                  {pendingMinAmount !== null && (
+                    <p className="text-xs text-blue-600 mt-1 flex items-center">
+                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      Saving...
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between">
