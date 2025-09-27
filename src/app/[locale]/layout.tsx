@@ -11,7 +11,7 @@ import { PreferencesThemeBridge } from '@/components/preferences-theme-bridge';
 import { IntlayerClientProvider } from 'next-intlayer';
 
 export const metadata: Metadata = {
-  title: 'FinTrack',
+  title: 'Tracklet',
   description: 'Smart personal finance management',
 };
 
