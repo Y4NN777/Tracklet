@@ -1,8 +1,8 @@
-# FinTrack API Documentation
+# Tracklet API Documentation
 
 ## Overview
 
-FinTrack provides a comprehensive REST API for financial management with both PATCH (partial updates) and PUT (complete replacements) support. The API follows RESTful conventions and uses JWT token authentication.
+Tracklet provides a comprehensive REST API for financial management with both PATCH (partial updates) and PUT (complete replacements) support. The API follows RESTful conventions and uses JWT token authentication.
 
 **Base URL:** `https://your-domain.com/api/v1`
 
@@ -34,7 +34,7 @@ const headers = {
 
 ## API Client (Recommended)
 
-FinTrack includes a centralized API client for easier development:
+Tracklet includes a centralized API client for easier development:
 
 ```typescript
 import { api } from '@/lib/api-client';
@@ -727,7 +727,7 @@ The system automatically creates notifications based on user preferences and fin
 **Type:** `system_notification` | **Priority:** Low | **Color:** Gray
 ```json
 {
-  "title": "Welcome to FinTrack!",
+  "title": "Welcome to Tracklet!",
   "message": "Your account has been successfully created.",
   "data": {},
   "action_url": null,
