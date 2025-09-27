@@ -25,7 +25,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'fintrack-preferences',
+  storageKey = 'tracklet-preferences',
   ...props
 }: ThemeProviderProps) {
   // Start with default theme (same on server and client)

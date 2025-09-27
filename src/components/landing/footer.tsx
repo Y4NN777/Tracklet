@@ -29,7 +29,7 @@ export function Footer() {
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              {i.finTrack}
+              {i.Tracklet}
             </motion.h3>
             <motion.p
               className="text-muted-foreground mb-6 max-w-md"
@@ -83,7 +83,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/Y4NN777/FinTrack"
+                  href="https://github.com/Y4NN777/Tracklet"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
@@ -98,7 +98,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/Y4NN777/FinTrack/issues"
+                  href="https://github.com/Y4NN777/Tracklet/issues"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
@@ -134,7 +134,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/Y4NN777/FinTrack/blob/main/CONTRIBUTING.md"
+                  href="https://github.com/Y4NN777/Tracklet/blob/main/CONTRIBUTING.md"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
@@ -144,7 +144,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/Y4NN777/FinTrack/discussions"
+                  href="https://github.com/Y4NN777/Tracklet/discussions"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
@@ -191,7 +191,7 @@ export function Footer() {
 
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/Y4NN777/FinTrack"
+              href="https://github.com/Y4NN777/Tracklet"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"

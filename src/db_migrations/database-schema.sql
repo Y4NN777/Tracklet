@@ -1,5 +1,5 @@
 -- =========================================
--- FinTrack Database Schema
+-- Tracklet Database Schema
 -- Execute this in Supabase SQL Editor
 -- =========================================
 

@@ -5,7 +5,7 @@ const developerStoryContent: DeclarationContent = {
   content: {
     altText: t({ en: "The Y4NN - Developer & Creator", fr: "The Y4NN - Développeur & Créateur" }),
     title: t({ en: "Built by a developer carrying about his community problem, for other devs, friends, youth and everyone struggling with finances management", fr: "Construit par un développeur soucieux des problèmes de sa communauté, pour les autres développeurs, les amis, les jeunes et tous ceux qui ont des difficultés avec la gestion des finances" }),
-    story: t({ en: "As a developer who struggled with personal finance management, I created FinTrack to help others achieve financial clarity through free, open source software.", fr: "En tant que développeur qui a eu du mal avec la gestion des finances personnelles, j'ai créé FinTrack pour aider les autres à atteindre la clarté financière grâce à un logiciel gratuit et open source." }),
+    story: t({ en: "As a developer who struggled with personal finance management, I created Tracklet to help others achieve financial clarity through free, open source software.", fr: "En tant que développeur qui a eu du mal avec la gestion des finances personnelles, j'ai créé Tracklet pour aider les autres à atteindre la clarté financière grâce à un logiciel gratuit et open source." }),
     name: t({ en: "TheY4NN", fr: "TheY4NN" }),
     role: t({ en: "Developer", fr: "Développeur" }),
     openSourceAdvocate: t({ en: "Open Source Advocate", fr: "Défenseur de l'Open Source" }),

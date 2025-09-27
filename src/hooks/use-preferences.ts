@@ -64,7 +64,7 @@ export function usePreferences() {
   // Load preferences from localStorage
   const loadLocalPreferences = useCallback((): UserPreferences => {
     try {
-      const stored = localStorage.getItem('fintrack-preferences');
+      const stored = localStorage.getItem('tracklet-preferences');
       return stored ? { ...DEFAULT_PREFERENCES, ...JSON.parse(stored) } : DEFAULT_PREFERENCES;
     } catch {
       return DEFAULT_PREFERENCES;
@@ -74,7 +74,7 @@ export function usePreferences() {
   // Save preferences to localStorage
   const saveLocalPreferences = useCallback((prefs: UserPreferences) => {
     try {
-      localStorage.setItem('fintrack-preferences', JSON.stringify(prefs));
+      localStorage.setItem('tracklet-preferences', JSON.stringify(prefs));
     } catch (error) {
 //      console.warn('Failed to save preferences to localStorage:', error);
     }

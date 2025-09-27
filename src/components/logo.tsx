@@ -26,7 +26,7 @@ export function Logo({ className }: LogoProps) {
         "text-lg font-bold text-primary transition-opacity duration-200",
         isCollapsed && "opacity-0"
       )}>
-        FinTrack
+        Tracklet
       </h1>
     </div>
   );

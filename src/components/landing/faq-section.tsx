@@ -12,8 +12,8 @@ export function FAQSection() {
 
   const faqs = [
     {
-      question: i.isFinTrackFree,
-      answer: i.isFinTrackFreeAnswer
+      question: i.isTrackletFree,
+      answer: i.isTrackletFreeAnswer
     },
     {
       question: i.canIContribute,
@@ -24,8 +24,8 @@ export function FAQSection() {
       answer: i.isDataSecureAnswer
     },
     {
-      question: i.whatMakesFinTrackDifferent,
-      answer: i.whatMakesFinTrackDifferentAnswer
+      question: i.whatMakesTrackletDifferent,
+      answer: i.whatMakesTrackletDifferentAnswer
     },
     {
       question: i.doINeedFinancialKnowledge,
@@ -100,7 +100,7 @@ export function FAQSection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://github.com/Y4NN777/FinTrack"
+              href="https://github.com/Y4NN777/Tracklet"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline font-medium"
@@ -108,7 +108,7 @@ export function FAQSection() {
               {i.viewDocumentation}
             </a>
             <a
-              href="https://github.com/Y4NN777/FinTrack/issues"
+              href="https://github.com/Y4NN777/Tracklet/issues"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline font-medium"

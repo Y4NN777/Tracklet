@@ -4,7 +4,7 @@ const dashboardPageContent: DeclarationContent = {
   key: "dashboard-page",
   content: {
     // Welcome Message (No Data)
-    welcomeToFinTrack: t({ en: "Welcome to FinTrack", fr: "Bienvenue sur FinTrack" }),
+    welcomeToTracklet: t({ en: "Welcome to Tracklet", fr: "Bienvenue sur Tracklet" }),
     startTracking: t({ en: "Start tracking your finances by adding your first account. Once you have an account set up, you can begin recording transactions.", fr: "Commencez à suivre vos finances en ajoutant votre premier compte. Une fois votre compte configuré, vous pouvez commencer à enregistrer des transactions." }),
     addAccount: t({ en: "Add Account", fr: "Ajouter un compte" }),
 

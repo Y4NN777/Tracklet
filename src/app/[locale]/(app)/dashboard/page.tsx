@@ -94,7 +94,7 @@ export default function DashboardPage() {
   if (!hasData && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
-        <h2 className="text-2xl font-bold">{i.welcomeToFinTrack}</h2>
+        <h2 className="text-2xl font-bold">{i.welcomeToTracklet}</h2>
         <p className="text-muted-foreground text-center max-w-md">
           {i.startTracking}
         </p>

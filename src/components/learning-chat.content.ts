@@ -5,8 +5,8 @@ const learningChatContent: DeclarationContent = {
   content: {
     // Welcome Message
     welcome: t({
-      en: "Hello! I'm your FinTrack Learning Assistant. I can help you learn about personal finance. What would you like to explore today?",
-      fr: "Bonjour! Je suis votre assistant d'apprentissage FinTrack. Je peux vous aider à apprendre la finance personnelle. Que voulez-vous explorer aujourd'hui?",
+      en: "Hello! I'm your Tracklet Learning Assistant. I can help you learn about personal finance. What would you like to explore today?",
+      fr: "Bonjour! Je suis votre assistant d'apprentissage Tracklet. Je peux vous aider à apprendre la finance personnelle. Que voulez-vous explorer aujourd'hui?",
     }),
     welcomeSuggestions: t({
       en: ["Budgeting Basics", "Saving Strategies", "Investment Basics"],

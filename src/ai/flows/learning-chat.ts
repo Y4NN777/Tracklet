@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Learning Center AI flow for FinTrack
+ * @fileOverview Learning Center AI flow for Tracklet
  * Provides educational conversations using structured learning themes
  */
 
@@ -30,7 +30,7 @@ const learningPrompt = ai.definePrompt({
   name: 'learningPrompt',
   input: {schema: LearningQuerySchema},
   output: {schema: LearningResponseSchema},
-  prompt: `You are FinTrack's Learning Assistant, an educational AI specialized in teaching personal finance to African users.
+  prompt: `You are Tracklet's Learning Assistant, an educational AI specialized in teaching personal finance to African users.
 
 You have access to these structured learning themes:
 
@@ -75,7 +75,7 @@ You have access to these structured learning themes:
 3. Include practical examples and actionable advice
 4. Suggest 2-3 related topics for continued learning
 5. Support both French and English conversations naturally
-6. Reference FinTrack app (Web App where you integrated) real and current features when relevant like budgeting, goal fixing and tracking, recommand also AI feature like the savings advisor and the insights provider
+6. Reference Tracklet app (Web App where you integrated) real and current features when relevant like budgeting, goal fixing and tracking, recommand also AI feature like the savings advisor and the insights provider
 7. Keep responses clear, encouraging, and culturally appropriate for African users
 8. Focus on manual, realistic financial strategies that work in local contexts
 9. Use the user's preferred currency ({{{currency}}}) in all financial examples instead of hardcoded currencies

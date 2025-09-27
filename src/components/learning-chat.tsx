@@ -81,12 +81,12 @@ export function LearningChat() {
   const getWelcomeMessage = (lang: 'en' | 'fr') => {
     if (lang === 'fr') {
       return {
-        text: 'Bonjour! Je suis votre assistant d\'apprentissage FinTrack. Je peux vous aider à apprendre la finance personnelle. Que voulez-vous explorer aujourd\'hui?',
+        text: 'Bonjour! Je suis votre assistant d\'apprentissage Tracklet. Je peux vous aider à apprendre la finance personnelle. Que voulez-vous explorer aujourd\'hui?',
         suggestions: ['Bases de la Budgétisation', 'Stratégies d\'Épargne', 'Bases de l\'Investissement']
       };
     }
     return {
-      text: 'Hello! I\'m your FinTrack Learning Assistant. I can help you learn about personal finance. What would you like to explore today?',
+      text: 'Hello! I\'m your Tracklet Learning Assistant. I can help you learn about personal finance. What would you like to explore today?',
       suggestions: ['Budgeting Basics', 'Saving Strategies', 'Investment Basics']
     };
   };

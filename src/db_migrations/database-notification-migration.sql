@@ -1,5 +1,5 @@
 -- =========================================
--- FinTrack Notification System Migration
+-- Tracklet Notification System Migration
 -- Safe to run multiple times - uses IF NOT EXISTS and ON CONFLICT
 -- =========================================
 

@@ -5,9 +5,9 @@ const onboardingPageContent: DeclarationContent = {
   key: "onboarding-page",
   content: {
     // Onboarding Steps
-    step1Title: t({ en: "Welcome to FinTrack", fr: "Bienvenue sur FinTrack" }),
+    step1Title: t({ en: "Welcome to Tracklet", fr: "Bienvenue sur Tracklet" }),
     step1Description: t({ en: "Your AI-powered finance companion awaits", fr: "Votre compagnon financier alimenté par l'IA vous attend" }),
-    step2Title: t({ en: "Discover FinTrack", fr: "Découvrez FinTrack" }),
+    step2Title: t({ en: "Discover Tracklet", fr: "Découvrez Tracklet" }),
     step2Description: t({ en: "Learn what makes your financial journey smarter", fr: "Découvrez ce qui rend votre parcours financier plus intelligent" }),
     step3Title: t({ en: "Profile Setup", fr: "Configuration du Profil" }),
     step3Description: t({ en: "Personalize your experience", fr: "Personnalisez votre expérience" }),
@@ -17,7 +17,7 @@ const onboardingPageContent: DeclarationContent = {
     step5Description: t({ en: "Ready to take control of your finances", fr: "Prêt à prendre le contrôle de vos finances" }),
 
     // Step Content
-    step1Welcome: t({ en: "Welcome to FinTrack!", fr: "Bienvenue sur FinTrack !" }),
+    step1Welcome: t({ en: "Welcome to Tracklet!", fr: "Bienvenue sur Tracklet !" }),
     step1Greeting: t({
       en: (params: { name: string } = { name: '' }) => `Hello ${params.name}! Let's set up your profile.`,
       fr: (params: { name: string } = { name: '' }) => `Bonjour ${params.name} ! Configurons votre profil.`,
@@ -40,7 +40,7 @@ const onboardingPageContent: DeclarationContent = {
     step4Currency: t({ en: "Currency", fr: "Devise" }),
 
     step5AllSet: t({ en: "You're All Set!", fr: "Vous êtes Prêt !" }),
-    step5Ready: t({ en: "Welcome to FinTrack! Your personalized experience is ready.", fr: "Bienvenue sur FinTrack ! Votre expérience personnalisée est prête." }),
+    step5Ready: t({ en: "Welcome to Tracklet! Your personalized experience is ready.", fr: "Bienvenue sur Tracklet ! Votre expérience personnalisée est prête." }),
 
     // General UI
     stepOf: t({
@@ -63,7 +63,7 @@ const onboardingPageContent: DeclarationContent = {
     avatarUploadSuccessDescription: t({ en: "Your profile picture has been saved.", fr: "Votre photo de profil a été enregistrée." }),
     avatarUploadFailedTitle: t({ en: "Upload failed", fr: "Échec du téléchargement" }),
     avatarUploadFailedDescription: t({ en: "Please try again.", fr: "Veuillez réessayer." }),
-    welcomeToastTitle: t({ en: "Welcome to FinTrack!", fr: "Bienvenue sur FinTrack !" }),
+    welcomeToastTitle: t({ en: "Welcome to Tracklet!", fr: "Bienvenue sur Tracklet !" }),
     welcomeToastDescription: t({ en: "Redirecting you to the dashboard...", fr: "Redirection vers le tableau de bord..." }),
     setupFailedTitle: t({ en: "Setup failed", fr: "Échec de la configuration" }),
     setupFailedDescription: t({ en: "Redirecting you anyway.", fr: "Redirection en cours malgré tout." }),

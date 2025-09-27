@@ -9,8 +9,8 @@ const termsPageContent: DeclarationContent = {
     // Main page content
     title: t({ en: "Terms of Service & Privacy Policy", fr: "Conditions d'utilisation et Politique de confidentialité" }),
     descriptionAuthenticated: t({ 
-      en: "Please review and accept our terms to continue using FinTrack.", 
-      fr: "Veuillez consulter et accepter nos conditions pour continuer à utiliser FinTrack." 
+      en: "Please review and accept our terms to continue using Tracklet.", 
+      fr: "Veuillez consulter et accepter nos conditions pour continuer à utiliser Tracklet." 
     }),
     descriptionUnauthenticated: t({ 
       en: "Please review our terms and privacy policy before creating your account.", 
@@ -21,8 +21,8 @@ const termsPageContent: DeclarationContent = {
     termsOfServiceTitle: t({ en: "Terms of Service", fr: "Conditions d'utilisation" }),
     terms1Title: t({ en: "1. Service Acceptance", fr: "1. Acceptation du service" }),
     terms1Content: t({ 
-      en: "By using FinTrack, you agree to these terms and confirm you are 18+ years old. This is a free, open-source personal finance management application.", 
-      fr: "En utilisant FinTrack, vous acceptez ces conditions et confirmez avoir plus de 18 ans. Il s'agit d'une application gratuite et open-source de gestion des finances personnelles." 
+      en: "By using Tracklet, you agree to these terms and confirm you are 18+ years old. This is a free, open-source personal finance management application.", 
+      fr: "En utilisant Tracklet, vous acceptez ces conditions et confirmez avoir plus de 18 ans. Il s'agit d'une application gratuite et open-source de gestion des finances personnelles." 
     }),
     terms2Title: t({ en: "2. User Responsibilities", fr: "2. Responsabilités de l'utilisateur" }),
     terms2Content: t({ 
@@ -31,13 +31,13 @@ const termsPageContent: DeclarationContent = {
     }),
     terms3Title: t({ en: "3. Service Availability", fr: "3. Disponibilité du service" }),
     terms3Content: t({ 
-      en: "FinTrack is provided as-is. While we strive for reliability, we cannot guarantee uninterrupted service availability.", 
-      fr: "FinTrack est fourni en l'état. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons garantir une disponibilité ininterrompue du service." 
+      en: "Tracklet is provided as-is. While we strive for reliability, we cannot guarantee uninterrupted service availability.", 
+      fr: "Tracklet est fourni en l'état. Bien que nous nous efforcions d'assurer la fiabilité, nous ne pouvons garantir une disponibilité ininterrompue du service." 
     }),
     terms4Title: t({ en: "4. Limitation of Liability", fr: "4. Limitation de responsabilité" }),
     terms4Content: t({ 
-      en: "FinTrack is for informational purposes only. We are not liable for financial decisions made based on the application's suggestions.", 
-      fr: "FinTrack est à des fins informatives uniquement. Nous ne sommes pas responsables des décisions financières prises sur la base des suggestions de l'application." 
+      en: "Tracklet is for informational purposes only. We are not liable for financial decisions made based on the application's suggestions.", 
+      fr: "Tracklet est à des fins informatives uniquement. Nous ne sommes pas responsables des décisions financières prises sur la base des suggestions de l'application." 
     }),
     
     // Privacy Policy section
@@ -92,8 +92,8 @@ const termsPageContent: DeclarationContent = {
       fr: "J'ai lu et j'accepte les Conditions d'utilisation" 
     }),
     acceptTermsDescription: t({ 
-      en: "You must accept the terms to use FinTrack's services.", 
-      fr: "Vous devez accepter les conditions pour utiliser les services de FinTrack." 
+      en: "You must accept the terms to use Tracklet's services.", 
+      fr: "Vous devez accepter les conditions pour utiliser les services de Tracklet." 
     }),
     acceptPrivacyLabel: t({ 
       en: "I have read and accept the Privacy Policy", 
@@ -129,8 +129,8 @@ const termsPageContent: DeclarationContent = {
     // Toast messages
     acceptAllToastTitle: t({ en: "Please accept all terms", fr: "Veuillez accepter toutes les conditions" }),
     acceptAllToastDescription: t({ 
-      en: "You must check all boxes to continue using FinTrack.", 
-      fr: "Vous devez cocher toutes les cases pour continuer à utiliser FinTrack." 
+      en: "You must check all boxes to continue using Tracklet.", 
+      fr: "Vous devez cocher toutes les cases pour continuer à utiliser Tracklet." 
     }),
     termsAcceptedToastTitle: t({ en: "Terms accepted", fr: "Conditions acceptées" }),
     termsAcceptedToastDescription: t({ 

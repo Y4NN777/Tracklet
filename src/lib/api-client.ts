@@ -1,5 +1,5 @@
 /**
- * FinTrack API Client
+ * Tracklet API Client
  *
  * Centralized API client with environment-based configuration
  * Handles authentication, base URL, and common request patterns

@@ -15,8 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { auth, db, supabase } from '@/lib/supabase';
 
 const ONBOARDING_STEPS = [
-  { id: 1, title: 'Welcome to FinTrack', description: 'Your AI-powered finance companion awaits' },
-  { id: 2, title: 'Discover FinTrack', description: 'Learn what makes your financial journey smarter' },
+  { id: 1, title: 'Welcome to Tracklet', description: 'Your AI-powered finance companion awaits' },
+  { id: 2, title: 'Discover Tracklet', description: 'Learn what makes your financial journey smarter' },
   { id: 3, title: 'Terms & Privacy', description: 'Review our terms and privacy policy' },
   { id: 4, title: 'Profile Setup', description: 'Personalize your experience' },
   { id: 5, title: 'Preferences', description: 'Customize your financial settings' },
@@ -162,7 +162,7 @@ export default function OnboardingPage() {
         }
 
         toast({
-          title: 'Welcome to FinTrack!',
+          title: 'Welcome to Tracklet!',
           description: 'Redirecting you to the dashboard...',
         });
 
@@ -241,7 +241,7 @@ export default function OnboardingPage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold flex items-center gap-2">
-                  Welcome to FinTrack! <PartyPopper className="w-5 h-5" />
+                  Welcome to Tracklet! <PartyPopper className="w-5 h-5" />
                 </h3>
                 <p className="text-muted-foreground">
                   Hello {user.user_metadata?.display_name || user.user_metadata?.name || user.user_metadata?.full_name || 'there'}! Your account has been created successfully. Let's set up your personalized finance experience.
@@ -253,7 +253,7 @@ export default function OnboardingPage() {
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-xl font-semibold mb-4">Discover FinTrack</h3>
+                <h3 className="text-xl font-semibold mb-4">Discover Tracklet</h3>
                 <p className="text-muted-foreground mb-6">Your AI-powered companion for smart financial management</p>
               </div>
 
@@ -312,7 +312,7 @@ export default function OnboardingPage() {
                 <div className="p-4 border rounded-lg bg-muted/50">
                   <h4 className="font-semibold mb-2">Terms of Service</h4>
                   <p className="text-sm text-muted-foreground mb-3">
-                    By using FinTrack, you agree to our terms of service which govern how we collect, use, and protect your financial data.
+                    By using Tracklet, you agree to our terms of service which govern how we collect, use, and protect your financial data.
                   </p>
                   <a href="/terms" className="text-sm text-primary hover:underline">Read full terms →</a>
                 </div>
@@ -616,7 +616,7 @@ export default function OnboardingPage() {
                   You're All Set! <PartyPopper className="w-5 h-5" />
                 </h3>
                 <p className="text-muted-foreground">
-                  Welcome to FinTrack, {user.user_metadata?.display_name || user.user_metadata?.name || user.user_metadata?.full_name || 'valued user'}! Your personalized finance tracking experience is ready. Start managing your money smarter today!
+                  Welcome to Tracklet, {user.user_metadata?.display_name || user.user_metadata?.name || user.user_metadata?.full_name || 'valued user'}! Your personalized finance tracking experience is ready. Start managing your money smarter today!
                 </p>
               </div>
             </div>

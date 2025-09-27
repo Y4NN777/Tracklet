@@ -6,7 +6,7 @@ const signupPageContent: DeclarationContent = {
   content: {
     // Card Header
     title: t({ en: "Create an account", fr: "Créer un compte" }),
-    description: t({ en: "Enter your information to get started with FinTrack", fr: "Entrez vos informations pour commencer avec FinTrack" }),
+    description: t({ en: "Enter your information to get started with Tracklet", fr: "Entrez vos informations pour commencer avec Tracklet" }),
 
     // Form Fields
     fullNameLabel: t({ en: "Full Name", fr: "Nom complet" }),

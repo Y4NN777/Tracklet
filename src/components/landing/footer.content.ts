@@ -3,7 +3,7 @@ import { t, type DeclarationContent } from "intlayer";
 const footerContent: DeclarationContent = {
   key: "footer",
   content: {
-    finTrack: t({ en: "FinTrack", fr: "FinTrack" }),
+    Tracklet: t({ en: "Tracklet", fr: "Tracklet" }),
     description: t({ 
       en: "AI-powered personal finance management. Free, open source software built by developers for everyone seeking financial clarity.", 
       fr: "Gestion des finances personnelles assistée par IA. Logiciel gratuit et open source conçu par des développeurs pour tous ceux qui recherchent la clarté financière." 
@@ -25,8 +25,8 @@ const footerContent: DeclarationContent = {
     // Simple approach - separate parts for copyright
     copyrightPrefix: t({ en: "©", fr: "©" }),
     copyrightSuffix: t({ 
-      en: "FinTrack. Open source under MIT License.", 
-      fr: "FinTrack. Open source sous licence MIT." 
+      en: "Tracklet. Open source under MIT License.", 
+      fr: "Tracklet. Open source sous licence MIT." 
     }),
     
     githubAria: t({ en: "GitHub Repository", fr: "Dépôt GitHub" }),

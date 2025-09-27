@@ -109,7 +109,7 @@ export default function ProfilePage() {
         const fileName = `${user.id}/avatar.${fileExt}`;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('fintrack-avatars')
+          .from('Tracklet-avatars')
           .upload(fileName, newAvatarFile, {
             cacheControl: '3600',
             upsert: true
@@ -123,6 +123,7 @@ export default function ProfilePage() {
 //        console.log('Upload successful, getting public URL...');
 
         const { data: { publicUrl } } = supabase.storage
+          //  TODO 
           .from('fintrack-avatars')
           .getPublicUrl(fileName);
 
