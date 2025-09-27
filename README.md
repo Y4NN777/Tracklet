@@ -1,6 +1,6 @@
-# FinTrack - AI-Powered Personal Finance Management Solution
+# Tracklet - AI-Powered Personal Finance Management Solution
 
-A fully open-source personal finance management application designed to help users track spending, set budgets, and achieve financial goals with optional AI-powered insights.
+A fully open-source personal finance management application designed to help users track their finances the smart way by logging spending, gains, set budgets, and achieve financial goals with optional AI-powered insights.
 
 
 **IMPORTANT** : Hybrid Alpha/Beta Testing
@@ -13,24 +13,24 @@ All bug reports and feature requests should be submitted through the GitHub Issu
 [![Supabase](https://img.shields.io/badge/Supabase-336791.svg)](https://supabase.com)
 [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI-4285F4.svg)](https://ai.google)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg)](https://github.com/Y4NN777/FinTrack)
-[![Contributors](https://img.shields.io/github/contributors/Y4NN777/FinTrack)](https://github.com/Y4NN777/FinTrack/graphs/contributors)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Y4NN777/FinTrack/pulls)
+[![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg)](https://github.com/Y4NN777/Tracklet)
+[![Contributors](https://img.shields.io/github/contributors/Y4NN777/Tracklet)](https://github.com/Y4NN777/Tracklet/graphs/contributors)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Y4NN777/Tracklet/pulls)
 
 ## Overview
 
 <img width="400" height="761" alt="image" src="https://github.com/user-attachments/assets/323b2569-4221-4299-9848-bb3746549a0e" />
 <img width="400" height="761" alt="image" src="https://github.com/user-attachments/assets/94e008cf-579e-4bc3-8cf5-14f597aff336" />
 
-FinTrack is a sophisticated personal finance management system built on a modern full-stack architecture. By combining a responsive Next.js frontend with a robust Supabase backend and Google Gemini AI capabilities, FinTrack provides comprehensive financial management tools with interactive AI-powered financial guidance.
+Tracklet is a sophisticated personal finance management system built on a modern full-stack architecture. By combining a responsive Next.js frontend with a robust Supabase backend and Google Gemini AI capabilities, FinTrack provides comprehensive financial management tools with interactive AI-powered financial guidance.
 
 The system includes AI-powered forms where users can input their financial information to receive personalized insights and recommendations, alongside comprehensive transaction tracking, budgeting, and goal-setting features.
 
 ## My Story & Mission
 
-**FinTrack was born from personal struggle and a vision to help others in the same situation like me.** As a developer who personally always struggled with personal financial management ( Even before becoming a developer), I realized that most existing finance apps I used didn't help me a lot (may be the problem was me. I respect and worth developers work a lot). So I was thinking about building my own when I started to grow as a dev but I was hesitating. After observing similar challenges among my peers, roommates, and younger people in my campus and community ( Burkina Faso, Ouagadougou), I realized this may be a widespread problem that needed a modern solution.
+**Tracklet was born from personal struggle and a vision to help others in the same situation like me.** As a developer who personally always struggled with personal financial management ( Even before becoming a developer), I realized that most existing finance apps I used didn't help me a lot (may be the problem was me. I respect and worth developers work a lot). So I was thinking about building my own when I started to grow as a dev but I was hesitating. After observing similar challenges among my peers, roommates, and younger people in my campus and community ( Burkina Faso, Ouagadougou), I realized this may be a widespread problem that needed a modern solution.
 
-**That's why I started to built FinTrack** - a comprehensive, AI-powered personal finance management system designed to make financial management accessible, understandable, and effective for everyone. By combining cutting-edge technology with practical financial guidance, FinTrack not only helps users track their money but provides the insights and recommendations needed to truly improve their financial health.
+**That's why I started to built Tracklet** - a comprehensive, AI-powered personal finance management system designed to make financial management accessible, understandable, and effective for everyone. By combining cutting-edge technology with practical financial guidance, FinTrack not only helps users track their money but provides the insights and recommendations needed to truly improve their financial health.
 
 **Our mission is simple**: To empower individuals with the tools and knowledge they need to take control of their finances, break free from financial stress, and build a more secure financial future. Whether you're a student managing your first budget, a young professional building wealth, or anyone seeking better financial clarity, FinTrack is here to help.
 
@@ -48,7 +48,7 @@ FinTrack is an **open-source project** that welcomes contributions! Whether you'
 - **UI/UX**: Improve the user interface and experience
 - **Testing**: Add tests and ensure code quality
 
-**[Get Started Contributing →](#-contributing-to-fintrack)** | **[View Issues →](https://github.com/Y4NN777/FinTrack/issues)**
+**[Get Started Contributing →](#-contributing-to-fintrack)** | **[View Issues →](https://github.com/Y4NN777/Tracklet/issues)**
 
 ---
 
@@ -187,7 +187,7 @@ User Interaction → Frontend Processing → API Requests → Database Operation
 ## Project Structure
 
 ```text
-FinTrack/
+Tracklet/
 ├── src/
 │   ├── app/                          # Next.js App Router structure
 │   │   ├── (app)/                    # Main application pages
@@ -297,8 +297,8 @@ FinTrack/
 ##### 1. Repository Setup
 
 ```bash
-git clone https://github.com/Y4NN777/FinTrack.git
-cd FinTrack
+git clone https://github.com/Y4NN777/Tracklet.git
+cd Tracklet
 ```
 
 ##### 2. Dependency Installation
@@ -429,7 +429,7 @@ We welcome contributions from developers of all skill levels! FinTrack is an ope
 
 1. **Fork & Clone**: Fork the repository and clone it locally
 2. **Setup Environment**: Follow the installation guide above
-3. **Pick an Issue**: Check [GitHub Issues](https://github.com/Y4NN777/FinTrack/issues) for good first issues
+3. **Pick an Issue**: Check [GitHub Issues](https://github.com/Y4NN777/Tracklet/issues) for good first issues
 4. **Create Branch**: Use descriptive branch names (e.g., `feature/add-budget-categories`)
 5. **Make Changes**: Implement your feature or fix
 6. **Test Thoroughly**: Ensure your changes work as expected
@@ -486,8 +486,8 @@ Contributors will be:
 
 ###  Getting Help
 
-- **Issues**: [GitHub Issues](https://github.com/Y4NN777/FinTrack/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Y4NN777/FinTrack/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Y4NN777/Tracklet/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Y4NN777/Tracklet/discussions)
 
 
 
@@ -516,8 +516,8 @@ Contributors will be:
 
 ###  Getting Help
 
-- **Issues**: [GitHub Issues](https://github.com/Y4NN777/FinTrack/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Y4NN777/FinTrack/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Y4NN777/Tracklet/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Y4NN777/Tracklet/discussions)
 - **Discord**: Join our community chat (coming soon)
 
 
@@ -553,7 +553,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ## Support & Documentation
 
-Issues: [GitHub Issues Tracker](https://github.com/Y4NN777/FinTrack/issues)
+Issues: [GitHub Issues Tracker](https://github.com/Y4NN777/Tracklet/issues)
 Documentation: Comprehensive guides in `/docs` directory
 Community: Developer discussions and Q&A
 API Reference: Complete endpoint documentation
@@ -604,7 +604,6 @@ API Reference: Complete endpoint documentation
 - [ ] **Financial Reports**: Comprehensive monthly and annual financial reports
 - [ ] **Family Accounts**: Shared financial management for households
 - [ ] **Real Assets Integration**: Integration with real assets app through uniform and normalized API
-- [ ] **Automatic system language detection and switching for better UX**
 
 ### Planned Perfomance optimization
 
@@ -690,5 +689,5 @@ If the application encounters issues during development, consider the following:
 
 ---
 
-Financial Management Disclaimer: FinTrack provides tools and insights to help manage personal finances more effectively. This system enhances financial awareness but does not constitute financial advice, investment recommendations, or tax guidance. Always consult qualified financial professionals for important financial decisions.
+Financial Management Disclaimer: Tracklet provides tools and insights to help manage personal finances more effectively. This system enhances financial awareness but does not constitute financial advice, investment recommendations, or tax guidance. Always consult qualified financial professionals for important financial decisions.
 
