@@ -40,7 +40,7 @@ The system includes AI-powered forms where users can input their financial infor
 
 ##  How to Contribute
 
-FinTrack is an **open-source project** that welcomes contributions! Whether you're a developer, designer, or financial expert, you can help improve FinTrack.
+Tracklet is an **open-source project** that welcomes contributions! Whether you're a developer, designer, or financial expert, you can help improve FinTrack.
 
 - **Fix Issues**: Help us resolve bugs and improve stability
 - **Add Features**: Implement new financial tools and enhancements
