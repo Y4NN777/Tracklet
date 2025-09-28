@@ -199,7 +199,7 @@ export default function DashboardPage() {
       {budgetAlerts.length > 0 && (
         <div className="space-y-2">
           {budgetAlerts.map((alert, index) => (
-            <Alert key={alert.budgetId} className={alert.severity === 'error' ? 'border-destructive' : 'border-warning'}>
+            <Alert key={alert.budgetId} variant={alert.severity === 'error' ? 'destructive' : 'info'}>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{alert.message}</AlertDescription>
             </Alert>

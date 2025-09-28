@@ -202,21 +202,18 @@ class DashboardService {
 
       if (budgetsResponse.data?.budgets) {
         for (const budget of budgetsResponse.data.budgets) {
-          const progress = await calculateBudgetProgress(budget.id, this.userId!)
-          if (progress) {
-            if (progress.isOverBudget) {
-              alerts.push({
-                budgetId: budget.id,
-                message: `${budget.name} budget exceeded by $${Math.abs(progress.remaining).toFixed(2)}`,
-                severity: 'error'
-              })
-            } else if (progress.percentage > 80) {
-              alerts.push({
-                budgetId: budget.id,
-                message: `${budget.name} budget is ${progress.percentage}% used`,
-                severity: 'warning'
-              })
-            }
+          if (budget.isOverBudget) {
+            alerts.push({
+              budgetId: budget.id,
+              message: `${budget.name} budget exceeded by $${Math.abs(budget.remaining).toFixed(2)}`,
+              severity: 'error'
+            })
+          } else if (budget.percentage > 80) {
+            alerts.push({
+              budgetId: budget.id,
+              message: `${budget.name} budget is ${budget.percentage}% used`,
+              severity: 'warning'
+            })
           }
         }
       }
