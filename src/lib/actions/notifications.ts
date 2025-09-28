@@ -330,21 +330,12 @@ export async function checkTransactionAlerts(userId: string, transactionId?: str
  * Calculate current spending for a budget
  */
 async function calculateBudgetSpending(userId: string, budget: any): Promise<number> {
-  const { start_date, end_date, category_id, id: budgetId, name: budgetName } = budget
+  const { start_date, end_date, id: budgetId, name: budgetName } = budget
 
-  console.log(`Calculating spending for budget ${budgetId} (${budgetName}): start=${start_date}, end=${end_date}, category=${category_id}`)
+  console.log(`Calculating spending for budget ${budgetId} (${budgetName}): start=${start_date}, end=${end_date}`)
 
-  // Hybrid assignment: expenses in category OR directly assigned to budget
-  const conditions = []
-  if (category_id) {
-    conditions.push(`category_id.eq.${category_id}`)
-  }
-  if (budgetId) {
-    conditions.push(`budget_id.eq.${budgetId}`)
-  }
-
-  if (conditions.length === 0) {
-    console.warn(`Budget ${budgetId} has no category or budget assignment criteria`)
+  if (!budgetId) {
+    console.warn(`Budget has no ID, cannot calculate spending`)
     return 0
   }
 
@@ -353,7 +344,7 @@ async function calculateBudgetSpending(userId: string, budget: any): Promise<num
     .select('amount')
     .eq('user_id', userId)
     .eq('type', 'expense')
-    .or(conditions.join(','))
+    .eq('budget_id', budgetId)
     .gte('date', start_date)
 
   if (end_date) {
@@ -368,7 +359,7 @@ async function calculateBudgetSpending(userId: string, budget: any): Promise<num
   }
 
   const total = data.reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
-  console.log(`Budget ${budgetId} spending: ${total} from ${data.length} transactions (hybrid: ${conditions.join(' OR ')})`)
+  console.log(`Budget ${budgetId} spending: ${total} from ${data.length} transactions`)
 
   return total
 }
@@ -430,7 +421,6 @@ async function checkDuplicateAlert(
   try {
     const since = new Date(Date.now() - timeWindow).toISOString()
 
-    // Get notification type ID
     const { data: typeData, error: typeError } = await supabase
       .from('notification_types')
       .select('id')
@@ -441,18 +431,14 @@ async function checkDuplicateAlert(
       return false
     }
 
-    // Check for existing notifications with similar data
+    // Use the contains operator for JSONB
     const { data: existing, error } = await supabase
       .from('notifications')
       .select('id')
       .eq('user_id', userId)
       .eq('type_id', typeData.id)
       .gte('created_at', since)
-      .eq('data->budget_id', data.budget_id || null)
-      .eq('data->goal_id', data.goal_id || null)
-      .eq('data->transaction_id', data.transaction_id || null)
-      .eq('data->threshold', data.threshold || null)
-      .eq('data->type', data.type || null)
+      .contains('data', data)
       .limit(1)
 
     return !error && existing && existing.length > 0
