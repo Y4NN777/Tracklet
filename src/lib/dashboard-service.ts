@@ -79,15 +79,11 @@ class DashboardService {
       const summary = financialSummary.status === 'fulfilled' ? financialSummary.value : null
 
       // Process budgets
-      const budgets: BudgetProgress[] = []
-      if (budgetsResponse.status === 'fulfilled' && budgetsResponse.value.data?.budgets) {
-        for (const budget of budgetsResponse.value.data.budgets) {
-          const progress = await calculateBudgetProgress(budget.id, this.userId!)
-          if (progress) {
-            budgets.push(progress)
-          }
-        }
-      }
+      const budgets: BudgetProgress[] =
+        budgetsResponse.status === 'fulfilled' && budgetsResponse.value.data?.budgets
+          ? budgetsResponse.value.data.budgets
+          : []
+
 
       // Process transactions
       const transactions = transactionsResponse.status === 'fulfilled'
