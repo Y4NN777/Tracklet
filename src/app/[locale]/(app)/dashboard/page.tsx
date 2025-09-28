@@ -41,7 +41,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  const [budgetAlerts, setBudgetAlerts] = useState<Array<{budgetId: string, message: string, severity: 'warning' | 'error'}>>([]);
+  const [budgetAlerts, setBudgetAlerts] = useState<Array<{ budgetId: string, message: string, severity: 'warning' | 'error' }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { formatCurrency: formatUserCurrency } = useCurrency();
@@ -73,7 +73,7 @@ export default function DashboardPage() {
       setMetrics(metricsData);
       setBudgetAlerts(alerts);
     } catch (err) {
-//      console.error('Failed to load dashboard data:', err);
+      //      console.error('Failed to load dashboard data:', err);
       setError(err instanceof Error ? err.message : i.failedToLoad);
     } finally {
       setIsLoading(false);
@@ -145,7 +145,7 @@ export default function DashboardPage() {
           <div className="h-80">
             <Skeleton className="h-full w-full" />
           </div>
-          
+
           {/* Loading skeleton for budget card */}
           <Card>
             <CardHeader>
@@ -269,7 +269,7 @@ export default function DashboardPage() {
               {isLoading ? (
                 <Skeleton className="h-3 w-32" />
               ) : (
-                 i.monthlyExpenses
+                i.monthlyExpenses
               )}
             </p>
           </CardContent>
@@ -312,9 +312,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {isLoading ? (
-              // Loading skeletons for budgets
-              [...Array(4)].map((_, i) => (
-                <div key={i} className="space-y-2">
+              // Loading skeletons for budgets - Fixed with unique keys
+              [...Array(4)].map((_, index) => (
+                <div key={`budget-skeleton-${index}`} className="space-y-2">
                   <div className="flex justify-between">
                     <Skeleton className="h-4 w-20" />
                     <Skeleton className="h-4 w-16" />
@@ -323,8 +323,9 @@ export default function DashboardPage() {
                 </div>
               ))
             ) : dashboardData?.budgets && dashboardData.budgets.length > 0 ? (
-              dashboardData.budgets.slice(0, 4).map((budget) => (
-                <div key={budget.budgetId} className="space-y-1">
+              dashboardData.budgets.slice(0, 4).map((budget, index) => (
+                // Using both budgetId and index as fallback for unique keys
+                <div key={budget.budgetId || `budget-${index}`} className="space-y-1">
                   <div className="flex justify-between text-sm font-medium">
                     <span>{budget.name}</span>
                     <span>
@@ -393,9 +394,8 @@ export default function DashboardPage() {
                       </Badge>
                     </TableCell>
                     <TableCell
-                      className={`text-right font-medium ${
-                        txn.type === 'income' ? 'text-success' : 'text-card-foreground'
-                      }`}
+                      className={`text-right font-medium ${txn.type === 'income' ? 'text-success' : 'text-card-foreground'
+                        }`}
                     >
                       {txn.type === 'income' ? '+' : '-'}
                       {formatUserCurrency(Math.abs(txn.amount))}
