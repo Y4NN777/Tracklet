@@ -431,15 +431,30 @@ async function checkDuplicateAlert(
       return false
     }
 
-    // Use the contains operator for JSONB
-    const { data: existing, error } = await supabase
+    // Build query with field-specific conditions instead of JSON containment
+    let query = supabase
       .from('notifications')
       .select('id')
       .eq('user_id', userId)
       .eq('type_id', typeData.id)
       .gte('created_at', since)
-      .contains('data', data)
-      .limit(1)
+
+    // Add field-specific conditions based on notification type
+    if (type === 'budget_alert') {
+      query = query
+        .eq('data->>budget_id', data.budget_id?.toString())
+        .eq('data->>threshold', data.threshold?.toString())
+    } else if (type === 'goal_reminder') {
+      query = query
+        .eq('data->>goal_id', data.goal_id?.toString())
+        .eq('data->>type', data.type)
+    } else if (type === 'transaction_alert') {
+      query = query
+        .eq('data->>transaction_id', data.transaction_id?.toString())
+        .eq('data->>type', data.type)
+    }
+
+    const { data: existing, error } = await query.limit(1)
 
     return !error && existing && existing.length > 0
   } catch (error) {
@@ -463,6 +478,14 @@ async function createNotification(
   }
 ) {
   try {
+    // Check for duplicates before creating
+    const isDuplicate = await checkDuplicateAlert(userId, type, notification.data)
+
+    if (isDuplicate) {
+      console.log(`Duplicate ${type} notification prevented for user ${userId}`)
+      return
+    }
+
     // Get notification type ID
     const { data: typeData, error: typeError } = await supabase
       .from('notification_types')
