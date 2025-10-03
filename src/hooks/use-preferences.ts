@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { auth, db } from '@/lib/supabase';
+import { auth, db, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 export interface UserPreferences {
@@ -201,7 +201,29 @@ export function usePreferences() {
     };
 
     initializePreferences();
-  }, []); // Empty dependency array - run only once on mount
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        const newUser = session?.user || null;
+        setUser(newUser);
+
+        if (newUser) {
+          // User logged in - load preferences from database
+          try {
+            await loadDatabasePreferences();
+          } catch (dbError) {
+            console.warn('Failed to load database preferences on auth change:', dbError);
+          }
+        } else {
+          // User logged out - keep local preferences but don't sync
+          // Optionally clear localStorage on logout if desired
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [loadDatabasePreferences, toast]);
 
 
   return {
