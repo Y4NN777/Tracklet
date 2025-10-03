@@ -75,10 +75,10 @@ export function NotificationBell() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-3 rounded-md border ${!notification.read_at ? 'bg-accent' : ''}`}
+                  className={`p-3 rounded-md border ${!notification.read_at ? 'bg-sky-200 text-black' : ''}`}
                 >
                   <div className="flex justify-between">
-                    <div className="font-medium text-sm">{notification.title}</div>
+                    <div className={`text-sm ${!notification.read_at ? 'font-bold' : 'font-medium'}`}>{notification.title}</div>
                     <div className="flex space-x-1">
                       {!notification.read_at && (
                         <Button
@@ -101,12 +101,12 @@ export function NotificationBell() {
                     </div>
                   </div>
                   {notification.message && (
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className={`text-sm mt-1 ${!notification.read_at ? 'text-black' : 'text-muted-foreground'}`}>
                       {notification.message}
                     </p>
                   )}
                   <div className="flex justify-between items-center mt-2">
-                    <p className="text-xs text-muted-foreground">
+                    <p className={`text-xs ${!notification.read_at ? 'text-black' : 'text-muted-foreground'}`}>
                       {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                     </p>
                     {notification.notification_types && (
