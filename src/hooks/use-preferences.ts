@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { auth, db } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 export interface UserPreferences {
   theme: 'light' | 'dark' | 'system';
@@ -56,6 +57,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
 };
 
 export function usePreferences() {
+  const { toast } = useToast();
   const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -80,18 +82,35 @@ export function usePreferences() {
     }
   }, []);
 
-  // Sync preferences with database
-  const syncWithDatabase = useCallback(async (prefs: UserPreferences) => {
+  // Sync preferences with database with retry logic
+  const syncWithDatabase = useCallback(async (prefs: UserPreferences, retryCount = 0) => {
     if (!user) return;
+
+    const maxRetries = 3;
+    const baseDelay = 1000; // 1 second
 
     try {
       await db.updateUserPreferences(user.id, prefs);
       setSyncError(null); // Clear any previous error
+      console.log('Preferences synced successfully');
     } catch (error) {
-      console.warn('Failed to sync preferences with database:', error);
-      setSyncError('Failed to save preferences. Changes may not persist across sessions.');
+      console.warn(`Failed to sync preferences with database (attempt ${retryCount + 1}):`, error);
+
+      if (retryCount < maxRetries) {
+        const delay = baseDelay * Math.pow(2, retryCount); // Exponential backoff
+        console.log(`Retrying sync in ${delay}ms...`);
+        setTimeout(() => syncWithDatabase(prefs, retryCount + 1), delay);
+      } else {
+        const errorMessage = 'Failed to save preferences. Changes may not persist across sessions.';
+        setSyncError(errorMessage);
+        toast({
+          title: 'Sync Error',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
     }
-  }, [user]);
+  }, [user, toast]);
 
   // Load preferences from database and merge with local
   const loadDatabasePreferences = useCallback(async () => {
@@ -103,13 +122,18 @@ export function usePreferences() {
         const dbPrefs = { ...DEFAULT_PREFERENCES, ...profile.preferences };
         setPreferences(dbPrefs);
         saveLocalPreferences(dbPrefs);
+        console.log('Preferences loaded from database');
       }
     } catch (error) {
       console.warn('Failed to load preferences from database:', error);
       // On mobile, this might fail - user will see localStorage preferences
-      // Consider showing a toast to inform user of potential sync issues
+      toast({
+        title: 'Sync Warning',
+        description: 'Unable to load latest preferences from server. Using local settings.',
+        variant: 'default',
+      });
     }
-  }, [user, saveLocalPreferences]);
+  }, [user, saveLocalPreferences, toast]);
 
   // Update preferences (local + database sync)
   const updatePreferences = useCallback(async (newPreferences: Partial<UserPreferences>) => {
@@ -145,7 +169,12 @@ export function usePreferences() {
           const result = await Promise.race([authPromise, authTimeout]);
           currentUser = result.user;
         } catch (authError) {
-//          console.warn('Auth check failed or timed out:', authError);
+          console.warn('Auth check failed or timed out:', authError);
+          toast({
+            title: 'Authentication Issue',
+            description: 'Unable to verify login status. Some features may be limited.',
+            variant: 'default',
+          });
           // Continue with null user (unauthenticated)
         }
 
