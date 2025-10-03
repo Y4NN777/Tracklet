@@ -217,7 +217,6 @@ export function usePreferences() {
           }
         } else {
           // User logged out - keep local preferences but don't sync
-          // Optionally clear localStorage on logout if desired
         }
       }
     );
