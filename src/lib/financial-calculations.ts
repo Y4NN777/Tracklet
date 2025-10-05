@@ -1,13 +1,4 @@
 import { supabase } from './supabase'
-import {
-  ChartConfig,
-  ChartData,
-  TimeSeriesDataPoint,
-  CategoryDataPoint,
-  GranularityType,
-  DataView,
-  TimeframeType
-} from './types/chart'
 
 // =========================================
 // FINANCIAL CALCULATIONS & BUSINESS LOGIC
@@ -38,6 +29,20 @@ export interface MonthlyData {
   net: number
 }
 
+export interface DailyData {
+  date: string
+  income: number
+  expenses: number
+  net: number
+}
+
+export interface WeeklyData {
+  week: string
+  income: number
+  expenses: number
+  net: number
+}
+
 export interface BudgetProgress {
   budgetId: string
   name: string
@@ -54,8 +59,7 @@ export interface BudgetProgress {
 
 export async function calculateFinancialSummary(
   userId: string,
-  months: number = 6,
-  granularity: GranularityType = GranularityType.MONTHLY
+  months: number = 6
 ): Promise<FinancialSummary> {
   const endDate = new Date()
   const startDate = new Date()
@@ -110,6 +114,146 @@ export async function calculateFinancialSummary(
     topCategories: categorySpending.slice(0, 5), // Top 5 categories
     monthlyTrend
   }
+}
+
+// =========================================
+// DAILY FINANCIAL SUMMARY CALCULATION
+// =========================================
+
+export async function calculateDailyFinancialSummary(
+  userId: string,
+  days: number = 30
+): Promise<DailyData[]> {
+  const endDate = new Date()
+  const startDate = new Date()
+  startDate.setDate(endDate.getDate() - days)
+
+  // Get transactions for the period
+  const { data: transactions, error } = await supabase
+    .from('transactions')
+    .select('amount, type, date')
+    .eq('user_id', userId)
+    .gte('date', startDate.toISOString().split('T')[0])
+    .lte('date', endDate.toISOString().split('T')[0])
+    .order('date')
+
+  if (error) {
+    console.error('Error fetching daily transactions:', error)
+    return []
+  }
+
+  // Initialize daily data structure
+  const dailyData: { [key: string]: DailyData } = {}
+
+  // Create entries for each day in the range
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const dateKey = d.toISOString().split('T')[0]
+    dailyData[dateKey] = {
+      date: dateKey,
+      income: 0,
+      expenses: 0,
+      net: 0
+    }
+  }
+
+  // Aggregate transactions by date
+  transactions?.forEach(transaction => {
+    const dateKey = transaction.date
+    if (dailyData[dateKey]) {
+      if (transaction.type === 'income') {
+        dailyData[dateKey].income += transaction.amount
+      } else if (transaction.type === 'expense') {
+        dailyData[dateKey].expenses += transaction.amount
+      }
+      dailyData[dateKey].net = dailyData[dateKey].income - dailyData[dateKey].expenses
+    }
+  })
+
+  // Return sorted array (oldest first for chart)
+  return Object.values(dailyData).sort((a, b) => a.date.localeCompare(b.date))
+}
+
+// =========================================
+// WEEKLY FINANCIAL SUMMARY CALCULATION
+// =========================================
+
+export async function calculateWeeklyFinancialSummary(
+  userId: string,
+  weeks: number = 12
+): Promise<WeeklyData[]> {
+  const endDate = new Date()
+  const startDate = new Date()
+  startDate.setDate(endDate.getDate() - (weeks * 7))
+
+  // Get transactions for the period
+  const { data: transactions, error } = await supabase
+    .from('transactions')
+    .select('amount, type, date')
+    .eq('user_id', userId)
+    .gte('date', startDate.toISOString().split('T')[0])
+    .lte('date', endDate.toISOString().split('T')[0])
+    .order('date')
+
+  if (error) {
+    console.error('Error fetching weekly transactions:', error)
+    return []
+  }
+
+  // Initialize weekly data structure
+  const weeklyData: { [key: string]: WeeklyData } = {}
+
+  // Create entries for each week in the range
+  const startWeek = getWeekStart(startDate)
+  const endWeek = getWeekStart(endDate)
+
+  for (let d = new Date(startWeek); d <= endWeek; d.setDate(d.getDate() + 7)) {
+    const year = d.getFullYear()
+    const weekNum = getWeekNumber(d)
+    const weekKey = `${year}-W${weekNum.toString().padStart(2, '0')}`
+    weeklyData[weekKey] = {
+      week: weekKey,
+      income: 0,
+      expenses: 0,
+      net: 0
+    }
+  }
+
+  // Aggregate transactions by week
+  transactions?.forEach(transaction => {
+    const transactionDate = new Date(transaction.date)
+    const year = transactionDate.getFullYear()
+    const weekNum = getWeekNumber(transactionDate)
+    const weekKey = `${year}-W${weekNum.toString().padStart(2, '0')}`
+
+    if (weeklyData[weekKey]) {
+      if (transaction.type === 'income') {
+        weeklyData[weekKey].income += transaction.amount
+      } else if (transaction.type === 'expense') {
+        weeklyData[weekKey].expenses += transaction.amount
+      }
+      weeklyData[weekKey].net = weeklyData[weekKey].income - weeklyData[weekKey].expenses
+    }
+  })
+
+  // Return sorted array (oldest first for chart)
+  return Object.values(weeklyData).sort((a, b) => a.week.localeCompare(b.week))
+}
+
+// Helper function to get the start of the week (Monday)
+function getWeekStart(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1) // Adjust for Sunday
+  return new Date(d.setDate(diff))
+}
+
+// Helper function to get ISO week number
+function getWeekNumber(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  const dayNum = d.getUTCDay() || 7
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
 }
 
 // =========================================
@@ -340,317 +484,6 @@ export async function generateFinancialInsights(userId: string): Promise<string[
   return insights
 }
 
-// =========================================
-// ENHANCED CHART DATA AGGREGATION
-// =========================================
-
-export async function aggregateDailyData(
-  userId: string,
-  startDate: Date,
-  endDate: Date
-): Promise<TimeSeriesDataPoint[]> {
-  const { data: transactions, error } = await supabase
-    .from('transactions')
-    .select('amount, type, date')
-    .eq('user_id', userId)
-    .gte('date', startDate.toISOString().split('T')[0])
-    .lte('date', endDate.toISOString().split('T')[0])
-    .order('date')
-
-  if (error) {
-    console.error('Error fetching daily transactions:', error)
-    return []
-  }
-
-  const dailyData: { [key: string]: TimeSeriesDataPoint } = {}
-
-  // Initialize date range
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    const dateKey = d.toISOString().split('T')[0]
-    dailyData[dateKey] = {
-      date: dateKey,
-      income: 0,
-      expenses: 0,
-      net: 0
-    }
-  }
-
-  // Aggregate transactions
-  transactions?.forEach(transaction => {
-    const dateKey = transaction.date
-    if (dailyData[dateKey]) {
-      if (transaction.type === 'income') {
-        dailyData[dateKey].income! += transaction.amount
-      } else if (transaction.type === 'expense') {
-        dailyData[dateKey].expenses! += transaction.amount
-      }
-      dailyData[dateKey].net = dailyData[dateKey].income! - dailyData[dateKey].expenses!
-    }
-  })
-
-  return Object.values(dailyData).sort((a, b) => a.date.localeCompare(b.date))
-}
-
-export async function aggregateWeeklyData(
-  userId: string,
-  startDate: Date,
-  endDate: Date
-): Promise<TimeSeriesDataPoint[]> {
-  const { data: transactions, error } = await supabase
-    .from('transactions')
-    .select('amount, type, date')
-    .eq('user_id', userId)
-    .gte('date', startDate.toISOString().split('T')[0])
-    .lte('date', endDate.toISOString().split('T')[0])
-    .order('date')
-
-  if (error) {
-    console.error('Error fetching weekly transactions:', error)
-    return []
-  }
-
-  const weeklyData: { [key: string]: TimeSeriesDataPoint } = {}
-
-  // Initialize week range
-  const startWeek = getWeekStart(startDate)
-  const endWeek = getWeekStart(endDate)
-
-  for (let d = new Date(startWeek); d <= endWeek; d.setDate(d.getDate() + 7)) {
-    const weekKey = d.toISOString().split('T')[0]
-    weeklyData[weekKey] = {
-      date: weekKey,
-      income: 0,
-      expenses: 0,
-      net: 0
-    }
-  }
-
-  // Aggregate transactions by week
-  transactions?.forEach(transaction => {
-    const transactionDate = new Date(transaction.date)
-    const weekStart = getWeekStart(transactionDate)
-    const weekKey = weekStart.toISOString().split('T')[0]
-
-    if (weeklyData[weekKey]) {
-      if (transaction.type === 'income') {
-        weeklyData[weekKey].income! += transaction.amount
-      } else if (transaction.type === 'expense') {
-        weeklyData[weekKey].expenses! += transaction.amount
-      }
-      weeklyData[weekKey].net = weeklyData[weekKey].income! - weeklyData[weekKey].expenses!
-    }
-  })
-
-  return Object.values(weeklyData).sort((a, b) => a.date.localeCompare(b.date))
-}
-
-function getWeekStart(date: Date): Date {
-  const d = new Date(date)
-  const day = d.getDay()
-  const diff = d.getDate() - day
-  return new Date(d.setDate(diff))
-}
-
-// =========================================
-// SPECIALIZED DATA VIEW FUNCTIONS
-// =========================================
-
-export async function getCategoryTrends(
-  userId: string,
-  config: ChartConfig
-): Promise<CategoryDataPoint[]> {
-  const { startDate, endDate } = getDateRange(config.timeframe, config.customRange)
-
-  const { data: transactions, error } = await supabase
-    .from('transactions')
-    .select(`
-      amount,
-      type,
-      categories (
-        id,
-        name,
-        color,
-        icon
-      )
-    `)
-    .eq('user_id', userId)
-    .eq('type', 'expense')
-    .gte('date', startDate.toISOString().split('T')[0])
-    .lte('date', endDate.toISOString().split('T')[0])
-
-  if (error) {
-    console.error('Error fetching category data:', error)
-    return []
-  }
-
-  const categoryTotals: { [key: string]: CategoryDataPoint } = {}
-
-  transactions?.forEach(transaction => {
-    const category = transaction.categories as any // Supabase returns joined data as object
-    const categoryId = category?.id
-    const categoryName = category?.name || 'Uncategorized'
-    const color = category?.color || '#6366f1'
-    const icon = category?.icon || '📊'
-
-    if (!categoryTotals[categoryId]) {
-      categoryTotals[categoryId] = {
-        name: categoryName,
-        value: 0,
-        percentage: 0,
-        color,
-        icon
-      }
-    }
-
-    categoryTotals[categoryId].value += transaction.amount
-  })
-
-  const total = Object.values(categoryTotals).reduce((sum, cat) => sum + cat.value, 0)
-
-  return Object.values(categoryTotals)
-    .map(cat => ({
-      ...cat,
-      percentage: total > 0 ? (cat.value / total) * 100 : 0
-    }))
-    .sort((a, b) => b.value - a.value)
-}
-
-export async function getBudgetProgression(
-  userId: string,
-  config: ChartConfig
-): Promise<TimeSeriesDataPoint[]> {
-  // This would require budget data over time - simplified implementation
-  const { startDate, endDate } = getDateRange(config.timeframe, config.customRange)
-
-  // For now, return empty array - would need budget history tracking
-  return []
-}
-
-export async function getNetWorthHistory(
-  userId: string,
-  config: ChartConfig
-): Promise<TimeSeriesDataPoint[]> {
-  const { startDate, endDate } = getDateRange(config.timeframe, config.customRange)
-
-  // Get all accounts for the user
-  const { data: accounts, error: accountsError } = await supabase
-    .from('accounts')
-    .select('id, balance, created_at')
-    .eq('user_id', userId)
-
-  if (accountsError) {
-    console.error('Error fetching accounts:', accountsError)
-    return []
-  }
-
-  // Simplified net worth calculation - would need historical balances
-  const netWorthData: TimeSeriesDataPoint[] = []
-
-  // For now, return current net worth as single point
-  const currentNetWorth = accounts?.reduce((total, account) => total + (account.balance || 0), 0) || 0
-
-  netWorthData.push({
-    date: new Date().toISOString().split('T')[0],
-    balance: currentNetWorth
-  })
-
-  return netWorthData
-}
-
-export async function getCashFlowData(
-  userId: string,
-  config: ChartConfig
-): Promise<TimeSeriesDataPoint[]> {
-  const { startDate, endDate } = getDateRange(config.timeframe, config.customRange)
-
-  let aggregationFunction: (userId: string, startDate: Date, endDate: Date) => Promise<TimeSeriesDataPoint[]>
-
-  switch (config.granularity) {
-    case GranularityType.DAILY:
-      aggregationFunction = aggregateDailyData
-      break
-    case GranularityType.WEEKLY:
-      aggregationFunction = aggregateWeeklyData
-      break
-    case GranularityType.MONTHLY:
-    default:
-      // For monthly, we'll use the existing monthly trends logic
-      const transactions = await getTransactionsForPeriod(userId, startDate, endDate)
-      return calculateMonthlyTrends(transactions, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)))
-        .map(month => ({
-          date: month.month + '-01',
-          income: month.income,
-          expenses: month.expenses,
-          net: month.net
-        }))
-  }
-
-  return aggregationFunction(userId, startDate, endDate)
-}
-
-// =========================================
-// HELPER FUNCTIONS
-// =========================================
-
-function getDateRange(timeframe: TimeframeType, customRange?: { startDate: Date; endDate: Date }): { startDate: Date; endDate: Date } {
-  let endDate = new Date()
-  let startDate = new Date()
-
-  switch (timeframe) {
-    case TimeframeType.LAST_7_DAYS:
-      startDate.setDate(endDate.getDate() - 7)
-      break
-    case TimeframeType.LAST_30_DAYS:
-      startDate.setDate(endDate.getDate() - 30)
-      break
-    case TimeframeType.LAST_3_MONTHS:
-      startDate.setMonth(endDate.getMonth() - 3)
-      break
-    case TimeframeType.LAST_6_MONTHS:
-      startDate.setMonth(endDate.getMonth() - 6)
-      break
-    case TimeframeType.LAST_12_MONTHS:
-      startDate.setMonth(endDate.getMonth() - 12)
-      break
-    case TimeframeType.ALL_TIME:
-      startDate = new Date('2000-01-01') // Far past date
-      break
-    case TimeframeType.CUSTOM_RANGE:
-      if (customRange) {
-        startDate = customRange.startDate
-        endDate = customRange.endDate
-      }
-      break
-  }
-
-  return { startDate, endDate }
-}
-
-async function getTransactionsForPeriod(userId: string, startDate: Date, endDate: Date): Promise<any[]> {
-  const { data: transactions, error } = await supabase
-    .from('transactions')
-    .select(`
-      amount,
-      type,
-      date,
-      categories (
-        id,
-        name,
-        color,
-        icon
-      )
-    `)
-    .eq('user_id', userId)
-    .gte('date', startDate.toISOString().split('T')[0])
-    .lte('date', endDate.toISOString().split('T')[0])
-
-  if (error) {
-    console.error('Error fetching transactions for period:', error)
-    return []
-  }
-
-  return transactions || []
-}
 
 // =========================================
 // UTILITY FUNCTIONS

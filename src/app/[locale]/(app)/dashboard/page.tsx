@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, AlertTriangle } from 'lucide-react';
 import {
@@ -30,15 +31,11 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EnhancedSpendingChart } from '@/components/spending-chart';
-import { ChartControls } from '@/components/chart-controls';
+import { SpendingChart } from '@/components/spending-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardService, DashboardData, DashboardMetrics } from '@/lib/dashboard-service';
-import { enhancedChartService } from '@/lib/enhanced-chart-service';
-import { useChartConfig } from '@/hooks/use-chart-config';
 import { useCurrency } from '@/contexts/preferences-context';
 import { useIntlayer } from 'next-intlayer';
-import { ChartData, ChartFilterOptions } from '@/lib/types/chart';
 
 export default function DashboardPage() {
   const i = useIntlayer('dashboard-page');
@@ -48,20 +45,29 @@ export default function DashboardPage() {
   const [budgetAlerts, setBudgetAlerts] = useState<Array<{ budgetId: string, message: string, severity: 'warning' | 'error' }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const { formatCurrency: formatUserCurrency } = useCurrency();
 
-  // Chart state
-  const { config: chartConfig, updateConfig: updateChartConfig } = useChartConfig('active');
-  const [chartData, setChartData] = useState<ChartData | null>(null);
-  const [chartLoading, setChartLoading] = useState(false);
-  const [filterOptions, setFilterOptions] = useState<ChartFilterOptions>({
-    accounts: [],
-    categories: [],
-    transactionTypes: []
-  });
+
+  // Get user ID on mount
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUserId(session?.user?.id || null);
+      } catch (error) {
+        console.error('Error getting user ID:', error);
+        setUserId(null);
+      }
+    };
+
+    getUserId();
+  }, []);
 
   useEffect(() => {
-    loadDashboardData();
+    if (userId) {
+      loadDashboardData();
+    }
 
     // Set up real-time updates
     const unsubscribe = dashboardService.subscribeToUpdates((data) => {
@@ -70,14 +76,7 @@ export default function DashboardPage() {
     });
 
     return unsubscribe;
-  }, []);
-
-  // Load chart data when config changes
-  useEffect(() => {
-    if (!isLoading) {
-      loadChartData();
-    }
-  }, [chartConfig, isLoading]);
+  }, [userId]);
 
   const loadDashboardData = async () => {
     try {
@@ -85,7 +84,7 @@ export default function DashboardPage() {
       setError(null);
 
       const [data, metricsData, alerts] = await Promise.all([
-        dashboardService.getDashboardData(),
+        dashboardService.getDashboardData(), // Default to monthly
         dashboardService.getDashboardMetrics(),
         dashboardService.getBudgetAlerts()
       ]);
@@ -93,38 +92,11 @@ export default function DashboardPage() {
       setDashboardData(data);
       setMetrics(metricsData);
       setBudgetAlerts(alerts);
-
-      // Set up filter options from dashboard data
-      if (data.accounts && data.budgets) {
-        setFilterOptions({
-          accounts: data.accounts.map(acc => ({ id: acc.id, name: acc.name })),
-          categories: [], // Would need to fetch categories separately
-          transactionTypes: [
-            { value: 'income', label: 'Income' },
-            { value: 'expense', label: 'Expense' },
-            { value: 'transfer', label: 'Transfer' }
-          ]
-        });
-      }
     } catch (err) {
       //      console.error('Failed to load dashboard data:', err);
       setError(err instanceof Error ? err.message : i.failedToLoad);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loadChartData = async () => {
-    try {
-      setChartLoading(true);
-      const result = await enhancedChartService.getChartData(chartConfig);
-      if (result.data) {
-        setChartData(result.data);
-      }
-    } catch (err) {
-      console.error('Failed to load chart data:', err);
-    } finally {
-      setChartLoading(false);
     }
   };
 
@@ -134,8 +106,14 @@ export default function DashboardPage() {
     dashboardData.budgets.length > 0 ||
     dashboardData.accounts.length > 0 ||
     (dashboardData.financialSummary && (
-      dashboardData.financialSummary.totalIncome > 0 ||
-      dashboardData.financialSummary.totalExpenses > 0
+      (dashboardData.timeGranularity === 'monthly' &&
+       typeof dashboardData.financialSummary === 'object' &&
+       !Array.isArray(dashboardData.financialSummary) &&
+       'totalIncome' in dashboardData.financialSummary &&
+       'totalExpenses' in dashboardData.financialSummary &&
+       (dashboardData.financialSummary.totalIncome > 0 ||
+        dashboardData.financialSummary.totalExpenses > 0)) ||
+      (Array.isArray(dashboardData.financialSummary) && dashboardData.financialSummary.length > 0)
     ))
   );
 
@@ -162,7 +140,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground text-center max-w-md">
           {error}
         </p>
-        <Button onClick={loadDashboardData}>
+        <Button onClick={() => loadDashboardData()}>
           {i.tryAgain}
         </Button>
       </div>
@@ -347,27 +325,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="space-y-4">
-          <ChartControls
-            timeframe={chartConfig.timeframe}
-            chartType={chartConfig.chartType}
-            dataView={chartConfig.dataView}
-            customRange={chartConfig.customRange}
-            filters={chartConfig.filters}
-            filterOptions={filterOptions}
-            onTimeframeChange={(timeframe) => updateChartConfig({ timeframe })}
-            onChartTypeChange={(chartType) => updateChartConfig({ chartType })}
-            onDataViewChange={(dataView) => updateChartConfig({ dataView })}
-            onCustomRangeChange={(customRange) => updateChartConfig({ customRange })}
-            onFiltersChange={(filters) => updateChartConfig({ filters })}
-          />
-          <EnhancedSpendingChart
-            config={chartConfig}
-            data={chartData || { metadata: { timeframe: chartConfig.timeframe, granularity: chartConfig.granularity, dataView: chartConfig.dataView, lastUpdated: new Date() } }}
-            isLoading={chartLoading || isLoading}
-            onConfigChange={updateChartConfig}
-          />
-        </div>
+        <SpendingChart
+          userId={userId || undefined}
+        />
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

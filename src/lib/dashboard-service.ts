@@ -1,15 +1,20 @@
 import { supabase } from './supabase'
 import {
   calculateFinancialSummary,
+  calculateDailyFinancialSummary,
+  calculateWeeklyFinancialSummary,
   calculateBudgetProgress,
   calculateAccountBalance,
   FinancialSummary,
+  DailyData,
+  WeeklyData,
   BudgetProgress
 } from './financial-calculations'
 import { api } from './api-client'
 
 export interface DashboardData {
-  financialSummary: FinancialSummary | null
+  financialSummary: FinancialSummary | DailyData[] | WeeklyData[] | null
+  timeGranularity: 'daily' | 'weekly' | 'monthly'
   budgets: BudgetProgress[]
   recentTransactions: any[]
   accounts: any[]
@@ -43,7 +48,21 @@ class DashboardService {
     }
   }
 
-  async getDashboardData(): Promise<DashboardData> {
+  private async getFinancialDataForTimeFilter(timeFilter: 'daily' | 'weekly' | 'monthly') {
+    if (!this.userId) return null
+
+    switch (timeFilter) {
+      case 'daily':
+        return calculateDailyFinancialSummary(this.userId, 30) // Last 30 days
+      case 'weekly':
+        return calculateWeeklyFinancialSummary(this.userId, 12) // Last 12 weeks
+      case 'monthly':
+      default:
+        return calculateFinancialSummary(this.userId, 6) // Last 6 months
+    }
+  }
+
+  async getDashboardData(timeFilter: 'daily' | 'weekly' | 'monthly' = 'monthly'): Promise<DashboardData> {
     if (!this.userId) {
       await this.initializeUser()
     }
@@ -51,6 +70,7 @@ class DashboardService {
     if (!this.userId) {
       return {
         financialSummary: null,
+        timeGranularity: timeFilter,
         budgets: [],
         recentTransactions: [],
         accounts: [],
@@ -69,7 +89,7 @@ class DashboardService {
         transactionsResponse,
         accountsResponse
       ] = await Promise.allSettled([
-        calculateFinancialSummary(this.userId, 6),
+        this.getFinancialDataForTimeFilter(timeFilter),
         api.getBudgets({ include_progress: 'true' }),
         api.getTransactions({ limit: '10' }),
         api.getAccounts()
@@ -109,6 +129,7 @@ class DashboardService {
 
       return {
         financialSummary: summary,
+        timeGranularity: timeFilter,
         budgets,
         recentTransactions: transactions,
         accounts,
@@ -122,6 +143,7 @@ class DashboardService {
 //      console.error('Error fetching dashboard data:', error)
       return {
         financialSummary: null,
+        timeGranularity: timeFilter,
         budgets: [],
         recentTransactions: [],
         accounts: [],
