@@ -92,13 +92,13 @@ export function usePreferences() {
     try {
       await db.updateUserPreferences(user.id, prefs);
       setSyncError(null); // Clear any previous error
-      console.log('Preferences synced successfully');
+      //console.log('Preferences synced successfully');
     } catch (error) {
-      console.warn(`Failed to sync preferences with database (attempt ${retryCount + 1}):`, error);
+     // console.warn(`Failed to sync preferences with database (attempt ${retryCount + 1}):`, error);
 
       if (retryCount < maxRetries) {
         const delay = baseDelay * Math.pow(2, retryCount); // Exponential backoff
-        console.log(`Retrying sync in ${delay}ms...`);
+        // console.log(`Retrying sync in ${delay}ms...`);
         setTimeout(() => syncWithDatabase(prefs, retryCount + 1), delay);
       } else {
         const errorMessage = 'Failed to save preferences. Changes may not persist across sessions.';
@@ -122,10 +122,10 @@ export function usePreferences() {
         const dbPrefs = { ...DEFAULT_PREFERENCES, ...profile.preferences };
         setPreferences(dbPrefs);
         saveLocalPreferences(dbPrefs);
-        console.log('Preferences loaded from database');
+        // console.log('Preferences loaded from database');
       }
     } catch (error) {
-      console.warn('Failed to load preferences from database:', error);
+      // console.warn('Failed to load preferences from database:', error);
       // On mobile, this might fail - user will see localStorage preferences
       toast({
         title: 'Sync Warning',
@@ -196,7 +196,7 @@ export function usePreferences() {
           try {
             await loadDatabasePreferences();
           } catch (dbError) {
-            console.warn('Failed to load database preferences on auth change:', dbError);
+            // console.warn('Failed to load database preferences on auth change:', dbError);
           }
         } else {
           // User logged out - keep local preferences but don't sync
