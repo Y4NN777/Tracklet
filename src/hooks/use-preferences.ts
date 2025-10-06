@@ -92,13 +92,13 @@ export function usePreferences() {
     try {
       await db.updateUserPreferences(user.id, prefs);
       setSyncError(null); // Clear any previous error
-      //console.log('Preferences synced successfully');
+      console.log('Preferences synced successfully');
     } catch (error) {
-     // console.warn(`Failed to sync preferences with database (attempt ${retryCount + 1}):`, error);
+      console.warn(`Failed to sync preferences with database (attempt ${retryCount + 1}):`, error);
 
       if (retryCount < maxRetries) {
         const delay = baseDelay * Math.pow(2, retryCount); // Exponential backoff
-        // console.log(`Retrying sync in ${delay}ms...`);
+        console.log(`Retrying sync in ${delay}ms...`);
         setTimeout(() => syncWithDatabase(prefs, retryCount + 1), delay);
       } else {
         const errorMessage = 'Failed to save preferences. Changes may not persist across sessions.';
@@ -122,10 +122,10 @@ export function usePreferences() {
         const dbPrefs = { ...DEFAULT_PREFERENCES, ...profile.preferences };
         setPreferences(dbPrefs);
         saveLocalPreferences(dbPrefs);
-        // console.log('Preferences loaded from database');
+        console.log('Preferences loaded from database');
       }
     } catch (error) {
-      // console.warn('Failed to load preferences from database:', error);
+      console.warn('Failed to load preferences from database:', error);
       // On mobile, this might fail - user will see localStorage preferences
       toast({
         title: 'Sync Warning',
@@ -149,14 +149,60 @@ export function usePreferences() {
 
   // Initialize preferences on mount
   useEffect(() => {
-    // Load from localStorage first
-    const localPrefs = loadLocalPreferences();
-    setPreferences(localPrefs);
-    setIsLoading(false);
-  }, []);
+    const initializePreferences = async () => {
+      setIsLoading(true);
 
-  // Listen for auth state changes
-  useEffect(() => {
+      try {
+        // Load from localStorage first
+        const localPrefs = loadLocalPreferences();
+        setPreferences(localPrefs);
+
+        // Check if user is logged in with timeout
+        const authTimeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Auth timeout')), 30000)
+        );
+
+        const authPromise = auth.getUser();
+
+        let currentUser = null;
+        try {
+          const result = await Promise.race([authPromise, authTimeout]);
+          currentUser = result.user;
+        } catch (authError) {
+          console.warn('Auth check failed or timed out:', authError);
+          toast({
+            title: 'Authentication Issue',
+            description: 'Unable to verify login status. Some features may be limited.',
+            variant: 'default',
+          });
+          // Continue with null user (unauthenticated)
+        }
+
+        setUser(currentUser);
+
+        if (currentUser) {
+          // Load from database and merge
+          try {
+            await loadDatabasePreferences();
+          } catch (dbError) {
+//            console.warn('Failed to load database preferences:', dbError);
+            // Continue with local preferences only
+          }
+        }
+      } catch (error) {
+//        console.error('Error initializing preferences:', error);
+        // Ensure we have default preferences loaded
+        const localPrefs = loadLocalPreferences();
+        setPreferences(localPrefs);
+      } finally {
+        // Always set loading to false, even if errors occurred
+        setIsLoading(false);
+      }
+    };
+
+    initializePreferences();
+
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const newUser = session?.user || null;
@@ -167,7 +213,7 @@ export function usePreferences() {
           try {
             await loadDatabasePreferences();
           } catch (dbError) {
-            // console.warn('Failed to load database preferences on auth change:', dbError);
+            console.warn('Failed to load database preferences on auth change:', dbError);
           }
         } else {
           // User logged out - keep local preferences but don't sync
