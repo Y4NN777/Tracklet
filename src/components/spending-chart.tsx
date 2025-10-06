@@ -236,13 +236,13 @@ export function SpendingChart({ userId, initialTimeFilter = 'monthly', className
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => formatXAxisLabel(value, timeFilter)}
             />
             <YAxis />
             <ChartTooltip content={<ChartTooltipContent />} />
             <ChartLegend content={<ChartLegendContent />} />
-            <Bar dataKey="income" fill="var(--color-income)" radius={4} />
-            <Bar dataKey="expenses" fill="var(--color-expenses)" radius={4} />
+            <Bar dataKey="income" fill="var(--color-income)" radius={4} barSize={timeFilter === 'daily' ? 70 : timeFilter === 'weekly' ? 90 : undefined} />
+            <Bar dataKey="expenses" fill="var(--color-expenses)" radius={4} barSize={timeFilter === 'daily' ? 70 : timeFilter === 'weekly' ? 90 : undefined} />
           </BarChart>
         </ChartContainer>
       </CardContent>
@@ -273,7 +273,7 @@ function transformChartData(data: any, timeFilter: 'daily' | 'weekly' | 'monthly
 
   if (timeFilter === 'weekly') {
     return timeSeries.map((item: any) => ({
-      date: item.date ? `Week ${item.date.split('-W')[1]}` : item.date,
+      date: formatWeekLabel(item.date),
       income: Math.round(item.income || 0),
       expenses: Math.round(item.expenses || 0)
     }));
@@ -289,5 +289,56 @@ function formatDateLabel(dateStr: string): string {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   } catch {
     return dateStr;
+  }
+}
+
+function formatXAxisLabel(value: string, timeFilter: 'daily' | 'weekly' | 'monthly'): string {
+  if (timeFilter === 'weekly') {
+    try {
+      const startDate = new Date(value);
+      // Find end of the week (start + 7 days)
+      const sunday = new Date(startDate);
+      sunday.setDate(startDate.getDate() + 7);
+
+      const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const sundayStr = sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      return `${startStr}-${sundayStr.split(' ')[1]}`; // "Jan 22-28"
+    } catch {
+      return value;
+    }
+  } else if (timeFilter === 'daily') {
+    return formatDateLabel(value);
+  } else {
+    // monthly
+    try {
+      const date = new Date(value + '-01');
+      return date.toLocaleDateString('en-US', { month: 'short' });
+    } catch {
+      return value.slice(0, 3);
+    }
+  }
+}
+
+function formatWeekLabel(weekStr: string): string {
+  try {
+    // weekStr is like "2024-W01"
+    const [year, week] = weekStr.split('-W');
+    const yearNum = parseInt(year);
+    const weekNum = parseInt(week);
+
+    // Calculate the start of the ISO week
+    const jan1 = new Date(yearNum, 0, 1);
+    const dayOfWeek = jan1.getDay();
+    const firstMonday = new Date(jan1);
+    firstMonday.setDate(jan1.getDate() - dayOfWeek + 1 + (dayOfWeek === 0 ? -7 : 0));
+
+    const weekStart = new Date(firstMonday);
+    weekStart.setDate(firstMonday.getDate() + (weekNum - 1) * 7);
+
+    // Return start date string for positioning (start of week)
+    return weekStart.toISOString().split('T')[0];
+  } catch {
+    return weekStr;
   }
 }
