@@ -128,17 +128,29 @@ export async function POST(request: NextRequest) {
 
 // Helper function to calculate budget progress
 async function calculateBudgetProgress(budget: any, userId: string) {
-  // Query transactions assigned to this specific budget
-  let query = supabase
+  // Determine date range for calculation
+  let dateRange: { start: string; end: string }
+
+  if (budget.end_date) {
+    // One-time budget: use stored start/end dates
+    dateRange = {
+      start: budget.start_date,
+      end: budget.end_date
+    }
+  } else {
+    // Recurring budget: calculate current period
+    dateRange = getCurrentPeriodDates(budget.start_date, budget.period)
+  }
+
+  // Query transactions assigned to this specific budget within the date range
+  const { data: transactions, error } = await supabase
     .from('transactions')
     .select('amount')
     .eq('user_id', userId)
     .eq('type', 'expense')
-    .eq('budget_id', budget.id)  // Only count transactions assigned to this budget
-    .gte('date', budget.start_date)
-    .lte('date', budget.end_date || new Date().toISOString().split('T')[0])
-
-  const { data: transactions, error } = await query
+    .eq('budget_id', budget.id)
+    .gte('date', dateRange.start)
+    .lte('date', dateRange.end)
 
   if (error) {
 //    console.error('Error calculating budget progress:', error)
@@ -154,5 +166,39 @@ async function calculateBudgetProgress(budget: any, userId: string) {
     remaining,
     percentage: Math.round(percentage * 100) / 100,
     is_over_budget: spent > budget.amount
+  }
+}
+
+// Helper function to get current period dates
+function getCurrentPeriodDates(startDate: string, period: string): { start: string; end: string } {
+  const now = new Date()
+  let currentStart: Date
+  let currentEnd: Date
+
+  if (period === 'monthly') {
+    // Current month
+    currentStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    currentEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  } else if (period === 'yearly') {
+    // Current year
+    currentStart = new Date(now.getFullYear(), 0, 1)
+    currentEnd = new Date(now.getFullYear(), 11, 31)
+  } else if (period === 'weekly') {
+    // Current week (Monday to Sunday)
+    const day = now.getDay()
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1) // Monday
+    currentStart = new Date(now)
+    currentStart.setDate(diff)
+    currentEnd = new Date(currentStart)
+    currentEnd.setDate(currentStart.getDate() + 6)
+  } else {
+    // Fallback to current month
+    currentStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    currentEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  }
+
+  return {
+    start: currentStart.toISOString().split('T')[0],
+    end: currentEnd.toISOString().split('T')[0]
   }
 }
