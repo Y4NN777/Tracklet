@@ -157,26 +157,9 @@ export function usePreferences() {
         const localPrefs = loadLocalPreferences();
         setPreferences(localPrefs);
 
-        // Check if user is logged in with timeout
-        const authTimeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Auth timeout')), 5000)
-        );
-
-        const authPromise = auth.getUser();
-
-        let currentUser = null;
-        try {
-          const result = await Promise.race([authPromise, authTimeout]);
-          currentUser = result.user;
-        } catch (authError) {
-          console.warn('Auth check failed or timed out:', authError);
-          toast({
-            title: 'Authentication Issue',
-            description: 'Unable to verify login status. Some features may be limited.',
-            variant: 'default',
-          });
-          // Continue with null user (unauthenticated)
-        }
+        // Check if user is logged in
+        const { session } = await auth.getSession();
+        const currentUser = session?.user || null;
 
         setUser(currentUser);
 
