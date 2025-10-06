@@ -149,43 +149,14 @@ export function usePreferences() {
 
   // Initialize preferences on mount
   useEffect(() => {
-    const initializePreferences = async () => {
-      setIsLoading(true);
+    // Load from localStorage first
+    const localPrefs = loadLocalPreferences();
+    setPreferences(localPrefs);
+    setIsLoading(false);
+  }, []);
 
-      try {
-        // Load from localStorage first
-        const localPrefs = loadLocalPreferences();
-        setPreferences(localPrefs);
-
-        // Check if user is logged in
-        const { session } = await auth.getSession();
-        const currentUser = session?.user || null;
-
-        setUser(currentUser);
-
-        if (currentUser) {
-          // Load from database and merge
-          try {
-            await loadDatabasePreferences();
-          } catch (dbError) {
-//            console.warn('Failed to load database preferences:', dbError);
-            // Continue with local preferences only
-          }
-        }
-      } catch (error) {
-//        console.error('Error initializing preferences:', error);
-        // Ensure we have default preferences loaded
-        const localPrefs = loadLocalPreferences();
-        setPreferences(localPrefs);
-      } finally {
-        // Always set loading to false, even if errors occurred
-        setIsLoading(false);
-      }
-    };
-
-    initializePreferences();
-
-    // Listen for auth state changes
+  // Listen for auth state changes
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const newUser = session?.user || null;
