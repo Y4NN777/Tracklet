@@ -159,7 +159,7 @@ export function usePreferences() {
 
         // Check if user is logged in with timeout
         const authTimeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Auth timeout')), 30000)
+          setTimeout(() => reject(new Error('Auth timeout')), 300000)
         );
 
         const authPromise = auth.getUser();
@@ -169,12 +169,12 @@ export function usePreferences() {
           const result = await Promise.race([authPromise, authTimeout]);
           currentUser = result.user;
         } catch (authError) {
-          console.warn('Auth check failed or timed out:', authError);
-          toast({
-            title: 'Authentication Issue',
-            description: 'Unable to verify login status. Some features may be limited.',
-            variant: 'default',
-          });
+          // console.warn('Auth check failed or timed out:', authError);
+          // toast({
+          //   title: 'Authentication Issue',
+          //   description: 'Unable to verify login status. Some features may be limited.',
+          //   variant: 'default',
+          // });
           // Continue with null user (unauthenticated)
         }
 
