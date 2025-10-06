@@ -122,7 +122,7 @@ export function usePreferences() {
         const dbPrefs = { ...DEFAULT_PREFERENCES, ...profile.preferences };
         setPreferences(dbPrefs);
         saveLocalPreferences(dbPrefs);
-        console.log('Preferences loaded from database');
+        return;
       }
     } catch (error) {
       console.warn('Failed to load preferences from database:', error);
