@@ -142,10 +142,6 @@ export function UserNav() {
               </Button>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard className="mr-2 h-4 w-4" />
-            <span>{i.billing}</span>
-          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/settings">
               <Button variant="ghost" className="w-full justify-start">
