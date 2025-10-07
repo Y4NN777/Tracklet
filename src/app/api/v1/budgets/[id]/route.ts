@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { calculateBudgetProgress } from '@/lib/financial-calculations'
 
 // GET /api/budgets/[id] - Get a specific budget
 export async function GET(
@@ -50,8 +51,35 @@ export async function GET(
 
     // Calculate progress if requested
     if (includeProgress) {
-      const progress = await calculateBudgetProgress(data, user.id)
-      return NextResponse.json({ budget: { ...data, ...progress } })
+      const progress = await calculateBudgetProgress(id, user.id)
+      if (progress) {
+        // Transform BudgetProgress to embedded format for API compatibility
+        const p = progress as any // Type assertion to avoid TypeScript confusion
+        return NextResponse.json({
+          budget: {
+            ...data,
+            spent: p.spent,
+            remaining: p.remaining,
+            percentage: p.percentage,
+            is_over_budget: p.isOverBudget,
+            // Include enhanced metrics
+            spending_velocity: p.spendingVelocity,
+            projected_overspend_date: p.projectedOverspendDate,
+            days_remaining: p.daysRemaining,
+            period_comparison: p.periodComparison
+          }
+        })
+      }
+      // Return budget without progress if calculation failed
+      return NextResponse.json({
+        budget: {
+          ...data,
+          spent: 0,
+          remaining: data.amount,
+          percentage: 0,
+          is_over_budget: false
+        }
+      })
     }
 
     return NextResponse.json({ budget: data })
@@ -240,6 +268,20 @@ export async function DELETE(
     }
 
     const { id } = await params
+
+    // First, remove budget assignment from transactions to avoid foreign key constraint
+    const { error: updateError } = await supabase
+      .from('transactions')
+      .update({ budget_id: null })
+      .eq('budget_id', id)
+      .eq('user_id', user.id)
+
+    if (updateError) {
+//      console.error('Error updating transactions:', updateError)
+      return NextResponse.json({ error: 'Failed to unassign transactions from budget' }, { status: 500 })
+    }
+
+    // Now delete the budget
     const { error } = await supabase
       .from('budgets')
       .delete()
@@ -256,33 +298,5 @@ export async function DELETE(
   } catch (error) {
 //    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
-
-// Helper function to calculate budget progress
-async function calculateBudgetProgress(budget: any, userId: string) {
-  const { data: transactions, error } = await supabase
-    .from('transactions')
-    .select('amount')
-    .eq('user_id', userId)
-    .eq('type', 'expense')
-    .eq('category_id', budget.category_id)
-    .gte('date', budget.start_date)
-    .lte('date', budget.end_date || new Date().toISOString().split('T')[0])
-
-  if (error) {
-//    console.error('Error calculating budget progress:', error)
-    return { spent: 0, remaining: budget.amount, percentage: 0 }
-  }
-
-  const spent = transactions?.reduce((sum, t) => sum + t.amount, 0) || 0
-  const remaining = budget.amount - spent
-  const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0
-
-  return {
-    spent,
-    remaining,
-    percentage: Math.round(percentage * 100) / 100,
-    is_over_budget: spent > budget.amount
   }
 }
