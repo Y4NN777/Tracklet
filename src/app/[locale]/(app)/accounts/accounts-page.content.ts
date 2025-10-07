@@ -26,6 +26,12 @@ const accountsPageContent: DeclarationContent = {
     accountCount: t({ en: (params: { count: number } = { count: 0 }) => `(${params.count} account${params.count !== 1 ? 's' : ''})`, fr: (params: { count: number } = { count: 0 }) => `(${params.count} compte${params.count !== 1 ? 's' : ''})` }),
     total: t({ en: (params: { type: string } = { type: '' }) => `Total ${params.type}`, fr: (params: { type: string } = { type: '' }) => `Total ${params.type}` }),
 
+    // Manual Balance Override
+    manualBadge: t({ en: "Manual", fr: "Manuel" }),
+    manualOverrideCleared: t({ en: "Manual balance override cleared. Account now shows calculated balance.", fr: "Substitution manuelle du solde supprimée. Le compte affiche maintenant le solde calculé." }),
+    clearManualOverrideFailed: t({ en: "Failed to clear manual balance override. Please try again.", fr: "Échec de la suppression de la substitution manuelle du solde. Veuillez réessayer." }),
+    clearManualOverrideTooltip: t({ en: "Clear manual balance override", fr: "Supprimer la substitution manuelle du solde" }),
+
     // Delete Dialog
     deleteDialogTitle: t({ en: "Delete Account", fr: "Supprimer le compte" }),
     deleteDialogDescription: t({ en: (params: { name: string } = { name: '' }) => `Are you sure you want to delete "${params.name}"? This action cannot be undone and will affect all associated transactions.`, fr: (params: { name:string } = { name: '' }) => `Êtes-vous sûr de vouloir supprimer "${params.name}" ? Cette action est irréversible et affectera toutes les transactions associées.` }),

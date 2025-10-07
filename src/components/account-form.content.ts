@@ -69,12 +69,24 @@ const accountFormContent: DeclarationContent = {
       fr: "Raison de l'ajustement manuel (optionnel)"
     }),
     manualBalanceNotePlaceholder: t({
-      en: "e.g., Bank reconciliation, opening balance adjustment",
-      fr: "ex: Réconciliation bancaire, ajustement du solde d'ouverture"
+      en: "e.g., Bank Or personal account reconciliation, opening balance adjustment",
+      fr: "ex: Réconciliation bancaire ou de compte personnel, ajustement du solde d'ouverture"
     }),
     manualBalanceRequired: t({
       en: "Manual balance is required when override is active",
       fr: "Le solde manuel est requis lorsque la substitution est active"
+    }),
+    useManualOverrideDescription: t({
+      en: "Override the automatically calculated balance with a custom value. Useful for personal reconciliation or opening balance adjustments.",
+      fr: "Remplacez le solde calculé automatiquement par une valeur personnalisée. Utile pour la réconciliation personnelle ou les ajustements du solde d'ouverture."
+    }),
+    manualBalanceDescription: t({
+      en: "Set a custom balance that will override the calculated value from your transactions.",
+      fr: "Définissez un solde personnalisé qui remplacera la valeur calculée à partir de vos transactions."
+    }),
+    manualBalanceNoteDescription: t({
+      en: "Optional note explaining why this manual balance was set (e.g., personal or particular reason).",
+      fr: "Note optionnelle expliquant pourquoi ce solde manuel a été défini (ex: raison personnelle ou particulière)."
     }),
   },
 };

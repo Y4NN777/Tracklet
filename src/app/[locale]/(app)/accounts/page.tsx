@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { MobileDataList } from '@/components/ui/mobile-data-list';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, Wallet, PiggyBank, CreditCard, TrendingUp, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Wallet, PiggyBank, CreditCard, TrendingUp, Edit, Trash2, Settings, X } from 'lucide-react';
 import { AccountForm } from '@/components/account-form';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api-client';
@@ -243,7 +243,29 @@ export default function AccountsPage() {
     if (!editingAccount) return;
 
     try {
-      const response = await api.updateAccount(editingAccount.id, values);
+      // Transform form values to match API expectations
+      const apiValues = { ...values };
+
+      // Handle manual balance override logic
+      if (values.use_manual_override) {
+        // User wants to set manual override
+        if (values.manual_balance !== undefined) {
+          apiValues.manual_balance = values.manual_balance;
+          apiValues.manual_balance_note = values.manual_balance_note || null;
+        }
+        // Remove form-specific fields
+        delete apiValues.use_manual_override;
+        delete apiValues.manual_balance_note;
+      } else {
+        // User wants to clear manual override
+        apiValues.clear_manual_override = true;
+        // Remove form-specific fields
+        delete apiValues.use_manual_override;
+        delete apiValues.manual_balance;
+        delete apiValues.manual_balance_note;
+      }
+
+      const response = await api.updateAccount(editingAccount.id, apiValues);
 
       if (response.data) {
         setAccounts(prev => prev.map(acc => acc.id === editingAccount.id ? response.data.account : acc));
@@ -294,6 +316,34 @@ export default function AccountsPage() {
       toast({
         title: i.errorToastTitle,
         description: i.deleteAccountFailed,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleClearManualOverride = async (accountId: string) => {
+    try {
+      const response = await api.updateAccount(accountId, { clear_manual_override: true });
+
+      if (response.data) {
+        setAccounts(prev => prev.map(acc => acc.id === accountId ? response.data.account : acc));
+        toast({
+          title: i.accountUpdatedToastTitle,
+          description: i.manualOverrideCleared,
+        });
+      } else if (response.error) {
+//        console.error('Failed to clear manual override:', response.error);
+        toast({
+          title: i.errorToastTitle,
+          description: i.clearManualOverrideFailed,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+//      console.error('Error clearing manual override:', error);
+      toast({
+        title: i.errorToastTitle,
+        description: i.clearManualOverrideFailed,
         variant: 'destructive',
       });
     }
@@ -438,6 +488,16 @@ export default function AccountsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          {account.manualOverrideActive && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleClearManualOverride(account.id)}
+                              title={i.clearManualOverrideTooltip}
+                            >
+                              <X className="h-4 w-4 text-orange-500" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -476,8 +536,14 @@ export default function AccountsPage() {
                                 currency: account.currency
                               })}
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              {account.currency}
+                            <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
+                              {account.manualOverrideActive && (
+                                <Badge variant="secondary" className="text-xs px-1 py-0">
+                                  <Settings className="h-3 w-3 mr-1" />
+                                  {i.manualBadge}
+                                </Badge>
+                              )}
+                              <span>{account.currency}</span>
                             </div>
                           </div>
                         </div>

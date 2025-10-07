@@ -282,7 +282,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                       {i.useManualOverrideLabel}
                     </FormLabel>
                     <FormDescription>
-                      Override the calculated balance with a manual value
+                      {i.useManualOverrideDescription}
                     </FormDescription>
                   </div>
                 </FormItem>
@@ -305,7 +305,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                         />
                       </FormControl>
                       <FormDescription>
-                        Set a custom balance that will override the calculated value
+                        {i.manualBalanceDescription}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -324,7 +324,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                         />
                       </FormControl>
                       <FormDescription>
-                        Optional note explaining why this manual balance was set
+                        {i.manualBalanceNoteDescription}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
