@@ -223,8 +223,8 @@ export default function AccountsPage() {
       if (response.data) {
         setAccounts(prev => [response.data.account, ...prev]);
         toast({
-          title: i.accountAddedToastTitle,
-          description: i.accountAddedToastDescription,
+          title: i.accountAddedToastTitle.key,
+          description: i.accountAddedToastDescription.key,
         });
       } else if (response.error) {
         throw new Error(response.error);
@@ -232,8 +232,8 @@ export default function AccountsPage() {
     } catch (error) {
 //      console.error('Error creating account:', error);
       toast({
-        title: i.errorToastTitle,
-        description: i.addAccountFailed,
+        title: i.errorToastTitle.key,
+        description: i.addAccountFailed.key,
         variant: 'destructive',
       });
       // Re-throw the error so the form can handle it
@@ -278,22 +278,22 @@ export default function AccountsPage() {
         setAccounts(prev => prev.map(acc => acc.id === editingAccount.id ? response.data.account : acc));
         setEditingAccount(null);
         toast({
-          title: i.accountUpdatedToastTitle,
-          description: i.accountUpdatedToastDescription,
+          title: i.accountUpdatedToastTitle.key,
+          description: i.accountUpdatedToastDescription.key,
         });
       } else if (response.error) {
 //        console.error('Failed to update account:', response.error);
         toast({
-          title: i.errorToastTitle,
-          description: i.updateAccountFailed,
+          title: i.errorToastTitle.key,
+          description: i.updateAccountFailed.key,
           variant: 'destructive',
         });
       }
     } catch (error) {
 //      console.error('Error updating account:', error);
       toast({
-        title: i.errorToastTitle,
-        description: i.updateAccountFailed,
+        title: i.errorToastTitle.key,
+        description: i.updateAccountFailed.key,
         variant: 'destructive',
       });
     }
@@ -307,14 +307,14 @@ export default function AccountsPage() {
         // DELETE returns 204 No Content, so no data but success
         setAccounts(prev => prev.filter(acc => acc.id !== accountId));
         toast({
-          title: i.accountDeletedToastTitle,
-          description: i.accountDeletedToastDescription,
+          title: i.accountDeletedToastTitle.key,
+          description: i.accountDeletedToastDescription.key,
         });
       } else if (response.error) {
 //        console.error('Failed to delete account:', response.error);
         toast({
-          title: i.errorToastTitle,
-          description: i.deleteAccountFailed,
+          title: i.errorToastTitle.key,
+          description: i.deleteAccountFailed.key,
           variant: 'destructive',
         });
       }
@@ -335,14 +335,14 @@ export default function AccountsPage() {
       if (response.data) {
         setAccounts(prev => prev.map(acc => acc.id === accountId ? response.data.account : acc));
         toast({
-          title: i.accountUpdatedToastTitle,
-          description: i.manualOverrideCleared,
+          title: i.accountUpdatedToastTitle.key,
+          description: i.manualOverrideCleared.key,
         });
       } else if (response.error) {
 //        console.error('Failed to clear manual override:', response.error);
         toast({
-          title: i.errorToastTitle,
-          description: i.clearManualOverrideFailed,
+          title: i.errorToastTitle.key,
+          description: i.clearManualOverrideFailed.key,
           variant: 'destructive',
         });
       }
@@ -362,7 +362,7 @@ export default function AccountsPage() {
   };
 
   // Calculate net worth using calculated balances
-  const netWorth = accounts.reduce((sum, account) => sum + (account.calculatedBalance ?? account.balance), 0);
+  const netWorth = accounts.reduce((sum, account) => sum + ((account.calculatedBalance ?? account.balance) ?? 0), 0);
 
   // Group accounts by type
   const accountsByType = accounts.reduce((acc, account) => {
@@ -376,8 +376,8 @@ export default function AccountsPage() {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>{i.title}</CardTitle>
-            <CardDescription>{i.loadingDescription}</CardDescription>
+            <CardTitle>{i.title.key}</CardTitle>
+            <CardDescription>{i.loadingDescription.key}</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -391,8 +391,8 @@ export default function AccountsPage() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <CardTitle>{i.title}</CardTitle>
-                <CardDescription>{i.description}</CardDescription>
+                <CardTitle>{i.title.key}</CardTitle>
+                <CardDescription>{i.description.key}</CardDescription>
               </div>
               <Button onClick={() => setOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -403,13 +403,13 @@ export default function AccountsPage() {
           <CardContent>
             <div className="flex flex-col items-center justify-center h-[400px] space-y-4">
               <Wallet className="h-12 w-12 text-muted-foreground" />
-              <h3 className="text-xl font-semibold">{i.emptyTitle}</h3>
+              <h3 className="text-xl font-semibold">{i.emptyTitle.key}</h3>
               <p className="text-muted-foreground text-center max-w-md">
-                {i.emptyDescription}
+                {i.emptyDescription.key}
               </p>
               <Button onClick={() => setOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                {i.addFirstAccountButton}
+                {i.addFirstAccountButton.key}
               </Button>
             </div>
           </CardContent>
@@ -433,13 +433,13 @@ export default function AccountsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              {i.netWorthTitle}
+              {i.netWorthTitle.key}
             </CardTitle>
-            <CardDescription>{i.netWorthDescription}</CardDescription>
+            <CardDescription>{i.netWorthDescription.key}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {netWorth.toLocaleString(i.locale, {
+              {netWorth.toLocaleString(i.locale || 'en-US', {
                 style: 'currency',
                 currency: userCurrency
               })}
@@ -450,7 +450,7 @@ export default function AccountsPage() {
         {/* Accounts by Type */}
         {Object.entries(accountsByType).map(([type, typeAccounts]) => {
           const IconComponent = accountTypeIcons[type as keyof typeof accountTypeIcons];
-          const typeTotal = typeAccounts.reduce((sum, acc) => sum + (acc.calculatedBalance ?? acc.balance), 0);
+          const typeTotal = typeAccounts.reduce((sum, acc) => sum + ((acc.calculatedBalance ?? acc.balance) ?? 0), 0);
 
           return (
             <div key={type} className="space-y-4">
@@ -464,12 +464,12 @@ export default function AccountsPage() {
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-semibold">
-                    {typeTotal.toLocaleString(i.locale, {
+                    {typeTotal.toLocaleString(i.locale || 'en-US', {
                       style: 'currency',
                       currency: userCurrency
                     })}
                   </div>
-                  <div className="text-sm text-muted-foreground">{typeof i.total === 'function' ? i.total({ type }) : `Total ${type}`}</div>
+                  <div className="text-sm text-muted-foreground">{typeof i.total === 'function' ? i.total({ type }).key : `Total ${type}`}</div>
                 </div>
               </div>
 
@@ -500,7 +500,7 @@ export default function AccountsPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleClearManualOverride(account.id)}
-                              title={i.clearManualOverrideTooltip}
+                              title={i.clearManualOverrideTooltip.key}
                             >
                               <X className="h-4 w-4 text-orange-500" />
                             </Button>
@@ -520,25 +520,25 @@ export default function AccountsPage() {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>{i.deleteDialogTitle}</AlertDialogTitle>
+                                <AlertDialogTitle>{i.deleteDialogTitle.key}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  {typeof i.deleteDialogDescription === 'function' ? i.deleteDialogDescription({ name: account.name }) : `Are you sure you want to delete "${account.name}"? This action cannot be undone and will affect all associated transactions.`}
+                                  {typeof i.deleteDialogDescription === 'function' ? i.deleteDialogDescription({ name: account.name }).key : `Are you sure you want to delete "${account.name}"? This action cannot be undone and will affect all associated transactions.`}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>{i.cancelButton}</AlertDialogCancel>
+                                <AlertDialogCancel>{i.cancelButton.key}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDeleteAccount(account.id)}
                                   className="bg-destructive hover:bg-destructive/90"
                                 >
-                                  {i.deleteButton}
+                                  {i.deleteButton.key}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
                           <div className="text-right ml-4">
-                            <div className={`text-lg font-semibold ${(account.calculatedBalance ?? account.balance) < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                              {(account.calculatedBalance ?? account.balance).toLocaleString(i.locale, {
+                            <div className={`text-lg font-semibold ${((account.calculatedBalance ?? account.balance) ?? 0) < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                              {((account.calculatedBalance ?? account.balance) ?? 0).toLocaleString(i.locale || 'en-US', {
                                 style: 'currency',
                                 currency: account.currency
                               })}
@@ -547,7 +547,7 @@ export default function AccountsPage() {
                               {account.manualOverrideActive && (
                                 <Badge variant="secondary" className="text-xs px-1 py-0">
                                   <Settings className="h-3 w-3 mr-1" />
-                                  {i.manualBadge}
+                                  {i.manualBadge.key}
                                 </Badge>
                               )}
                               <span>{account.currency}</span>
@@ -571,7 +571,7 @@ export default function AccountsPage() {
         <div className="flex justify-center">
           <Button onClick={() => setOpen(true)} size="lg">
             <PlusCircle className="mr-2 h-4 w-4" />
-            {i.addAccountButton}
+            {i.addAccountButton.key}
           </Button>
         </div>
       </div>
