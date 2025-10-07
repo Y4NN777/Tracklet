@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { calculateBudgetProgress } from '@/lib/financial-calculations'
 
 // GET /api/budgets - Get all budgets for the authenticated user
 export async function GET(request: NextRequest) {
@@ -46,8 +47,31 @@ export async function GET(request: NextRequest) {
     if (includeProgress && budgets) {
       const budgetsWithProgress = await Promise.all(
         budgets.map(async (budget) => {
-          const progress = await calculateBudgetProgress(budget, user.id)
-          return { ...budget, ...progress }
+          const progress = await calculateBudgetProgress(budget.id, user.id)
+          if (progress) {
+            // Transform BudgetProgress to embedded format for API compatibility
+            const p = progress as any // Type assertion to avoid TypeScript confusion
+            return {
+              ...budget,
+              spent: p.spent,
+              remaining: p.remaining,
+              percentage: p.percentage,
+              is_over_budget: p.isOverBudget,
+              // Include enhanced metrics
+              spending_velocity: p.spendingVelocity,
+              projected_overspend_date: p.projectedOverspendDate,
+              days_remaining: p.daysRemaining,
+              period_comparison: p.periodComparison
+            }
+          }
+          // Return budget without progress if calculation failed
+          return {
+            ...budget,
+            spent: 0,
+            remaining: budget.amount,
+            percentage: 0,
+            is_over_budget: false
+          }
         })
       )
       return NextResponse.json({ budgets: budgetsWithProgress })
@@ -123,82 +147,5 @@ export async function POST(request: NextRequest) {
   } catch (error) {
 //    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
-
-// Helper function to calculate budget progress
-async function calculateBudgetProgress(budget: any, userId: string) {
-  // Determine date range for calculation
-  let dateRange: { start: string; end: string }
-
-  if (budget.end_date) {
-    // One-time budget: use stored start/end dates
-    dateRange = {
-      start: budget.start_date,
-      end: budget.end_date
-    }
-  } else {
-    // Recurring budget: calculate current period
-    dateRange = getCurrentPeriodDates(budget.start_date, budget.period)
-  }
-
-  // Query transactions assigned to this specific budget within the date range
-  const { data: transactions, error } = await supabase
-    .from('transactions')
-    .select('amount')
-    .eq('user_id', userId)
-    .eq('type', 'expense')
-    .eq('budget_id', budget.id)
-    .gte('date', dateRange.start)
-    .lte('date', dateRange.end)
-
-  if (error) {
-//    console.error('Error calculating budget progress:', error)
-    return { spent: 0, remaining: budget.amount, percentage: 0 }
-  }
-
-  const spent = transactions?.reduce((sum, t) => sum + t.amount, 0) || 0
-  const remaining = budget.amount - spent
-  const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0
-
-  return {
-    spent,
-    remaining,
-    percentage: Math.round(percentage * 100) / 100,
-    is_over_budget: spent > budget.amount
-  }
-}
-
-// Helper function to get current period dates
-function getCurrentPeriodDates(startDate: string, period: string): { start: string; end: string } {
-  const now = new Date()
-  let currentStart: Date
-  let currentEnd: Date
-
-  if (period === 'monthly') {
-    // Current month
-    currentStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    currentEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-  } else if (period === 'yearly') {
-    // Current year
-    currentStart = new Date(now.getFullYear(), 0, 1)
-    currentEnd = new Date(now.getFullYear(), 11, 31)
-  } else if (period === 'weekly') {
-    // Current week (Monday to Sunday)
-    const day = now.getDay()
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1) // Monday
-    currentStart = new Date(now)
-    currentStart.setDate(diff)
-    currentEnd = new Date(currentStart)
-    currentEnd.setDate(currentStart.getDate() + 6)
-  } else {
-    // Fallback to current month
-    currentStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    currentEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-  }
-
-  return {
-    start: currentStart.toISOString().split('T')[0],
-    end: currentEnd.toISOString().split('T')[0]
   }
 }
