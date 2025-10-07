@@ -3,8 +3,8 @@ import {
   calculateFinancialSummary,
   calculateDailyFinancialSummary,
   calculateWeeklyFinancialSummary,
-  calculateBudgetProgress,
   calculateAccountBalance,
+  invalidateBudgetProgress,
   FinancialSummary,
   DailyData,
   WeeklyData,
@@ -12,10 +12,40 @@ import {
 } from './financial-calculations'
 import { api } from './api-client'
 
+// Interface for budget with progress data as returned by API
+export interface BudgetWithProgress {
+  id: string
+  user_id: string
+  name: string
+  category_id: string | null
+  amount: number
+  spent: number
+  period: string
+  start_date: string
+  end_date: string | null
+  created_at: string
+  updated_at: string
+  categories?: {
+    id: string
+    name: string
+    color: string
+    icon: string
+  } | null
+  // Progress fields
+  remaining: number
+  percentage: number
+  is_over_budget: boolean
+  // Enhanced progress metrics
+  spending_velocity: number
+  projected_overspend_date?: string
+  days_remaining: number
+  period_comparison?: number
+}
+
 export interface DashboardData {
   financialSummary: FinancialSummary | DailyData[] | WeeklyData[] | null
   timeGranularity: 'daily' | 'weekly' | 'monthly'
-  budgets: BudgetProgress[]
+  budgets: BudgetWithProgress[]
   recentTransactions: any[]
   accounts: any[]
   netWorth: number
@@ -99,7 +129,7 @@ class DashboardService {
       const summary = financialSummary.status === 'fulfilled' ? financialSummary.value : null
 
       // Process budgets
-      const budgets: BudgetProgress[] =
+      const budgets: BudgetWithProgress[] =
         budgetsResponse.status === 'fulfilled' && budgetsResponse.value.data?.budgets
           ? budgetsResponse.value.data.budgets
           : []
@@ -224,7 +254,7 @@ class DashboardService {
 
       if (budgetsResponse.data?.budgets) {
         for (const budget of budgetsResponse.data.budgets) {
-          if (budget.isOverBudget) {
+          if (budget.is_over_budget) {
             alerts.push({
               budgetId: budget.id,
               message: `${budget.name} budget exceeded by $${Math.abs(budget.remaining).toFixed(2)}`,
@@ -261,7 +291,13 @@ class DashboardService {
           schema: 'public',
           table: 'transactions',
           filter: `user_id=eq.${this.userId}`
-        }, () => {
+        }, (payload) => {
+          // Invalidate budget progress cache when transactions change
+          const transaction = (payload.new || payload.old) as any
+          const budgetId = transaction?.budget_id
+          if (budgetId) {
+            invalidateBudgetProgress(budgetId, this.userId!)
+          }
           this.getDashboardData().then(callback)
         })
         .subscribe(),
@@ -274,7 +310,13 @@ class DashboardService {
           schema: 'public',
           table: 'budgets',
           filter: `user_id=eq.${this.userId}`
-        }, () => {
+        }, (payload) => {
+          // Invalidate budget progress cache when budgets change
+          if (payload.eventType === 'DELETE' && payload.old?.id) {
+            invalidateBudgetProgress(payload.old.id, this.userId!)
+          } else if ((payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') && payload.new?.id) {
+            invalidateBudgetProgress(payload.new.id, this.userId!)
+          }
           this.getDashboardData().then(callback)
         })
         .subscribe(),
