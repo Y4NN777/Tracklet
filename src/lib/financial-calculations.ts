@@ -608,10 +608,10 @@ export function clearBudgetProgressCache(): void {
 // =========================================
 
 export async function calculateAccountBalance(accountId: string, userId: string): Promise<number> {
-  // Get account details
+  // Get account opening balance (historical balance when account was created)
   const { data: account, error: accountError } = await supabase
     .from('accounts')
-    .select('balance')
+    .select('opening_balance')
     .eq('id', accountId)
     .eq('user_id', userId)
     .single()
@@ -621,7 +621,7 @@ export async function calculateAccountBalance(accountId: string, userId: string)
     return 0
   }
 
-  // Get all transactions for this account
+  // Get all transactions for this account (since account was added to app)
   const { data: transactions, error: transactionError } = await supabase
     .from('transactions')
     .select('amount, type')
@@ -630,10 +630,11 @@ export async function calculateAccountBalance(accountId: string, userId: string)
 
   if (transactionError) {
 //    console.error('Error fetching transactions for account:', transactionError)
-    return account.balance || 0
+    // Fallback to opening balance if transaction fetch fails
+    return account.opening_balance || 0
   }
 
-  // Calculate balance from transactions
+  // Calculate transaction impact (income + expense -)
   const transactionBalance = transactions?.reduce((balance, transaction) => {
     if (transaction.type === 'income') {
       return balance + transaction.amount
@@ -643,7 +644,8 @@ export async function calculateAccountBalance(accountId: string, userId: string)
     return balance
   }, 0) || 0
 
-  return (account.balance || 0) + transactionBalance
+  // Current balance = opening balance + transaction impact
+  return (account.opening_balance || 0) + transactionBalance
 }
 
 // =========================================

@@ -67,7 +67,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
-    const { name, type, balance, currency, is_savings } = body
+    const { name, type, opening_balance, currency, is_savings } = body
 
     // Validate account type if provided
     if (type && !['checking', 'savings', 'credit', 'investment'].includes(type)) {
@@ -78,7 +78,7 @@ export async function PATCH(
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
     if (type !== undefined) updateData.type = type
-    if (balance !== undefined) updateData.balance = parseFloat(balance)
+    if (opening_balance !== undefined) updateData.opening_balance = parseFloat(opening_balance)
     if (currency !== undefined) updateData.currency = currency
     if (is_savings !== undefined) updateData.is_savings = is_savings
 
@@ -137,7 +137,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { name, type, balance, currency } = body
+    const { name, type, opening_balance, currency } = body
 
     // PUT requires ALL required fields
     if (!name || !type) {
@@ -156,7 +156,7 @@ export async function PUT(
       .update({
         name,
         type,
-        balance: parseFloat(balance || 0),
+        opening_balance: parseFloat(opening_balance || 0),
         currency: currency || 'USD'
       })
       .eq('id', id)
