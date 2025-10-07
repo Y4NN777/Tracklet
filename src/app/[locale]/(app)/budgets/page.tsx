@@ -33,6 +33,11 @@ interface Budget {
   categories?: {
     name: string;
   };
+  // Enhanced metrics
+  spending_velocity?: number;
+  projected_overspend_date?: string;
+  days_remaining?: number;
+  period_comparison?: number;
 }
 
 interface Goal {
