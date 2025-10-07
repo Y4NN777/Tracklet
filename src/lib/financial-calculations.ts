@@ -607,43 +607,74 @@ export function clearBudgetProgressCache(): void {
 // ACCOUNT BALANCE CALCULATION
 // =========================================
 
-export async function calculateAccountBalance(accountId: string, userId: string): Promise<number> {
-  // Get account details
-  const { data: account, error: accountError } = await supabase
+export async function calculateAccountBalance(accountId: string, userId: string): Promise<{
+  balance: number;
+  manualOverrideActive: boolean;
+  manualBalance?: number;
+  transactionImpact?: number;
+  lastManualSet?: string;
+}> {
+  // Get account with manual override data
+  const { data: account, error } = await supabase
     .from('accounts')
-    .select('balance')
+    .select('manual_balance, manual_override_active, manual_balance_set_at')
     .eq('id', accountId)
     .eq('user_id', userId)
     .single()
 
-  if (accountError || !account) {
-//    console.error('Error fetching account:', accountError)
-    return 0
+  if (error || !account) {
+    return { balance: 0, manualOverrideActive: false }
   }
 
-  // Get all transactions for this account
-  const { data: transactions, error: transactionError } = await supabase
-    .from('transactions')
-    .select('amount, type')
-    .eq('user_id', userId)
-    .eq('account_id', accountId)
+  if (account.manual_override_active && account.manual_balance) {
+    // Manual override active - calculate transactions since manual balance was set
+    const { data: recentTransactions, error: txError } = await supabase
+      .from('transactions')
+      .select('amount, type')
+      .eq('account_id', accountId)
+      .eq('user_id', userId)
+      .gt('created_at', account.manual_balance_set_at)
 
-  if (transactionError) {
-//    console.error('Error fetching transactions for account:', transactionError)
-    return account.balance || 0
-  }
-
-  // Calculate balance from transactions
-  const transactionBalance = transactions?.reduce((balance, transaction) => {
-    if (transaction.type === 'income') {
-      return balance + transaction.amount
-    } else if (transaction.type === 'expense') {
-      return balance - transaction.amount
+    if (txError) {
+      console.error('Error fetching recent transactions:', txError)
+      return {
+        balance: account.manual_balance,
+        manualOverrideActive: true,
+        manualBalance: account.manual_balance
+      }
     }
-    return balance
-  }, 0) || 0
 
-  return (account.balance || 0) + transactionBalance
+    const transactionImpact = recentTransactions?.reduce((sum, t) =>
+      t.type === 'income' ? sum + t.amount : sum - t.amount, 0) || 0
+
+    return {
+      balance: account.manual_balance + transactionImpact,
+      manualOverrideActive: true,
+      manualBalance: account.manual_balance,
+      transactionImpact,
+      lastManualSet: account.manual_balance_set_at
+    }
+  } else {
+    // Standard transaction-only calculation
+    const { data: allTransactions, error: txError } = await supabase
+      .from('transactions')
+      .select('amount, type')
+      .eq('account_id', accountId)
+      .eq('user_id', userId)
+
+    if (txError) {
+      console.error('Error fetching all transactions:', txError)
+      return { balance: 0, manualOverrideActive: false }
+    }
+
+    const balance = allTransactions?.reduce((sum, t) =>
+      t.type === 'income' ? sum + t.amount : sum - t.amount, 0) || 0
+
+    return {
+      balance,
+      manualOverrideActive: false
+    }
+  }
 }
 
 // =========================================
