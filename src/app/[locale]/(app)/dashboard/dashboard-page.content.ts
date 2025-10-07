@@ -30,6 +30,18 @@ const dashboardPageContent: DeclarationContent = {
     noBudgets: t({ en: "No budgets set up yet", fr: "Aucun budget configuré pour le moment" }),
     createBudgets: t({ en: "Create budgets to track your spending", fr: "Créez des budgets pour suivre vos dépenses" }),
 
+    // Enhanced Budget Metrics
+    days: t({ en: "days", fr: "jours" }),
+    perDay: t({ en: "day", fr: "jour" }),
+    vsLastPeriod: t({ en: "vs last period", fr: "vs période précédente" }),
+    overspendRisk: t({ en: "Overspend risk", fr: "Risque de dépassement" }),
+
+    // Tooltip Texts
+    spendingIncreased: t({ en: "Spending increased compared to previous", fr: "Dépenses augmentées par rapport à la précédente" }),
+    spendingDecreased: t({ en: "Spending decreased compared to previous", fr: "Dépenses diminuées par rapport à la précédente" }),
+    period: t({ en: "period", fr: "période" }),
+    overspendRiskTooltip: t({ en: "Projected date when budget will be exceeded at current spending rate", fr: "Date projetée où le budget sera dépassé au taux de dépenses actuel" }),
+
     // Recent Transactions Card
     recentTransactions: t({ en: "Recent Transactions", fr: "Transactions récentes" }),
     latestFinancialActivities: t({ en: "A quick look at your latest financial activities.", fr: "Un aperçu rapide de vos dernières activités financières." }),
