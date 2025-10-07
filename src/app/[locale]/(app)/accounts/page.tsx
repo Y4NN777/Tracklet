@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { MobileDataList } from '@/components/ui/mobile-data-list';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, Wallet, PiggyBank, CreditCard, TrendingUp, Edit, Trash2, Settings, X } from 'lucide-react';
+import { PlusCircle, Wallet, PiggyBank, CreditCard, TrendingUp, Edit, Trash2, Settings, RotateCcw } from 'lucide-react';
 import { AccountForm } from '@/components/account-form';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api-client';
@@ -275,7 +275,18 @@ export default function AccountsPage() {
       const response = await api.updateAccount(editingAccount.id, apiValues);
 
       if (response.data) {
-        setAccounts(prev => prev.map(acc => acc.id === editingAccount.id ? response.data.account : acc));
+        // Update the account in the local state
+        setAccounts(prev => prev.map(acc => acc.id === editingAccount.id ? {
+          ...response.data.account,
+          // Immediately recalculate balance for UI update
+          calculatedBalance: response.data.account.manual_override_active ?
+            (response.data.account.manual_balance || 0) : (response.data.account.balance || 0),
+          manualOverrideActive: response.data.account.manual_override_active,
+          manualBalance: response.data.account.manual_balance,
+          transactionImpact: 0, // Reset transaction impact for immediate UI update
+          lastManualSet: response.data.account.manual_balance_set_at
+        } : acc));
+
         setEditingAccount(null);
         toast({
           title: i.accountUpdatedToastTitle.key,
@@ -333,7 +344,17 @@ export default function AccountsPage() {
       const response = await api.updateAccount(accountId, { clear_manual_override: true });
 
       if (response.data) {
-        setAccounts(prev => prev.map(acc => acc.id === accountId ? response.data.account : acc));
+        // Update the account in the local state with cleared manual override
+        setAccounts(prev => prev.map(acc => acc.id === accountId ? {
+          ...response.data.account,
+          // Clear manual override fields and use regular balance
+          calculatedBalance: response.data.account.balance || 0,
+          manualOverrideActive: false,
+          manualBalance: undefined,
+          transactionImpact: 0,
+          lastManualSet: undefined
+        } : acc));
+
         toast({
           title: i.accountUpdatedToastTitle.key,
           description: i.manualOverrideCleared.key,
@@ -502,7 +523,7 @@ export default function AccountsPage() {
                               onClick={() => handleClearManualOverride(account.id)}
                               title={i.clearManualOverrideTooltip.key}
                             >
-                              <X className="h-4 w-4 text-orange-500" />
+                              <RotateCcw className="h-4 w-4 text-orange-500" />
                             </Button>
                           )}
                           <Button
