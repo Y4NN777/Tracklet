@@ -140,20 +140,25 @@ class DashboardService {
         ? transactionsResponse.value.data?.transactions || []
         : []
 
-      // Process accounts and calculate net worth
+      // Process accounts with manual balance support
       let netWorth = 0
       let totalSavings = 0
       const accounts = accountsResponse.status === 'fulfilled'
         ? accountsResponse.value.data?.accounts || []
         : []
-
+    
       for (const account of accounts) {
-        const balance = await calculateAccountBalance(account.id, this.userId!)
-        account.calculatedBalance = balance
-        netWorth += balance
-
+        const balanceData = await calculateAccountBalance(account.id, this.userId!)
+        account.calculatedBalance = balanceData.balance
+        account.manualOverrideActive = balanceData.manualOverrideActive
+        account.manualBalance = balanceData.manualBalance
+        account.transactionImpact = balanceData.transactionImpact
+        account.lastManualSet = balanceData.lastManualSet
+    
+        netWorth += balanceData.balance
+    
         if (account.is_savings) {
-          totalSavings += balance
+          totalSavings += balanceData.balance
         }
       }
 
@@ -210,11 +215,11 @@ class DashboardService {
 
       if (accountsResponse.data?.accounts) {
         for (const account of accountsResponse.data.accounts) {
-          const balance = await calculateAccountBalance(account.id, this.userId!)
-          netWorth += balance
+          const balanceData = await calculateAccountBalance(account.id, this.userId!)
+          netWorth += balanceData.balance
 
           if (account.is_savings) {
-            totalSavings += balance
+            totalSavings += balanceData.balance
           }
         }
       }

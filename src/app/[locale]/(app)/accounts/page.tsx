@@ -38,6 +38,11 @@ interface Account {
   currency: string;
   created_at: string;
   calculatedBalance?: number;
+  // Manual balance override fields
+  manualOverrideActive?: boolean;
+  manualBalance?: number;
+  transactionImpact?: number;
+  lastManualSet?: string;
 }
 
 const accountTypeIcons = {
@@ -143,10 +148,14 @@ export default function AccountsPage() {
         const accountsWithBalances = await Promise.all(
           accountsData.map(async (account: Account) => {
             try {
-              const calculatedBalance = await calculateAccountBalance(account.id, session.user.id);
+              const balanceData = await calculateAccountBalance(account.id, session.user.id);
               return {
                 ...account,
-                calculatedBalance
+                calculatedBalance: balanceData.balance,
+                manualOverrideActive: balanceData.manualOverrideActive,
+                manualBalance: balanceData.manualBalance,
+                transactionImpact: balanceData.transactionImpact,
+                lastManualSet: balanceData.lastManualSet
               };
             } catch (error) {
 //              console.error(`Error calculating balance for account ${account.id}:`, error);
@@ -178,10 +187,14 @@ export default function AccountsPage() {
       const updatedAccounts = await Promise.all(
         accounts.map(async (account: Account) => {
           try {
-            const calculatedBalance = await calculateAccountBalance(account.id, session.user.id);
+            const balanceData = await calculateAccountBalance(account.id, session.user.id);
             return {
               ...account,
-              calculatedBalance
+              calculatedBalance: balanceData.balance,
+              manualOverrideActive: balanceData.manualOverrideActive,
+              manualBalance: balanceData.manualBalance,
+              transactionImpact: balanceData.transactionImpact,
+              lastManualSet: balanceData.lastManualSet
             };
           } catch (error) {
 //            console.error(`Error recalculating balance for account ${account.id}:`, error);
