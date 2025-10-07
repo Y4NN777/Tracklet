@@ -1,6 +1,70 @@
 import { supabase } from './supabase'
 
 // =========================================
+// BUDGET PROGRESS CACHE
+// =========================================
+
+interface CacheEntry<T> {
+  data: T
+  timestamp: number
+  ttl: number
+}
+
+class BudgetProgressCache {
+  private cache = new Map<string, CacheEntry<BudgetProgress>>()
+  private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes in milliseconds
+
+  private getCacheKey(budgetId: string, userId: string): string {
+    return `budget_progress_${budgetId}_${userId}`
+  }
+
+  get(budgetId: string, userId: string): BudgetProgress | null {
+    const key = this.getCacheKey(budgetId, userId)
+    const entry = this.cache.get(key)
+
+    if (!entry) return null
+
+    // Check if cache entry has expired
+    if (Date.now() - entry.timestamp > entry.ttl) {
+      this.cache.delete(key)
+      return null
+    }
+
+    return entry.data
+  }
+
+  set(budgetId: string, userId: string, data: BudgetProgress, ttl = this.DEFAULT_TTL): void {
+    const key = this.getCacheKey(budgetId, userId)
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl
+    })
+  }
+
+  invalidate(budgetId: string, userId: string): void {
+    const key = this.getCacheKey(budgetId, userId)
+    this.cache.delete(key)
+  }
+
+  invalidateUserBudgets(userId: string): void {
+    // Remove all cache entries for this user
+    for (const [key, entry] of this.cache.entries()) {
+      if (key.includes(`_${userId}`)) {
+        this.cache.delete(key)
+      }
+    }
+  }
+
+  clear(): void {
+    this.cache.clear()
+  }
+}
+
+// Global cache instance
+const budgetProgressCache = new BudgetProgressCache()
+
+// =========================================
 // FINANCIAL CALCULATIONS & BUSINESS LOGIC
 // =========================================
 
@@ -51,6 +115,11 @@ export interface BudgetProgress {
   percentage: number
   isOverBudget: boolean
   categoryName: string
+  // Enhanced metrics
+  spendingVelocity: number // Amount spent per day in current period
+  projectedOverspendDate?: string // When budget will be exceeded at current rate
+  daysRemaining: number // Days left in current budget period
+  periodComparison?: number // Percentage change from previous period (-50 = 50% less than previous)
 }
 
 // =========================================
@@ -378,6 +447,12 @@ export async function calculateBudgetProgress(
   budgetId: string,
   userId: string
 ): Promise<BudgetProgress | null> {
+  // Check cache first
+  const cached = budgetProgressCache.get(budgetId, userId)
+  if (cached) {
+    return cached
+  }
+
   // Get budget details
   const { data: budget, error: budgetError } = await supabase
     .from('budgets')
@@ -436,15 +511,96 @@ export async function calculateBudgetProgress(
   const remaining = budget.amount - spent
   const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0
 
-  return {
+  // Calculate enhanced metrics
+  const now = new Date()
+  const periodStart = new Date(dateRange.start)
+  const periodEnd = new Date(dateRange.end)
+  const daysElapsed = Math.max(1, Math.ceil((now.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)))
+  const totalPeriodDays = Math.max(1, Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)))
+
+  // Spending velocity (amount per day)
+  const spendingVelocity = spent / daysElapsed
+
+  // Days remaining in period
+  const daysRemaining = Math.max(0, Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+
+  // Projected overspend date (if currently overspending)
+  let projectedOverspendDate: string | undefined
+  if (spendingVelocity > 0 && remaining < 0) {
+    const daysToOverspend = Math.abs(remaining) / spendingVelocity
+    const overspendDate = new Date(now.getTime() + (daysToOverspend * 24 * 60 * 60 * 1000))
+    projectedOverspendDate = overspendDate.toISOString().split('T')[0]
+  }
+
+  // Period comparison (compare to previous period)
+  let periodComparison: number | undefined
+  try {
+    // Calculate previous period dates
+    const prevPeriodEnd = new Date(periodStart.getTime() - (24 * 60 * 60 * 1000))
+    let prevPeriodStart: Date
+
+    if (budget.period === 'monthly') {
+      prevPeriodStart = new Date(prevPeriodEnd.getFullYear(), prevPeriodEnd.getMonth(), 1)
+    } else if (budget.period === 'yearly') {
+      prevPeriodStart = new Date(prevPeriodEnd.getFullYear(), 0, 1)
+    } else if (budget.period === 'weekly') {
+      const day = prevPeriodEnd.getDay()
+      prevPeriodStart = new Date(prevPeriodEnd)
+      prevPeriodStart.setDate(prevPeriodEnd.getDate() - day + (day === 0 ? -6 : 1))
+    } else {
+      // Default to previous month
+      prevPeriodStart = new Date(prevPeriodEnd.getFullYear(), prevPeriodEnd.getMonth(), 1)
+    }
+
+    // Get previous period transactions
+    const { data: prevTransactions } = await supabase
+      .from('transactions')
+      .select('amount')
+      .eq('user_id', userId)
+      .eq('type', 'expense')
+      .eq('budget_id', budget.id)
+      .gte('date', prevPeriodStart.toISOString().split('T')[0])
+      .lte('date', prevPeriodEnd.toISOString().split('T')[0])
+
+    const prevSpent = prevTransactions?.reduce((sum, t) => sum + t.amount, 0) || 0
+    if (prevSpent > 0) {
+      periodComparison = ((spent - prevSpent) / prevSpent) * 100
+    }
+  } catch (error) {
+    // Silently fail for period comparison
+  }
+
+  const result: BudgetProgress = {
     budgetId: budget.id,
     name: budget.name,
     spent,
     remaining,
     percentage: Math.round(percentage * 100) / 100,
     isOverBudget: spent > budget.amount,
-    categoryName: (budget.categories as any)?.name || 'Uncategorized'
+    categoryName: (budget.categories as any)?.name || 'Uncategorized',
+    spendingVelocity: Math.round(spendingVelocity * 100) / 100,
+    projectedOverspendDate,
+    daysRemaining,
+    periodComparison: periodComparison ? Math.round(periodComparison * 100) / 100 : undefined
   }
+
+  // Cache the result
+  budgetProgressCache.set(budgetId, userId, result)
+
+  return result
+}
+
+// Cache management functions
+export function invalidateBudgetProgress(budgetId: string, userId: string): void {
+  budgetProgressCache.invalidate(budgetId, userId)
+}
+
+export function invalidateUserBudgetProgress(userId: string): void {
+  budgetProgressCache.invalidateUserBudgets(userId)
+}
+
+export function clearBudgetProgressCache(): void {
+  budgetProgressCache.clear()
 }
 
 // =========================================
