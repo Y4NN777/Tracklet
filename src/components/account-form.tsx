@@ -130,8 +130,8 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
     try {
       await onSubmit(values);
       toast({
-        title: i.accountAddedTitle,
-        description: i.accountAddedDescription,
+        title: editingAccount ? i.accountUpdatedTitle.key : i.accountAddedTitle.key,
+        description: editingAccount ? i.accountUpdatedDescription.key : i.accountAddedDescription.key,
       })
       handleClose();
     } catch (error) {

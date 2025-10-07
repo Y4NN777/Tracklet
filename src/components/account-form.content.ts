@@ -24,6 +24,8 @@ const accountFormContent: DeclarationContent = {
     // Toast Messages
     accountAddedTitle: t({ en: "Account added.", fr: "Compte ajouté." }),
     accountAddedDescription: t({ en: "Your account has been added successfully.", fr: "Votre compte a été ajouté avec succès." }),
+    accountUpdatedTitle: t({ en: "Account updated.", fr: "Compte mis à jour." }),
+    accountUpdatedDescription: t({ en: "Your account has been updated successfully.", fr: "Votre compte a été mis à jour avec succès." }),
     errorTitle: t({ en: "Error", fr: "Erreur" }),
     failedToCreateAccount: t({ en: "Failed to create account. Please try again.", fr: "Échec de la création du compte. Veuillez réessayer." }),
 
