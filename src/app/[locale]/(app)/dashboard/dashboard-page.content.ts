@@ -51,6 +51,28 @@ const dashboardPageContent: DeclarationContent = {
     uncategorized: t({ en: "Uncategorized", fr: "Non classé" }),
     noTransactions: t({ en: "No transactions yet", fr: "Aucune transaction pour le moment" }),
     addFirstTransaction: t({ en: "Add your first transaction to get started", fr: "Ajoutez votre première transaction pour commencer" }),
+
+    // Manual Balance Override
+    manualOverrideActive: t({
+      en: "Manual Override",
+      fr: "Substitution Active"
+    }),
+    manualBalanceText: t({
+      en: "Manual balance",
+      fr: "Solde manuel"
+    }),
+    transactionImpactText: t({
+      en: "from recent transactions",
+      fr: "des transactions récentes"
+    }),
+    sinceDateText: t({
+      en: "since",
+      fr: "depuis le"
+    }),
+    clearManualOverride: t({
+      en: "Clear Manual Override",
+      fr: "Effacer la Substitution Manuelle"
+    }),
   },
 };
 

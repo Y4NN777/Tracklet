@@ -50,6 +50,32 @@ const accountFormContent: DeclarationContent = {
     addAccountButton: t({ en: "Add Account", fr: "Ajouter un Compte" }),
     isSavingsAccountLabel: t({ en: "Is this a savings account?", fr: "S'agit-il d'un compte d'épargne ?" }),
     isSavingsAccountDescription: t({ en: "Mark this account as a savings account to include it in your total savings.", fr: "Marquez ce compte comme un compte d'épargne pour l'inclure dans votre épargne totale." }),
+
+    // Manual Balance Override
+    useManualOverrideLabel: t({
+      en: "Set manual balance override",
+      fr: "Définir une substitution de solde manuel"
+    }),
+    manualBalanceLabel: t({
+      en: "Manual Balance",
+      fr: "Solde Manuel"
+    }),
+    manualBalancePlaceholder: t({
+      en: "Enter manual balance",
+      fr: "Entrez le solde manuel"
+    }),
+    manualBalanceNoteLabel: t({
+      en: "Reason for manual adjustment (optional)",
+      fr: "Raison de l'ajustement manuel (optionnel)"
+    }),
+    manualBalanceNotePlaceholder: t({
+      en: "e.g., Bank reconciliation, opening balance adjustment",
+      fr: "ex: Réconciliation bancaire, ajustement du solde d'ouverture"
+    }),
+    manualBalanceRequired: t({
+      en: "Manual balance is required when override is active",
+      fr: "Le solde manuel est requis lorsque la substitution est active"
+    }),
   },
 };
 
