@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, AlertTriangle } from 'lucide-react';
+import { PlusCircle, AlertTriangle, TrendingDown, Clock } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -349,23 +349,48 @@ export default function DashboardPage() {
               ))
             ) : dashboardData?.budgets && dashboardData.budgets.length > 0 ? (
               dashboardData.budgets.slice(0, 4).map((budget, index) => (
-                // Using both budgetId and index as fallback for unique keys
-                <div key={budget.budgetId || `budget-${index}`} className="space-y-1">
-                  <div className="flex justify-between text-sm font-medium">
-                    <span>{budget.name}</span>
-                    <span>
-                      {formatUserCurrency(budget.spent)} / {formatUserCurrency(budget.spent + budget.remaining)}
-                    </span>
+                // Using both id and index as fallback for unique keys
+                <div key={budget.id || `budget-${index}`} className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium">{budget.name}</span>
+                    <div className="text-right">
+                      <div>{formatUserCurrency(budget.spent)} / {formatUserCurrency(budget.amount)}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {budget.days_remaining} {i.days} • {formatUserCurrency(budget.spending_velocity || 0)}/{i.perDay}
+                      </div>
+                    </div>
                   </div>
+
                   <Progress
                     value={budget.percentage}
-                    className={budget.isOverBudget ? "[&>div]:bg-destructive" : ""}
+                    className={budget.is_over_budget ? "[&>div]:bg-destructive" : ""}
                   />
-                  {budget.isOverBudget && (
-                    <p className="text-xs text-destructive">
-                      {i.overBudgetBy} {formatUserCurrency(Math.abs(budget.remaining))}
-                    </p>
-                  )}
+
+                  {/* Enhanced insights with proper Lucide icons and tooltips */}
+                  <div className="flex justify-between text-xs">
+                    {budget.period_comparison && (
+                      <span
+                        className={`flex items-center gap-1 ${budget.period_comparison > 0 ? "text-red-500" : "text-green-500"}`}
+                        title={`${budget.period_comparison > 0 ? i.spendingIncreased : i.spendingDecreased} ${budget.period} ${i.period}`}
+                      >
+                        {budget.period_comparison > 0 ?
+                          <TrendingUp className="h-3 w-3" /> :
+                          <TrendingDown className="h-3 w-3" />
+                        }
+                        {Math.abs(budget.period_comparison)}% {i.vsLastPeriod}
+                      </span>
+                    )}
+                    {budget.projected_overspend_date && (
+                      <span
+                        className="text-orange-500 flex items-center gap-1"
+                        title={i.overspendRiskTooltip}
+                      >
+                        <AlertTriangle className="h-3 w-3" />
+                        {new Date(budget.projected_overspend_date).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             ) : (
