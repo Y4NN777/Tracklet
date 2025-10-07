@@ -67,7 +67,10 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
-    const { name, type, balance, currency, is_savings } = body
+    const {
+      name, type, balance, currency, is_savings,
+      manual_balance, clear_manual_override, manual_balance_note
+    } = body
 
     // Validate account type if provided
     if (type && !['checking', 'savings', 'credit', 'investment'].includes(type)) {
@@ -78,9 +81,26 @@ export async function PATCH(
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
     if (type !== undefined) updateData.type = type
-    if (balance !== undefined) updateData.balance = parseFloat(balance)
+    if (balance !== undefined) updateData.balance = parseFloat(balance) // Keep for backward compatibility
     if (currency !== undefined) updateData.currency = currency
     if (is_savings !== undefined) updateData.is_savings = is_savings
+
+    // Handle manual balance override
+    if (manual_balance !== undefined) {
+      updateData.manual_balance = parseFloat(manual_balance)
+      updateData.manual_override_active = true
+      updateData.manual_balance_set_at = new Date().toISOString()
+      if (manual_balance_note) {
+        updateData.manual_balance_note = manual_balance_note
+      }
+    }
+
+    if (clear_manual_override) {
+      updateData.manual_override_active = false
+      updateData.manual_balance = null
+      updateData.manual_balance_set_at = null
+      updateData.manual_balance_note = null
+    }
 
     // Check if any fields were provided
     if (Object.keys(updateData).length === 0) {
