@@ -5,8 +5,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, TrendingUp, TrendingDown, Clock, AlertTriangle } from "lucide-react"
 import { useCurrency } from "@/contexts/preferences-context"
+import { useIntlayer } from "next-intlayer"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -234,6 +235,7 @@ export function BudgetCard({
   onClick?: () => void
 }) {
   const { formatCurrency } = useCurrency()
+  const i = useIntlayer('budgets-page')
   const progress = (budget.spent / budget.amount) * 100
   const remaining = budget.amount - budget.spent
 
@@ -262,8 +264,31 @@ export function BudgetCard({
       metadata={[
         { label: "Remaining", value: formatCurrency(remaining) },
         { label: "Category", value: budget.categories?.name || budget.category || "General" },
-        { label: "Period", value: budget.period || "monthly" }
-      ]}
+        { label: "Period", value: budget.period || "monthly" },
+        // Enhanced metrics with proper Lucide icons
+        budget.spending_velocity && {
+          label: i.dailyRate,
+          value: `${formatCurrency(budget.spending_velocity)}/${i.perDay}`,
+          icon: <TrendingUp className="h-3 w-3" />
+        },
+        budget.days_remaining && {
+          label: i.timeLeft,
+          value: `${budget.days_remaining} ${i.days}`,
+          icon: <Clock className="h-3 w-3" />
+        },
+        budget.period_comparison && {
+          label: i.vsLastPeriod,
+          value: `${budget.period_comparison > 0 ? '+' : ''}${budget.period_comparison.toFixed(1)}%`,
+          icon: budget.period_comparison > 0 ?
+            <TrendingUp className="h-3 w-3 text-red-500" /> :
+            <TrendingDown className="h-3 w-3 text-green-500" />
+        },
+        budget.projected_overspend_date && {
+          label: i.riskDate,
+          value: new Date(budget.projected_overspend_date).toLocaleDateString(),
+          icon: <AlertTriangle className="h-3 w-3 text-orange-500" />
+        }
+      ].filter(Boolean)}
       actions={actions}
       onClick={onClick}
     >
