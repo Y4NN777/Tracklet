@@ -45,20 +45,31 @@ interface AccountFormProps {
   onClose?: () => void;
 }
 
-const getAccountSchema = (i: any) => z.object({
+const getAccountSchema = (i: any, editingAccount?: any) => z.object({
   name: z.string().min(2, {
     message: i.nameMinLength.key,
   }),
   type: z.enum(['checking', 'savings', 'credit', 'investment'], {
     required_error: i.typeRequired.key,
   }),
-  balance: z.coerce.number({
+  balance: editingAccount ? z.coerce.number().optional() : z.coerce.number({
     required_error: i.balanceRequired.key,
   }),
   currency: z.string().min(3, {
     message: i.currencyRequired.key,
   }),
   is_savings: z.boolean().optional(),
+  use_manual_override: z.boolean().optional(),
+  manual_balance: z.coerce.number().optional(),
+  manual_balance_note: z.string().optional(),
+}).refine((data) => {
+  if (data.use_manual_override && data.manual_balance === undefined) {
+    return false;
+  }
+  return true;
+}, {
+  message: i.manualBalanceRequired.key,
+  path: ["manual_balance"],
 });
 
 export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }: AccountFormProps) {
@@ -66,7 +77,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
   const { toast } = useToast();
   const { currency } = useCurrency();
 
-  const accountSchema = getAccountSchema(i);
+  const accountSchema = getAccountSchema(i, editingAccount);
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
@@ -76,6 +87,9 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
       balance: 0,
       currency: currency,
       is_savings: false,
+      use_manual_override: false,
+      manual_balance: undefined,
+      manual_balance_note: "",
     },
   })
 
@@ -88,6 +102,9 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
         balance: editingAccount.balance,
         currency: currency,
         is_savings: (editingAccount as any).is_savings || false,
+        use_manual_override: (editingAccount as any).manualOverrideActive || false,
+        manual_balance: (editingAccount as any).manualBalance,
+        manual_balance_note: (editingAccount as any).lastManualSet ? `Manual balance set on ${(editingAccount as any).lastManualSet}` : "",
       });
     } else {
       form.reset({
@@ -96,6 +113,9 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
         balance: 0,
         currency: currency,
         is_savings: false,
+        use_manual_override: false,
+        manual_balance: undefined,
+        manual_balance_note: "",
       });
     }
   }, [editingAccount, form, currency]);
@@ -179,27 +199,29 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="balance"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{i.currentBalanceLabel}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {i.currentBalanceDescription}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!editingAccount && (
+              <FormField
+                control={form.control}
+                name="balance"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{i.currentBalanceLabel}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {i.currentBalanceDescription}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="currency"
@@ -244,6 +266,72 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="use_manual_override"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      {i.useManualOverrideLabel}
+                    </FormLabel>
+                    <FormDescription>
+                      Override the calculated balance with a manual value
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            {form.watch("use_manual_override") && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="manual_balance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{i.manualBalanceLabel}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder={i.manualBalancePlaceholder.key}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Set a custom balance that will override the calculated value
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="manual_balance_note"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{i.manualBalanceNoteLabel}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={i.manualBalanceNotePlaceholder.key}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Optional note explaining why this manual balance was set
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             <DialogFooter>
               <Button type="submit">{editingAccount ? i.updateAccountButton : i.addAccountButton}</Button>
             </DialogFooter>
