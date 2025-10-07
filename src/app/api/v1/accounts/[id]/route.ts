@@ -81,18 +81,22 @@ export async function PATCH(
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
     if (type !== undefined) updateData.type = type
-    if (balance !== undefined) updateData.balance = parseFloat(balance) // Keep for backward compatibility
     if (currency !== undefined) updateData.currency = currency
     if (is_savings !== undefined) updateData.is_savings = is_savings
 
-    // Handle manual balance override
+    // Handle manual balance override first
     if (manual_balance !== undefined) {
       updateData.manual_balance = parseFloat(manual_balance)
       updateData.manual_override_active = true
       updateData.manual_balance_set_at = new Date().toISOString()
+      // When manual override is active, set balance to null to avoid conflicts
+      updateData.balance = null
       if (manual_balance_note) {
         updateData.manual_balance_note = manual_balance_note
       }
+    } else if (balance !== undefined && !clear_manual_override) {
+      // Only update balance if not setting manual override and not clearing it
+      updateData.balance = parseFloat(balance)
     }
 
     if (clear_manual_override) {
@@ -100,6 +104,10 @@ export async function PATCH(
       updateData.manual_balance = null
       updateData.manual_balance_set_at = null
       updateData.manual_balance_note = null
+      // Restore balance field when clearing manual override
+      if (balance !== undefined) {
+        updateData.balance = parseFloat(balance)
+      }
     }
 
     // Check if any fields were provided

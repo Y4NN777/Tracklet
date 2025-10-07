@@ -159,9 +159,11 @@ export default function AccountsPage() {
               };
             } catch (error) {
 //              console.error(`Error calculating balance for account ${account.id}:`, error);
+              // For accounts with manual override, don't use stored balance as fallback since it will be null
+              const hasManualOverride = (account as any).manual_override_active;
               return {
                 ...account,
-                calculatedBalance: account.balance || 0 // Fallback to stored balance
+                calculatedBalance: hasManualOverride ? 0 : (account.balance || 0) // Fallback to stored balance only for non-manual accounts
               };
             }
           })
@@ -198,7 +200,12 @@ export default function AccountsPage() {
             };
           } catch (error) {
 //            console.error(`Error recalculating balance for account ${account.id}:`, error);
-            return account;
+            // For accounts with manual override, don't use stored balance as fallback since it will be null
+            const hasManualOverride = (account as any).manualOverrideActive;
+            return {
+              ...account,
+              calculatedBalance: hasManualOverride ? 0 : (account.calculatedBalance ?? account.balance ?? 0)
+            };
           }
         })
       );

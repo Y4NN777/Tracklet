@@ -617,7 +617,7 @@ export async function calculateAccountBalance(accountId: string, userId: string)
   // Get account with manual override data
   const { data: account, error } = await supabase
     .from('accounts')
-    .select('manual_balance, manual_override_active, manual_balance_set_at')
+    .select('balance, manual_balance, manual_override_active, manual_balance_set_at')
     .eq('id', accountId)
     .eq('user_id', userId)
     .single()
@@ -628,12 +628,30 @@ export async function calculateAccountBalance(accountId: string, userId: string)
 
   if (account.manual_override_active && account.manual_balance) {
     // Manual override active - calculate transactions since manual balance was set
+    let manualBalanceDate: string
+
+    try {
+      // Convert timestamp to date for proper comparison
+      if (!account.manual_balance_set_at) {
+        throw new Error('Manual balance set date is missing')
+      }
+      manualBalanceDate = new Date(account.manual_balance_set_at).toISOString().split('T')[0]
+    } catch (dateError) {
+      console.error('Error parsing manual balance date:', dateError)
+      // Fallback: return manual balance without transaction impact
+      return {
+        balance: account.manual_balance,
+        manualOverrideActive: true,
+        manualBalance: account.manual_balance
+      }
+    }
+
     const { data: recentTransactions, error: txError } = await supabase
       .from('transactions')
       .select('amount, type')
       .eq('account_id', accountId)
       .eq('user_id', userId)
-      .gt('created_at', account.manual_balance_set_at)
+      .gt('date', manualBalanceDate)
 
     if (txError) {
       console.error('Error fetching recent transactions:', txError)
