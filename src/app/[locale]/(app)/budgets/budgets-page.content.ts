@@ -39,6 +39,14 @@ const budgetsPageContent: DeclarationContent = {
     updateBudgetFailed: t({ en: "Failed to update budget. Please try again.", fr: "Échec de la mise à jour du budget. Veuillez réessayer." }),
     deleteBudgetFailed: t({ en: "Failed to delete budget. Please try again.", fr: "Échec de la suppression du budget. Veuillez réessayer." }),
     addGoalFailed: t({ en: "Failed to add goal. Please try again.", fr: "Échec de l'ajout de l'objectif. Veuillez réessayer." }),
+
+    // Enhanced Budget Metrics
+    dailyRate: t({ en: "Daily Rate", fr: "Taux journalier" }),
+    timeLeft: t({ en: "Time Left", fr: "Temps restant" }),
+    vsLastPeriod: t({ en: "vs Last Period", fr: "vs Période précédente" }),
+    riskDate: t({ en: "Risk Date", fr: "Date de risque" }),
+    perDay: t({ en: "day", fr: "jour" }),
+    days: t({ en: "days", fr: "jours" }),
   },
 };
 
