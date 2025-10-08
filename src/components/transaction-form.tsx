@@ -213,10 +213,10 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
           const accountsWithBalances = await Promise.all(
             accountsData.map(async (account: Account) => {
               try {
-                const calculatedBalance = await calculateAccountBalance(account.id, session.user.id);
+                const balanceData = await calculateAccountBalance(account.id, session.user.id);
                 return {
                   ...account,
-                  calculatedBalance
+                  calculatedBalance: balanceData.balance
                 };
               } catch (error) {
 //                console.error(`Error calculating balance for account ${account.id}:`, error);
@@ -397,7 +397,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                       <option value="">{i.selectAccount}</option>
                       {accounts.map((account) => (
                         <option key={account.id} value={account.id}>
-                          {account.name} ({account.type}) - {(typeof account.calculatedBalance === 'object' ? account.calculatedBalance?.balance : account.calculatedBalance ?? account.balance ?? 0).toLocaleString(i.locale || 'en-US', { style: 'currency', currency: account.currency })}
+                          {account.name} ({account.type}) - {(account.calculatedBalance ?? 0).toLocaleString(i.locale || 'en-US', { style: 'currency', currency: account.currency })}
                         </option>
                       ))}
                     </select>
