@@ -22,67 +22,9 @@ const accountsPageContent: DeclarationContent = {
     netWorthDescription: t({ en: "Your total financial position", fr: "Votre situation financière totale" }),
 
     // Account Grouping
-    accountsTitle: t({
-      en: (params: { type: string } = { type: '' }) => {
-        const displayNames: Record<string, string> = {
-          bank_account: "Bank Account",
-          savings: "Savings",
-          credit: "Credit Card",
-          investment: "Investment",
-          mobile_money: "Mobile Money",
-          cash: "Cash",
-          business_fund: "Business Fund",
-          other: "Other"
-        };
-        const displayName = displayNames[params.type] || params.type;
-        return `${displayName} Accounts`;
-      },
-      fr: (params: { type: string } = { type: '' }) => {
-        const displayNames: Record<string, string> = {
-          bank_account: "Compte Bancaire",
-          savings: "Épargne",
-          credit: "Carte de Crédit",
-          investment: "Investissement",
-          mobile_money: "Mobile Money",
-          cash: "Espèces",
-          business_fund: "Fonds Commercial",
-          other: "Autre"
-        };
-        const displayName = displayNames[params.type] || params.type;
-        return `Comptes ${displayName}`;
-      }
-    }),
+    accountsTitle: t({ en: "Accounts", fr: "Comptes" }),
     accountCount: t({ en: (params: { count: number } = { count: 0 }) => `(${params.count} account${params.count !== 1 ? 's' : ''})`, fr: (params: { count: number } = { count: 0 }) => `(${params.count} compte${params.count !== 1 ? 's' : ''})` }),
-    total: t({
-      en: (params: { type: string } = { type: '' }) => {
-        const displayNames: Record<string, string> = {
-          bank_account: "Bank Account",
-          savings: "Savings",
-          credit: "Credit Card",
-          investment: "Investment",
-          mobile_money: "Mobile Money",
-          cash: "Cash",
-          business_fund: "Business Fund",
-          other: "Other"
-        };
-        const displayName = displayNames[params.type] || params.type;
-        return `Total ${displayName}`;
-      },
-      fr: (params: { type: string } = { type: '' }) => {
-        const displayNames: Record<string, string> = {
-          bank_account: "Compte Bancaire",
-          savings: "Épargne",
-          credit: "Carte de Crédit",
-          investment: "Investissement",
-          mobile_money: "Mobile Money",
-          cash: "Espèces",
-          business_fund: "Fonds Commercial",
-          other: "Autre"
-        };
-        const displayName = displayNames[params.type] || params.type;
-        return `Total ${displayName}`;
-      }
-    }),
+    total: t({ en: "Total", fr: "Total" }),
 
     // Account Type Display Names
     accountTypeDisplay: {

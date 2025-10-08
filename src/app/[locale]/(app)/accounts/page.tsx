@@ -484,12 +484,25 @@ export default function AccountsPage() {
           const IconComponent = accountTypeIcons[type as keyof typeof accountTypeIcons];
           const typeTotal = typeAccounts.reduce((sum, acc) => sum + ((acc.calculatedBalance ?? acc.balance) ?? 0), 0);
 
+          // Get display name for the account type
+          const displayNames: Record<string, string> = {
+            bank_account: "Bank Account",
+            savings: "Savings",
+            credit: "Credit Card",
+            investment: "Investment",
+            mobile_money: "Mobile Money",
+            cash: "Cash",
+            business_fund: "Business Fund",
+            other: "Other"
+          };
+          const displayName = displayNames[type] || type;
+
           return (
             <div key={type} className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <IconComponent className={`h-5 w-5 ${accountTypeColors[type as keyof typeof accountTypeColors]}`} />
-                  <h2 className="text-xl font-semibold capitalize">{typeof i.accountsTitle === 'function' ? i.accountsTitle({ type }) : `${type} Accounts`}</h2>
+                  <h2 className="text-xl font-semibold">{displayName} Accounts</h2>
                   <span className="text-sm text-muted-foreground">
                     {typeof i.accountCount === 'function' ? i.accountCount({ count: typeAccounts.length }) : `(${typeAccounts.length} account${typeAccounts.length !== 1 ? 's' : ''})`}
                   </span>
@@ -501,7 +514,7 @@ export default function AccountsPage() {
                       currency: userCurrency
                     })}
                   </div>
-                  <div className="text-sm text-muted-foreground">{typeof i.total === 'function' ? i.total({ type }).key : `Total ${type}`}</div>
+                  <div className="text-sm text-muted-foreground">Total {displayName}</div>
                 </div>
               </div>
 
