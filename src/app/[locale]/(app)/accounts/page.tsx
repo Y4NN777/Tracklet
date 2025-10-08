@@ -258,11 +258,9 @@ export default function AccountsPage() {
         // User wants to set manual override
         if (values.manual_balance !== undefined) {
           apiValues.manual_balance = values.manual_balance;
-          apiValues.manual_balance_note = values.manual_balance_note || null;
         }
         // Remove form-specific fields
         delete apiValues.use_manual_override;
-        delete apiValues.manual_balance_note;
       } else {
         // User wants to clear manual override
         apiValues.clear_manual_override = true;

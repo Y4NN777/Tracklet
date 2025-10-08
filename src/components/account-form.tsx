@@ -61,7 +61,6 @@ const getAccountSchema = (i: any, editingAccount?: any) => z.object({
   is_savings: z.boolean().optional(),
   use_manual_override: z.boolean().optional(),
   manual_balance: z.coerce.number().optional(),
-  manual_balance_note: z.string().optional(),
 }).refine((data) => {
   if (data.use_manual_override && data.manual_balance === undefined) {
     return false;
@@ -89,7 +88,6 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
       is_savings: false,
       use_manual_override: false,
       manual_balance: undefined,
-      manual_balance_note: "",
     },
   })
 
@@ -104,7 +102,6 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
         is_savings: (editingAccount as any).is_savings || false,
         use_manual_override: (editingAccount as any).manualOverrideActive || false,
         manual_balance: (editingAccount as any).manualBalance,
-        manual_balance_note: (editingAccount as any).lastManualSet ? `Manual balance set on ${(editingAccount as any).lastManualSet}` : "",
       });
     } else {
       form.reset({
@@ -115,7 +112,6 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
         is_savings: false,
         use_manual_override: false,
         manual_balance: undefined,
-        manual_balance_note: "",
       });
     }
   }, [editingAccount, form, currency]);
@@ -311,25 +307,25 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="manual_balance_note"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{i.manualBalanceNoteLabel}</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder={i.manualBalanceNotePlaceholder.key}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {i.manualBalanceNoteDescription}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {editingAccount && (editingAccount as any).manualOverrideActive && (editingAccount as any).lastManualSet && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Manual Balance Set
+                    </label>
+                    <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
+                      {new Date((editingAccount as any).lastManualSet).toLocaleString(i.locale || 'en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      When this manual balance was originally set
+                    </p>
+                  </div>
+                )}
               </>
             )}
             <DialogFooter>
