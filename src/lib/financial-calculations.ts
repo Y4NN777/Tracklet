@@ -673,7 +673,7 @@ export async function calculateAccountBalance(accountId: string, userId: string)
       lastManualSet: account.manual_balance_set_at
     }
   } else {
-    // Standard transaction-only calculation
+    // Standard calculation: stored balance + all transactions
     const { data: allTransactions, error: txError } = await supabase
       .from('transactions')
       .select('amount, type')
@@ -682,14 +682,14 @@ export async function calculateAccountBalance(accountId: string, userId: string)
 
     if (txError) {
       console.error('Error fetching all transactions:', txError)
-      return { balance: 0, manualOverrideActive: false }
+      return { balance: account.balance || 0, manualOverrideActive: false }
     }
 
-    const balance = allTransactions?.reduce((sum, t) =>
+    const transactionBalance = allTransactions?.reduce((sum, t) =>
       t.type === 'income' ? sum + t.amount : sum - t.amount, 0) || 0
 
     return {
-      balance,
+      balance: (account.balance || 0) + transactionBalance,
       manualOverrideActive: false
     }
   }
