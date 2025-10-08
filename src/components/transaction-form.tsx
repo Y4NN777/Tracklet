@@ -397,7 +397,7 @@ export function TransactionForm({ open, setOpen, onSubmit, editingTransaction, o
                       <option value="">{i.selectAccount}</option>
                       {accounts.map((account) => (
                         <option key={account.id} value={account.id}>
-                          {account.name} ({account.type}) - {(account.calculatedBalance ?? account.balance).toLocaleString(i.locale, { style: 'currency', currency: account.currency })}
+                          {account.name} ({account.type}) - {(typeof account.calculatedBalance === 'object' ? account.calculatedBalance?.balance : account.calculatedBalance ?? account.balance ?? 0).toLocaleString(i.locale || 'en-US', { style: 'currency', currency: account.currency })}
                         </option>
                       ))}
                     </select>

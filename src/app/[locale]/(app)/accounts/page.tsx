@@ -275,17 +275,19 @@ export default function AccountsPage() {
       const response = await api.updateAccount(editingAccount.id, apiValues);
 
       if (response.data) {
-        // Update the account in the local state
-        setAccounts(prev => prev.map(acc => acc.id === editingAccount.id ? {
-          ...response.data.account,
-          // Immediately recalculate balance for UI update
-          calculatedBalance: response.data.account.manual_override_active ?
-            (response.data.account.manual_balance || 0) : (response.data.account.balance || 0),
-          manualOverrideActive: response.data.account.manual_override_active,
-          manualBalance: response.data.account.manual_balance,
-          transactionImpact: 0, // Reset transaction impact for immediate UI update
-          lastManualSet: response.data.account.manual_balance_set_at
-        } : acc));
+        // Update the account in the local state with proper balance calculation
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const balanceData = await calculateAccountBalance(editingAccount.id, session.user.id);
+          setAccounts(prev => prev.map(acc => acc.id === editingAccount.id ? {
+            ...response.data.account,
+            calculatedBalance: balanceData.balance,
+            manualOverrideActive: balanceData.manualOverrideActive,
+            manualBalance: balanceData.manualBalance,
+            transactionImpact: balanceData.transactionImpact,
+            lastManualSet: balanceData.lastManualSet
+          } : acc));
+        }
 
         setEditingAccount(null);
         toast({
@@ -354,6 +356,9 @@ export default function AccountsPage() {
           transactionImpact: 0,
           lastManualSet: undefined
         } : acc));
+
+        // Trigger balance refresh to ensure all accounts are up to date
+        setTimeout(() => refreshAccountBalances(), 100);
 
         toast({
           title: i.accountUpdatedToastTitle.key,
