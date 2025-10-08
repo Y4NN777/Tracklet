@@ -502,7 +502,7 @@ export default function AccountsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <IconComponent className={`h-5 w-5 ${accountTypeColors[type as keyof typeof accountTypeColors]}`} />
-                  <h2 className="text-xl font-semibold">{displayName} Accounts</h2>
+                  <h2 className="text-xl font-semibold">{displayName}</h2>
                   <span className="text-sm text-muted-foreground">
                     {typeof i.accountCount === 'function' ? i.accountCount({ count: typeAccounts.length }) : `(${typeAccounts.length} account${typeAccounts.length !== 1 ? 's' : ''})`}
                   </span>
