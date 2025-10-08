@@ -73,7 +73,7 @@ export async function PATCH(
     } = body
 
     // Validate account type if provided
-    if (type && !['checking', 'savings', 'credit', 'investment'].includes(type)) {
+    if (type && !['bank_account', 'savings', 'credit', 'investment', 'mobile_money', 'cash', 'business_fund', 'other'].includes(type)) {
       return NextResponse.json({ error: 'Invalid account type' }, { status: 400 })
     }
 
@@ -175,7 +175,7 @@ export async function PUT(
     }
 
     // Validate account type
-    if (!['checking', 'savings', 'credit', 'investment'].includes(type)) {
+    if (!['bank_account', 'savings', 'credit', 'investment', 'mobile_money', 'cash', 'business_fund', 'other'].includes(type)) {
       return NextResponse.json({ error: 'Invalid account type' }, { status: 400 })
     }
 

@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate account type
-    if (!['checking', 'savings', 'credit', 'investment'].includes(type)) {
+    if (!['bank_account', 'savings', 'credit', 'investment', 'mobile_money', 'cash', 'business_fund', 'other'].includes(type)) {
       return NextResponse.json({ error: 'Invalid account type' }, { status: 400 })
     }
 
