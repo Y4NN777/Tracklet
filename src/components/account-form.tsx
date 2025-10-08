@@ -32,7 +32,7 @@ type AccountFormValues = z.infer<ReturnType<typeof getAccountSchema>>;
 interface Account {
   id: string;
   name: string;
-  type: 'checking' | 'savings' | 'credit' | 'investment';
+  type: 'bank_account' | 'savings' | 'credit' | 'investment' | 'mobile_money' | 'cash' | 'business_fund' | 'other';
   balance: number;
   currency: string;
 }
@@ -49,7 +49,7 @@ const getAccountSchema = (i: any, editingAccount?: any) => z.object({
   name: z.string().min(2, {
     message: i.nameMinLength.key,
   }),
-  type: z.enum(['checking', 'savings', 'credit', 'investment'], {
+  type: z.enum(['bank_account', 'savings', 'credit', 'investment', 'mobile_money', 'cash', 'business_fund', 'other'], {
     required_error: i.typeRequired.key,
   }),
   balance: editingAccount ? z.coerce.number().optional() : z.coerce.number({
@@ -82,7 +82,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
     resolver: zodResolver(accountSchema),
     defaultValues: {
       name: "",
-      type: "checking",
+      type: "bank_account",
       balance: 0,
       currency: currency,
       is_savings: false,
@@ -106,7 +106,7 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
     } else {
       form.reset({
         name: "",
-        type: "checking",
+        type: "bank_account",
         balance: 0,
         currency: currency,
         is_savings: false,
@@ -182,10 +182,14 @@ export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <option value="">{i.selectAccountTypeOption}</option>
-                      <option value="checking">{i.checkingAccountOption}</option>
+                      <option value="bank_account">{i.bankAccountOption}</option>
                       <option value="savings">{i.savingsAccountOption}</option>
                       <option value="credit">{i.creditCardOption}</option>
                       <option value="investment">{i.investmentAccountOption}</option>
+                      <option value="mobile_money">{i.mobileMoneyOption}</option>
+                      <option value="cash">{i.cashOption}</option>
+                      <option value="business_fund">{i.businessFundOption}</option>
+                      <option value="other">{i.otherAccountOption}</option>
                     </select>
                   </FormControl>
                   <FormDescription>

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { MobileDataList } from '@/components/ui/mobile-data-list';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, Wallet, PiggyBank, CreditCard, TrendingUp, Edit, Trash2, Settings, RotateCcw } from 'lucide-react';
+import { PlusCircle, Wallet, PiggyBank, CreditCard, TrendingUp, Edit, Trash2, Settings, RotateCcw, Smartphone, DollarSign, Briefcase, MoreHorizontal } from 'lucide-react';
 import { AccountForm } from '@/components/account-form';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api-client';
@@ -33,7 +33,7 @@ import { useIntlayer } from 'next-intlayer';
 interface Account {
   id: string;
   name: string;
-  type: 'checking' | 'savings' | 'credit' | 'investment';
+  type: 'bank_account' | 'savings' | 'credit' | 'investment' | 'mobile_money' | 'cash' | 'business_fund' | 'other';
   balance: number;
   currency: string;
   created_at: string;
@@ -46,17 +46,25 @@ interface Account {
 }
 
 const accountTypeIcons = {
-  checking: Wallet,
+  bank_account: Wallet,
   savings: PiggyBank,
   credit: CreditCard,
   investment: TrendingUp,
+  mobile_money: Smartphone,
+  cash: DollarSign,
+  business_fund: Briefcase,
+  other: MoreHorizontal,
 };
 
 const accountTypeColors = {
-  checking: 'text-blue-500',
+  bank_account: 'text-blue-500',
   savings: 'text-green-600',
   credit: 'text-red-600',
   investment: 'text-purple-600',
+  mobile_money: 'text-orange-500',
+  cash: 'text-yellow-600',
+  business_fund: 'text-indigo-600',
+  other: 'text-gray-600',
 };
 
 export default function AccountsPage() {
@@ -513,7 +521,7 @@ export default function AccountsPage() {
                             <h3 className="font-semibold">{account.name}</h3>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="outline" className="text-xs">
-                                {account.type.charAt(0).toUpperCase() + account.type.slice(1)}
+                                {i.accountTypeDisplay[account.type as keyof typeof i.accountTypeDisplay]?.key || account.type}
                               </Badge>
                             </div>
                           </div>

@@ -26,6 +26,18 @@ const accountsPageContent: DeclarationContent = {
     accountCount: t({ en: (params: { count: number } = { count: 0 }) => `(${params.count} account${params.count !== 1 ? 's' : ''})`, fr: (params: { count: number } = { count: 0 }) => `(${params.count} compte${params.count !== 1 ? 's' : ''})` }),
     total: t({ en: (params: { type: string } = { type: '' }) => `Total ${params.type}`, fr: (params: { type: string } = { type: '' }) => `Total ${params.type}` }),
 
+    // Account Type Display Names
+    accountTypeDisplay: {
+      bank_account: t({ en: "Bank Account", fr: "Compte Bancaire" }),
+      savings: t({ en: "Savings", fr: "Épargne" }),
+      credit: t({ en: "Credit Card", fr: "Carte de Crédit" }),
+      investment: t({ en: "Investment", fr: "Investissement" }),
+      mobile_money: t({ en: "Mobile Money", fr: "Mobile Money" }),
+      cash: t({ en: "Cash", fr: "Espèces" }),
+      business_fund: t({ en: "Business Fund", fr: "Fonds Commercial" }),
+      other: t({ en: "Other", fr: "Autre" }),
+    },
+
     // Manual Balance Override
     manualBadge: t({ en: "Manual", fr: "Manuel" }),
     manualOverrideCleared: t({ en: "Manual balance override cleared. Account now shows calculated balance.", fr: "Substitution manuelle du solde supprimée. Le compte affiche maintenant le solde calculé." }),
