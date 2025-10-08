@@ -651,7 +651,7 @@ export async function calculateAccountBalance(accountId: string, userId: string)
       .select('amount, type')
       .eq('account_id', accountId)
       .eq('user_id', userId)
-      .gt('date', manualBalanceDate)
+      .gte('date', manualBalanceDate)
 
     if (txError) {
       console.error('Error fetching recent transactions:', txError)
