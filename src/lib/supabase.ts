@@ -4,7 +4,40 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const appUrl = process.env.NEXT_PUBLIC_APP_URL!
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL!
+const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+const API_BASE_PATH = '/api/v1'
+
+const normalizeBaseUrl = (base: string) => base.replace(/\/+$/, '')
+
+const resolveApiBaseUrl = () => {
+  if (typeof window === 'undefined') {
+    if (configuredApiBaseUrl && configuredApiBaseUrl.startsWith('http')) {
+      return normalizeBaseUrl(configuredApiBaseUrl)
+    }
+    return `${normalizeBaseUrl(appUrl)}${API_BASE_PATH}`
+  }
+
+  if (!configuredApiBaseUrl || configuredApiBaseUrl === '' || configuredApiBaseUrl.includes('localhost')) {
+    return API_BASE_PATH
+  }
+
+  if (configuredApiBaseUrl.startsWith('http')) {
+    return normalizeBaseUrl(configuredApiBaseUrl)
+  }
+
+  return configuredApiBaseUrl.startsWith('/') ? configuredApiBaseUrl : `/${configuredApiBaseUrl}`
+}
+
+const buildApiUrl = (path: string) => {
+  const base = resolveApiBaseUrl()
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+
+  if (base.startsWith('http')) {
+    return `${base}${normalizedPath}`
+  }
+
+  return `${base}${normalizedPath}`.replace(/\/{2,}/g, '/')
+}
 
 // Use service role key for server-side operations (API routes), regular key for client-side
 const isServerSide = typeof window === 'undefined'
@@ -29,7 +62,7 @@ export const auth = {
   }) => {
     try {
       // Call server-side API route for signup
-      const response = await fetch(`${apiBaseUrl}/auth/signup`, {
+      const response = await fetch(buildApiUrl('/auth/signup'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
