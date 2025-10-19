@@ -10,9 +10,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Mail, Lock, User, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { auth, db } from '@/lib/supabase';
+import { auth } from '@/lib/supabase';
 import { useIntlayer } from 'next-intlayer';
 
 export default function SignupPage() {
@@ -29,6 +29,8 @@ export default function SignupPage() {
     confirmPassword: '',
     agreeToTerms: false,
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateForm = () => {
     if (formData.password !== formData.confirmPassword) {
@@ -70,6 +72,13 @@ export default function SignupPage() {
       }
 
       if (data?.user) {
+        const { error: signInError } = await auth.signIn(formData.email, formData.password);
+
+        if (signInError) {
+          setError(signInError.message || i.autoLoginFailed.key);
+          return;
+        }
+
         toast({
           title: i.accountCreatedToastTitle.key,
           description: i.accountCreatedToastDescription.key,
@@ -162,7 +171,7 @@ export default function SignupPage() {
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder={i.passwordPlaceholder.key}
                 className="pl-10"
                 value={formData.password}
@@ -170,6 +179,15 @@ export default function SignupPage() {
                 required
                 disabled={isLoading}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={showPassword ? i.hidePasswordLabel.key : i.showPasswordLabel.key}
+                disabled={isLoading}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
             <p className="text-xs text-muted-foreground">
               {i.passwordHint}
@@ -182,7 +200,7 @@ export default function SignupPage() {
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="confirmPassword"
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 placeholder={i.passwordPlaceholder.key}
                 className="pl-10"
                 value={formData.confirmPassword}
@@ -190,6 +208,15 @@ export default function SignupPage() {
                 required
                 disabled={isLoading}
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={showConfirmPassword ? i.hidePasswordLabel.key : i.showPasswordLabel.key}
+                disabled={isLoading}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 

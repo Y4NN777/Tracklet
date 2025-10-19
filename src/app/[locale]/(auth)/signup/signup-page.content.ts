@@ -17,6 +17,8 @@ const signupPageContent: DeclarationContent = {
     passwordPlaceholder: t({ en: "••••••••", fr: "••••••••" }),
     passwordHint: t({ en: "Must be at least 8 characters long", fr: "Doit contenir au moins 8 caractères" }),
     confirmPasswordLabel: t({ en: "Confirm Password", fr: "Confirmez le mot de passe" }),
+    showPasswordLabel: t({ en: "Show password", fr: "Afficher le mot de passe" }),
+    hidePasswordLabel: t({ en: "Hide password", fr: "Masquer le mot de passe" }),
 
     // Terms
     agreeTo: t({ en: "I agree to the", fr: "J'accepte les" }),
@@ -45,6 +47,7 @@ const signupPageContent: DeclarationContent = {
     accountCreatedToastDescription: t({ en: "Welcome! Let's set up your profile.", fr: "Bienvenue ! Configurons votre profil." }),
     unexpectedError: t({ en: "An unexpected error occurred", fr: "Une erreur inattendue est survenue" }),
     accountCreationFailed: t({ en: "Failed to create account. Please try again.", fr: "Échec de la création du compte. Veuillez réessayer." }),
+    autoLoginFailed: t({ en: "Account created but we couldn't sign you in automatically. Please log in.", fr: "Compte créé mais nous n'avons pas pu vous connecter automatiquement. Veuillez vous connecter." }),
     googleSignupFailed: t({ en: "Failed to sign up with Google. Please try again.", fr: "Échec de l'inscription avec Google. Veuillez réessayer." }),
   },
 };

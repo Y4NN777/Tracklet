@@ -13,6 +13,8 @@ const loginPageContent: DeclarationContent = {
     emailPlaceholder: t({ en: "you@example.com", fr: "vous@exemple.com" }),
     passwordLabel: t({ en: "Password", fr: "Mot de passe" }),
     passwordPlaceholder: t({ en: "••••••••", fr: "••••••••" }),
+    showPasswordLabel: t({ en: "Show password", fr: "Afficher le mot de passe" }),
+    hidePasswordLabel: t({ en: "Hide password", fr: "Masquer le mot de passe" }),
     forgotPasswordLink: t({ en: "Forgot password?", fr: "Mot de passe oublié ?" }),
 
     // Buttons
