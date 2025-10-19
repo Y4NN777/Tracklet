@@ -18,7 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const ONBOARDING_STEPS = [
   { id: 1, title: 'Welcome to Tracklet', description: 'Your AI-powered finance companion awaits' },
   { id: 2, title: 'Discover Tracklet', description: 'Learn what makes your financial journey smarter' },
-  { id: 3, title: 'Terms & Privacy', description: 'Review our terms and privacy policy' },
+  { id: 3, title: 'Terms & Privacy', description: 'Review our Terms of Service and privacy details' },
   { id: 4, title: 'Profile Setup', description: 'Personalize your experience' },
   { id: 5, title: 'Preferences', description: 'Customize your financial settings' },
   { id: 6, title: 'You\'re All Set!', description: 'Ready to take control of your finances' }
@@ -336,24 +336,16 @@ export default function OnboardingPage() {
             <div className="space-y-6">
               <div className="text-center">
                 <h3 className="text-xl font-semibold mb-4">Terms & Privacy</h3>
-                <p className="text-muted-foreground mb-6">Please review and accept our terms to continue</p>
+                <p className="text-muted-foreground mb-6">Review our Terms of Service and privacy details to continue</p>
               </div>
 
               <div className="space-y-4">
-                <div className="p-4 border rounded-lg bg-muted/50">
-                  <h4 className="font-semibold mb-2">Terms of Service</h4>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    By using Tracklet, you agree to our terms of service which govern how we collect, use, and protect your financial data.
+                <div className="p-4 border rounded-lg bg-muted/50 space-y-3">
+                  <h4 className="font-semibold">Terms of Service & Privacy</h4>
+                  <p className="text-sm text-muted-foreground">
+                    By using Tracklet, you agree to our Terms of Service and acknowledge our privacy practices, which together explain how we collect, use, and protect your financial data.
                   </p>
-                  <a href="/terms" className="text-sm text-primary hover:underline">Read full terms →</a>
-                </div>
-
-                <div className="p-4 border rounded-lg bg-muted/50">
-                  <h4 className="font-semibold mb-2">Privacy Policy</h4>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Your privacy is our priority. We use bank-level security to protect your financial information and never share it without your consent.
-                  </p>
-                  <a href="/privacy" className="text-sm text-primary hover:underline">Read privacy policy →</a>
+                  <a href="/terms" className="text-sm text-primary hover:underline">Read the full Terms & Privacy details →</a>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -365,7 +357,7 @@ export default function OnboardingPage() {
                     className="rounded border-gray-300"
                   />
                   <label htmlFor="terms-acceptance" className="text-sm">
-                    I agree to the <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
+                    I agree to the <a href="/terms" className="text-primary hover:underline">Terms of Service & Privacy details</a>
                   </label>
                 </div>
               </div>
