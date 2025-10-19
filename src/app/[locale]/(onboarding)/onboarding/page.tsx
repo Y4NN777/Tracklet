@@ -10,9 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Upload, Check, ArrowRight, ArrowLeft, Bot, Target, BarChart3, RefreshCw, PartyPopper } from 'lucide-react';
+import { Upload, Check, ArrowRight, ArrowLeft, Bot, Target, BarChart3, RefreshCw, PartyPopper, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { auth, db, supabase } from '@/lib/supabase';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ONBOARDING_STEPS = [
   { id: 1, title: 'Welcome to Tracklet', description: 'Your AI-powered finance companion awaits' },
@@ -213,7 +214,37 @@ export default function OnboardingPage() {
   const progress = (currentStep / totalSteps) * 100;
 
   if (!user) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <Skeleton className="h-2 w-full" />
+        </div>
+
+        <Card>
+          <CardHeader className="space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-72 max-w-full" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+            <div className="flex items-center justify-end gap-3">
+              <Skeleton className="h-10 w-24" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-md border">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
