@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { auth, db, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -61,6 +61,7 @@ export function usePreferences() {
   const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const userIdRef = useRef<string | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
 
   // Load preferences from localStorage
@@ -84,13 +85,14 @@ export function usePreferences() {
 
   // Sync preferences with database with retry logic
   const syncWithDatabase = useCallback(async (prefs: UserPreferences, retryCount = 0) => {
-    if (!user) return;
+    const userId = userIdRef.current;
+    if (!userId) return;
 
     const maxRetries = 3;
     const baseDelay = 1000; // 1 second
 
     try {
-      await db.updateUserPreferences(user.id, prefs);
+      await db.updateUserPreferences(userId, prefs);
       setSyncError(null); // Clear any previous error
       console.log('Preferences synced successfully');
     } catch (error) {
@@ -110,14 +112,12 @@ export function usePreferences() {
         });
       }
     }
-  }, [user, toast]);
+  }, [toast]);
 
   // Load preferences from database and merge with local
-  const loadDatabasePreferences = useCallback(async () => {
-    if (!user) return;
-
+  const loadDatabasePreferences = useCallback(async (userId: string) => {
     try {
-      const { data: profile } = await db.getUserProfile(user.id);
+      const { data: profile } = await db.getUserProfile(userId);
       if (profile?.preferences) {
         const dbPrefs = { ...DEFAULT_PREFERENCES, ...profile.preferences };
         setPreferences(dbPrefs);
@@ -133,7 +133,7 @@ export function usePreferences() {
         variant: 'default',
       });
     }
-  }, [user, saveLocalPreferences, toast]);
+  }, [saveLocalPreferences, toast]);
 
   // Update preferences (local + database sync)
   const updatePreferences = useCallback(async (newPreferences: Partial<UserPreferences>) => {
@@ -142,20 +142,24 @@ export function usePreferences() {
     saveLocalPreferences(updatedPrefs);
 
     // Sync with database if user is logged in
-    if (user) {
+    if (userIdRef.current) {
       await syncWithDatabase(updatedPrefs);
     }
-  }, [preferences, saveLocalPreferences, syncWithDatabase, user]);
+  }, [preferences, saveLocalPreferences, syncWithDatabase]);
 
   // Initialize preferences on mount
   useEffect(() => {
+    let isMounted = true;
+
     const initializePreferences = async () => {
       setIsLoading(true);
 
       try {
         // Load from localStorage first
         const localPrefs = loadLocalPreferences();
-        setPreferences(localPrefs);
+        if (isMounted) {
+          setPreferences(localPrefs);
+        }
 
         // Check if user is logged in with timeout
         const authTimeout = new Promise<never>((_, reject) =>
@@ -169,34 +173,33 @@ export function usePreferences() {
           const result = await Promise.race([authPromise, authTimeout]);
           currentUser = result.user;
         } catch (authError) {
-          // console.warn('Auth check failed or timed out:', authError);
-          // toast({
-          //   title: 'Authentication Issue',
-          //   description: 'Unable to verify login status. Some features may be limited.',
-          //   variant: 'default',
-          // });
           // Continue with null user (unauthenticated)
         }
 
-        setUser(currentUser);
+        userIdRef.current = currentUser?.id ?? null;
+        if (isMounted) {
+          setUser(currentUser);
+        }
 
         if (currentUser) {
           // Load from database and merge
           try {
-            await loadDatabasePreferences();
+            await loadDatabasePreferences(currentUser.id);
           } catch (dbError) {
-//            console.warn('Failed to load database preferences:', dbError);
             // Continue with local preferences only
           }
         }
       } catch (error) {
-//        console.error('Error initializing preferences:', error);
         // Ensure we have default preferences loaded
         const localPrefs = loadLocalPreferences();
-        setPreferences(localPrefs);
+        if (isMounted) {
+          setPreferences(localPrefs);
+        }
       } finally {
         // Always set loading to false, even if errors occurred
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -206,12 +209,13 @@ export function usePreferences() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const newUser = session?.user || null;
+        userIdRef.current = newUser?.id ?? null;
         setUser(newUser);
 
         if (newUser) {
           // User logged in - load preferences from database
           try {
-            await loadDatabasePreferences();
+            await loadDatabasePreferences(newUser.id);
           } catch (dbError) {
             console.warn('Failed to load database preferences on auth change:', dbError);
           }
@@ -221,8 +225,11 @@ export function usePreferences() {
       }
     );
 
-    return () => subscription.unsubscribe();
-  }, [loadDatabasePreferences, toast]);
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [loadDatabasePreferences, loadLocalPreferences]);
 
 
   return {

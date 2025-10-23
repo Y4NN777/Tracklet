@@ -25,6 +25,7 @@ export default function SettingsPage() {
   const { toast } = useToast();
   const { preferences, updatePreferences, isLoading, syncError } = usePreferencesContext();
   const [saving, setSaving] = useState(false);
+  const [savingTimer, setSavingTimer] = useState<NodeJS.Timeout | null>(null);
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [pendingMinAmount, setPendingMinAmount] = useState<number | string | null>(null);
   // Show sync error toast
@@ -44,32 +45,49 @@ export default function SettingsPage() {
       if (debounceTimer) {
         clearTimeout(debounceTimer);
       }
-    };
-  }, [debounceTimer]);
-
-  const updatePreference = async (key: string, value: any) => {
-    setSaving(true);
-    try {
-      if (key === 'notifications') {
-        await updatePreferences({ notifications: value });
-      } else {
-        await updatePreferences({ [key]: value });
+      if (savingTimer) {
+        clearTimeout(savingTimer);
       }
+    };
+  }, [debounceTimer, savingTimer]);
 
-      toast({
-        title: i.settingsSaved,
-        description: i.preferencesUpdated,
-      });
-    } catch (error) {
- //      console.error('Failed to save preferences:', error);
-      toast({
-        title: i.error,
-        description: i.failedToSave,
-        variant: 'destructive',
-      });
-    } finally {
-      setSaving(false);
+  const updatePreference = (key: string, value: any) => {
+    setSaving(true);
+
+    if (savingTimer) {
+      clearTimeout(savingTimer);
     }
+
+    const savePromise = key === 'notifications'
+      ? updatePreferences({ notifications: value })
+      : updatePreferences({ [key]: value });
+
+    const timer = setTimeout(() => {
+      setSaving(false);
+      setSavingTimer(null);
+    }, 250);
+
+    setSavingTimer(timer);
+
+    savePromise
+      .then(() => {
+        toast({
+          title: i.settingsSaved,
+          description: i.preferencesUpdated,
+        });
+      })
+      .catch(() => {
+        clearTimeout(timer);
+        setSaving(false);
+        setSavingTimer(null);
+        toast({
+          title: i.error,
+          description: i.failedToSave,
+          variant: 'destructive',
+        });
+      });
+
+    return savePromise;
   };
 
   const updateNotificationPreference = (
