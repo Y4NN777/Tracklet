@@ -40,6 +40,7 @@ const signupPageContent: DeclarationContent = {
     // Validation Errors
     passwordsDoNotMatch: t({ en: "Passwords do not match", fr: "Les mots de passe ne correspondent pas" }),
     passwordTooShort: t({ en: "Password must be at least 8 characters long", fr: "Le mot de passe doit contenir au moins 8 caractères" }),
+    passwordTooWeak: t({ en: "Please choose a stronger password (add numbers or symbols).", fr: "Veuillez choisir un mot de passe plus robuste (ajoutez des chiffres ou symboles)." }),
     mustAgreeToTerms: t({ en: "You must agree to the terms and conditions", fr: "Vous devez accepter les termes et conditions" }),
 
     // Toasts & Errors
@@ -49,6 +50,7 @@ const signupPageContent: DeclarationContent = {
     accountCreationFailed: t({ en: "Failed to create account. Please try again.", fr: "Échec de la création du compte. Veuillez réessayer." }),
     autoLoginFailed: t({ en: "Account created but we couldn't sign you in automatically. Please log in.", fr: "Compte créé mais nous n'avons pas pu vous connecter automatiquement. Veuillez vous connecter." }),
     googleSignupFailed: t({ en: "Failed to sign up with Google. Please try again.", fr: "Échec de l'inscription avec Google. Veuillez réessayer." }),
+    emailAlreadyUsed: t({ en: "An account already exists with this email. Try signing in instead.", fr: "Un compte existe déjà avec cet e-mail. Essayez de vous connecter." }),
   },
 };
 

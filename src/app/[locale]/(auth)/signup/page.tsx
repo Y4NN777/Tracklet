@@ -14,6 +14,7 @@ import { Mail, Lock, User, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-reac
 import { useToast } from '@/hooks/use-toast';
 import { auth } from '@/lib/supabase';
 import { useIntlayer } from 'next-intlayer';
+import { mapSignupError } from '@/lib/signup-error-messages';
 
 export default function SignupPage() {
   const i = useIntlayer('signup-page');
@@ -67,7 +68,7 @@ export default function SignupPage() {
       });
 
       if (error) {
-        setError(error.message || i.unexpectedError.key);
+        setError(mapSignupError(error.message, i));
         return;
       }
 
@@ -75,7 +76,7 @@ export default function SignupPage() {
         const { error: signInError } = await auth.signIn(formData.email, formData.password);
 
         if (signInError) {
-          setError(signInError.message || i.autoLoginFailed.key);
+          setError(mapSignupError(signInError.message, i));
           return;
         }
 
