@@ -35,14 +35,14 @@ export default function LandingPage() {
            </div>
         </header>
 
-        <main>
-          {/* Hero Section */}
-          <HeroSection />
-
-          {/* Tech Credibility Infinite Scroll */}
-          <div className="py-10 bg-muted/30 border-y border-border/50">
+        <main className="pt-20">
+          {/* Tech Credibility Infinite Scroll (Moved back to top) */}
+          <div className="bg-muted/30 border-b border-border/50 overflow-hidden">
              <TechScroll />
           </div>
+
+          {/* Hero Section */}
+          <HeroSection />
 
           {/* Features Showcase */}
           <FeaturesShowcase />
