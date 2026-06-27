@@ -1,9 +1,14 @@
-
 import { t, type DeclarationContent } from "intlayer";
 
 const settingsPageContent: DeclarationContent = {
   key: "settings-page",
   content: {
+    // Titles
+    settingsTitle: t({ en: "Settings", fr: "Paramètres" }),
+    settingsDescription: t({ en: "Manage your account settings and preferences.", fr: "Gérez les paramètres et les préférences de votre compte." }),
+    profileTitle: t({ en: "Profile", fr: "Profil" }),
+    categories: t({ en: "Categories", fr: "Catégories" }),
+
     // Toasts
     settingsSaved: t({ en: "Settings saved", fr: "Paramètres enregistrés" }),
     preferencesUpdated: t({ en: "Your preferences have been updated.", fr: "Vos préférences ont été mises à jour." }),
@@ -38,17 +43,6 @@ const settingsPageContent: DeclarationContent = {
     alertThresholdsLabel: t({ en: "Alert Thresholds (%)", fr: "Seuils d'alerte (%)" }),
     alertThresholdsDescription: t({ en: "Get notified at these spending percentages.", fr: "Soyez averti à ces pourcentages de dépenses." }),
 
-    // Goal Reminders Card
-    goalRemindersTitle: t({ en: "Goal Reminders", fr: "Rappels d'objectifs" }),
-    goalRemindersDescription: t({ en: "Get reminded about your savings goals and deadlines.", fr: "Recevez des rappels concernant vos objectifs d'épargne et vos échéances." }),
-    enableGoalRemindersLabel: t({ en: "Enable Goal Reminders", fr: "Activer les rappels d'objectifs" }),
-    enableGoalRemindersDescription: t({ en: "Receive notifications about savings goals.", fr: "Recevez des notifications sur les objectifs d'épargne." }),
-    reminderFrequencyLabel: t({ en: "Reminder Frequency", fr: "Fréquence des rappels" }),
-    dailyOption: t({ en: "Daily", fr: "Quotidien" }),
-    weeklyOption: t({ en: "Weekly", fr: "Hebdomadaire" }),
-    monthlyOption: t({ en: "Monthly", fr: "Mensuel" }),
-    daysBeforeDeadlineLabel: t({ en: "Days Before Deadline", fr: "Jours avant l'échéance" }),
-
     // Transaction Alerts Card
     transactionAlertsTitle: t({ en: "Transaction Alerts", fr: "Alertes de transaction" }),
     transactionAlertsDescription: t({ en: "Get notified about significant or unusual transactions.", fr: "Soyez averti des transactions importantes ou inhabituelles." }),
@@ -56,17 +50,6 @@ const settingsPageContent: DeclarationContent = {
     enableTransactionAlertsDescription: t({ en: "Receive notifications about transactions.", fr: "Recevez des notifications sur les transactions." }),
     minAmountLabel: t({ en: "Minimum Alert Amount", fr: "Montant minimum de l'alerte" }),
     minAmountDescription: t({ en: "Get notified for transactions above this amount.", fr: "Soyez averti pour les transactions dépassant ce montant." }),
-    detectUnusualSpendingLabel: t({ en: "Detect Unusual Spending", fr: "Détecter les dépenses inhabituelles" }),
-    detectUnusualSpendingDescription: t({ en: "Alert me about statistically unusual transactions.", fr: "M'alerter des transactions statistiquement inhabituelles." }),
-
-    // Email Notifications Card
-    emailNotificationsTitle: t({ en: "Email Notifications", fr: "Notifications par e-mail" }),
-    emailNotificationsDescription: t({ en: "Receive notifications via email.", fr: "Recevez des notifications par e-mail." }),
-    enableEmailNotificationsLabel: t({ en: "Enable Email Notifications", fr: "Activer les notifications par e-mail" }),
-    emailDigestLabel: t({ en: "Email Digest Frequency", fr: "Fréquence du résumé par e-mail" }),
-    immediateOption: t({ en: "Immediate", fr: "Immédiat" }),
-    dailyDigestOption: t({ en: "Daily Digest", fr: "Résumé quotidien" }),
-    weeklyDigestOption: t({ en: "Weekly Digest", fr: "Résumé hebdomadaire" }),
   },
 };
 

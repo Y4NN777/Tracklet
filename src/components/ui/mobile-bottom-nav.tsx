@@ -6,100 +6,69 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
-  Home,
+  LayoutDashboard,
   Wallet,
-  CreditCard,
   Target,
-  PiggyBank,
   GraduationCap,
-  TrendingUp,
   Settings,
-  HomeIcon,
-  CreditCardIcon,
-  TargetIcon,
-  TrendingUpIcon,
-  SettingsIcon
 } from "lucide-react"
-
-const navigationItems = [
-  {
-    name: "Dashboard",
-    href: "/",
-    icon: Home,
-    activeIcon: HomeIcon
-  },
-  {
-    name: "Accounts",
-    href: "/accounts",
-    icon: Wallet,
-    activeIcon: Wallet
-  },
-  {
-    name: "Transactions",
-    href: "/transactions",
-    icon: CreditCard,
-    activeIcon: CreditCardIcon
-  },
-  {
-    name: "Budgets",
-    href: "/budgets",
-    icon: Target,
-    activeIcon: TargetIcon
-  },
-  {
-    name: "Savings",
-    href: "/savings",
-    icon: PiggyBank,
-    activeIcon: PiggyBank
-  },
-  {
-    name: "Learning",
-    href: "/learning",
-    icon: GraduationCap,
-    activeIcon: GraduationCap
-  },
-  {
-    name: "Insights",
-    href: "/insights",
-    icon: TrendingUp,
-    activeIcon: TrendingUpIcon
-  },
-  {
-    name: "Settings",
-    href: "/settings",
-    icon: Settings,
-    activeIcon: SettingsIcon
-  }
-]
+import { useIntlayer } from 'next-intlayer';
 
 export function MobileBottomNav() {
+  const i = useIntlayer('main-nav');
   const pathname = usePathname()
+
+  const navigationItems = [
+    {
+      name: i.home,
+      href: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      name: i.finance,
+      href: "/accounts",
+      icon: Wallet,
+    },
+    {
+      name: i.planning,
+      href: "/budgets",
+      icon: Target,
+    },
+    {
+      name: i.hub,
+      href: "/learning",
+      icon: GraduationCap,
+    },
+    {
+      name: i.settings,
+      href: "/settings",
+      icon: Settings,
+    }
+  ]
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border md:hidden">
-      <nav className="flex items-center h-16 px-2 overflow-x-auto scrollbar-hide">
-        <div className="flex space-x-1 min-w-max">
-          {navigationItems.map((item) => {
-            const isActive = pathname === item.href
-            const Icon = isActive ? item.activeIcon : item.icon
+      <nav className="flex items-center justify-around h-16 px-2">
+        {navigationItems.map((item) => {
+          const isActive = pathname.startsWith(item.href) || (item.href === '/dashboard' && pathname === '/')
 
-            return (
-              <Link key={item.name} href={item.href}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "flex flex-col items-center justify-center min-w-[60px] h-12 p-1 gap-1 flex-shrink-0 rounded-lg",
-                    isActive && "bg-primary text-primary-foreground"
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span className="text-xs font-medium text-center leading-tight">{item.name}</span>
-                </Button>
-              </Link>
-            )
-          })}
-        </div>
+          return (
+            <Link key={item.name} href={item.href} className="flex-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "flex flex-col items-center justify-center w-full h-14 p-1 gap-1 rounded-none bg-transparent hover:bg-transparent",
+                  isActive ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                <item.icon className={cn("h-5 w-5", isActive && "stroke-[2.5px]")} />
+                <span className="text-[10px] font-medium text-center leading-tight">{item.name}</span>
+                {isActive && <div className="absolute bottom-1 w-1 h-1 rounded-full bg-primary" />}
+              </Button>
+            </Link>
+          )
+        })}
       </nav>
     </div>
   )

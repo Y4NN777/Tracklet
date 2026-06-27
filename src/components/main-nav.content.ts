@@ -3,6 +3,10 @@ import { t, type DeclarationContent } from "intlayer";
 const mainNavContent: DeclarationContent = {
   key: "main-nav",
   content: {
+    home: t({ en: "Home", fr: "Accueil" }),
+    finance: t({ en: "Finance", fr: "Finance" }),
+    planning: t({ en: "Planning", fr: "Planification" }),
+    hub: t({ en: "Hub", fr: "Hub" }),
     dashboard: t({ en: "Dashboard", fr: "Tableau de bord" }),
     accounts: t({ en: "Accounts", fr: "Comptes" }),
     transactions: t({ en: "Transactions", fr: "Transactions" }),
