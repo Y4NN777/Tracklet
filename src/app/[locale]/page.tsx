@@ -1,4 +1,3 @@
-import { TechScroll } from '@/components/landing/tech-scroll'
 import { HeroSection } from '@/components/landing/hero-section'
 import { FeaturesShowcase } from '@/components/landing/features-showcase'
 import { DeveloperStory } from '@/components/landing/developer-story'
@@ -12,7 +11,10 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Logo } from '@/components/logo'
 
-export default function LandingPage() {
+export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
+  // Await params to avoid Next.js 15 render errors
+  await params;
+
   return (
     <LandingThemeProvider>
       <div className="min-h-screen bg-background selection:bg-primary selection:text-primary-foreground">
@@ -36,11 +38,6 @@ export default function LandingPage() {
         </header>
 
         <main className="pt-20">
-          {/* Tech Credibility Infinite Scroll (Moved back to top) */}
-          <div className="bg-muted/30 border-b border-border/50 overflow-hidden">
-             <TechScroll />
-          </div>
-
           {/* Hero Section */}
           <HeroSection />
 
