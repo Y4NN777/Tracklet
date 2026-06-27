@@ -17,7 +17,7 @@ export async function createAccount(data: any) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath('/[locale]/(app)/accounts', 'page');
+  revalidatePath('/[locale]/(app)/wallet', 'page');
   revalidatePath('/[locale]/(app)/dashboard', 'page');
 
   return account;
@@ -39,7 +39,7 @@ export async function updateAccount(id: string, data: any) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath('/[locale]/(app)/accounts', 'page');
+  revalidatePath('/[locale]/(app)/wallet', 'page');
   revalidatePath('/[locale]/(app)/dashboard', 'page');
 
   return account;
@@ -59,6 +59,6 @@ export async function deleteAccount(id: string) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath('/[locale]/(app)/accounts', 'page');
+  revalidatePath('/[locale]/(app)/wallet', 'page');
   revalidatePath('/[locale]/(app)/dashboard', 'page');
 }

@@ -17,7 +17,7 @@ export async function createTransaction(data: any) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath('/[locale]/(app)/transactions', 'page');
+  revalidatePath('/[locale]/(app)/wallet', 'page');
   revalidatePath('/[locale]/(app)/dashboard', 'page');
 
   return transaction;
@@ -39,7 +39,7 @@ export async function updateTransaction(id: string, data: any) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath('/[locale]/(app)/transactions', 'page');
+  revalidatePath('/[locale]/(app)/wallet', 'page');
   revalidatePath('/[locale]/(app)/dashboard', 'page');
 
   return transaction;
@@ -59,6 +59,6 @@ export async function deleteTransaction(id: string) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath('/[locale]/(app)/transactions', 'page');
+  revalidatePath('/[locale]/(app)/wallet', 'page');
   revalidatePath('/[locale]/(app)/dashboard', 'page');
 }
