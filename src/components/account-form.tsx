@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+'use client';
+
+import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -15,329 +17,131 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/contexts/preferences-context';
-
-type AccountFormValues = z.infer<ReturnType<typeof getAccountSchema>>;
-
-interface Account {
-  id: string;
-  name: string;
-  type: 'bank_account' | 'savings' | 'credit' | 'investment' | 'mobile_money' | 'cash' | 'business_fund' | 'other';
-  balance: number;
-  currency: string;
-}
-
-interface AccountFormProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  onSubmit: (values: AccountFormValues) => void;
-  editingAccount?: Account | null;
-  onClose?: () => void;
-}
+import { FormLayout } from '@/components/ui/form-layout';
 
 const getAccountSchema = (i: any, editingAccount?: any) => z.object({
-  name: z.string().min(2, {
-    message: i.nameMinLength.key,
-  }),
-  type: z.enum(['bank_account', 'savings', 'credit', 'investment', 'mobile_money', 'cash', 'business_fund', 'other'], {
-    required_error: i.typeRequired.key,
-  }),
-  balance: editingAccount ? z.coerce.number().optional() : z.coerce.number({
-    required_error: i.balanceRequired.key,
-  }),
-  currency: z.string().min(3, {
-    message: i.currencyRequired.key,
-  }),
+  name: z.string().min(2, { message: i.nameMinLength.key }),
+  type: z.string().min(1, { message: i.typeRequired.key }),
+  balance: z.coerce.number().optional(),
+  currency: z.string().min(3),
   is_savings: z.boolean().optional(),
-  use_manual_override: z.boolean().optional(),
-  manual_balance: z.coerce.number().optional(),
-}).refine((data) => {
-  if (data.use_manual_override && data.manual_balance === undefined) {
-    return false;
-  }
-  return true;
-}, {
-  message: i.manualBalanceRequired.key,
-  path: ["manual_balance"],
 });
 
-export function AccountForm({ open, setOpen, onSubmit, editingAccount, onClose }: AccountFormProps) {
+export function AccountForm({ open, setOpen, onSubmit, editingAccount }: any) {
   const i = useIntlayer('account-form');
-  const { toast } = useToast();
   const { currency } = useCurrency();
 
-  const accountSchema = getAccountSchema(i, editingAccount);
-
-  const form = useForm<AccountFormValues>({
-    resolver: zodResolver(accountSchema),
+  const form = useForm<any>({
+    resolver: zodResolver(getAccountSchema(i, editingAccount)),
     defaultValues: {
       name: "",
       type: "bank_account",
       balance: 0,
       currency: currency,
       is_savings: false,
-      use_manual_override: false,
-      manual_balance: undefined,
     },
-  })
+  });
 
-  // Handle editing mode
   useEffect(() => {
-    if (editingAccount) {
-      form.reset({
-        name: editingAccount.name,
-        type: editingAccount.type,
-        balance: editingAccount.balance,
-        currency: currency,
-        is_savings: (editingAccount as any).is_savings || false,
-        use_manual_override: (editingAccount as any).manualOverrideActive || false,
-        manual_balance: (editingAccount as any).manualBalance,
-      });
-    } else {
-      form.reset({
-        name: "",
-        type: "bank_account",
-        balance: 0,
-        currency: currency,
-        is_savings: false,
-        use_manual_override: false,
-        manual_balance: undefined,
-      });
+    if (open) {
+      if (editingAccount) {
+        form.reset({
+          name: editingAccount.name,
+          type: editingAccount.type,
+          balance: editingAccount.balance,
+          currency: editingAccount.currency || currency,
+          is_savings: editingAccount.is_savings || false,
+        });
+      } else {
+        form.reset({
+          name: "",
+          type: "bank_account",
+          balance: 0,
+          currency: currency,
+          is_savings: false,
+        });
+      }
     }
-  }, [editingAccount, form, currency]);
-
-  function handleClose() {
-    form.reset();
-    setOpen(false);
-    if (onClose) onClose();
-  }
-
-  async function onSubmitHandler(values: AccountFormValues) {
-    try {
-      await onSubmit(values);
-      toast({
-        title: editingAccount ? i.accountUpdatedTitle.key : i.accountAddedTitle.key,
-        description: editingAccount ? i.accountUpdatedDescription.key : i.accountAddedDescription.key,
-      })
-      handleClose();
-    } catch (error) {
-      // console.error('Account creation failed:', error);
-      toast({
-        title: i.errorTitle,
-        description: error instanceof Error ? error.message : i.failedToCreateAccount,
-        variant: "destructive",
-      });
-    }
-  }
+  }, [open, editingAccount, form, currency]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{editingAccount ? i.editAccountTitle : i.addAccountTitle}</DialogTitle>
-          <DialogDescription>
-            {editingAccount
-              ? i.updateAccountDescription
-              : i.addAccountDescription
-            }
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{i.accountNameLabel}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={i.accountNamePlaceholder.key} {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    {i.accountNameDescription}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{i.accountTypeLabel}</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <option value="">{i.selectAccountTypeOption}</option>
-                      <option value="bank_account">{i.bankAccountOption}</option>
-                      <option value="savings">{i.savingsAccountOption}</option>
-                      <option value="credit">{i.creditCardOption}</option>
-                      <option value="investment">{i.investmentAccountOption}</option>
-                      <option value="mobile_money">{i.mobileMoneyOption}</option>
-                      <option value="cash">{i.cashOption}</option>
-                      <option value="business_fund">{i.businessFundOption}</option>
-                      <option value="other">{i.otherAccountOption}</option>
-                    </select>
-                  </FormControl>
-                  <FormDescription>
-                    {i.accountTypeDescription}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {!editingAccount && (
-              <FormField
-                control={form.control}
-                name="balance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{i.currentBalanceLabel}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {i.currentBalanceDescription}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <FormLayout
+      open={open}
+      onOpenChange={setOpen}
+      title={editingAccount ? i.editAccountTitle : i.addAccountTitle}
+      description={editingAccount ? i.updateAccountDescription : i.addAccountDescription}
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(async (v) => { await onSubmit(v); setOpen(false); })} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-bold uppercase tracking-wider opacity-70">{i.accountNameLabel}</FormLabel>
+                <FormControl><Input placeholder="e.g. Main Savings" className="h-12 bg-muted/30 border-none shadow-inner" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{i.currencyLabel}</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm cursor-not-allowed"
-                      style={{ pointerEvents: 'none' }}
-                    >
-                      <option value={currency}>{currency}</option>
-                    </select>
-                  </FormControl>
-                  <FormDescription>
-                    {i.currencyDescription}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="is_savings"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      {i.isSavingsAccountLabel}
-                    </FormLabel>
-                    <FormDescription>
-                      {i.isSavingsAccountDescription}
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="use_manual_override"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      {i.useManualOverrideLabel}
-                    </FormLabel>
-                    <FormDescription>
-                      {i.useManualOverrideDescription}
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-            {form.watch("use_manual_override") && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="manual_balance"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{i.manualBalanceLabel}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder={i.manualBalancePlaceholder.key}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {i.manualBalanceDescription}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {editingAccount && (editingAccount as any).manualOverrideActive && (editingAccount as any).lastManualSet && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      Manual Balance Set
-                    </label>
-                    <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
-                      {new Date((editingAccount as any).lastManualSet).toLocaleString(i.locale || 'en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      When this manual balance was originally set
-                    </p>
-                  </div>
-                )}
-              </>
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <FormField
+               control={form.control}
+               name="type"
+               render={({ field }) => (
+                 <FormItem>
+                   <FormLabel className="text-sm font-bold uppercase tracking-wider opacity-70">{i.accountTypeLabel}</FormLabel>
+                   <FormControl>
+                     <select {...field} className="w-full h-12 rounded-md bg-muted/30 border-none px-3 text-sm shadow-inner">
+                       <option value="bank_account">Bank Account</option>
+                       <option value="savings">Savings</option>
+                       <option value="credit">Credit Card</option>
+                       <option value="investment">Investment</option>
+                       <option value="cash">Cash</option>
+                     </select>
+                   </FormControl>
+                   <FormMessage />
+                 </FormItem>
+               )}
+             />
+
+             {!editingAccount && (
+               <FormField
+                 control={form.control}
+                 name="balance"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel className="text-sm font-bold uppercase tracking-wider opacity-70">{i.currentBalanceLabel}</FormLabel>
+                     <FormControl><Input type="number" step="0.01" className="h-12 bg-muted/30 border-none shadow-inner font-mono text-lg" {...field} /></FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
+             )}
+          </div>
+
+          <FormField
+            control={form.control}
+            name="is_savings"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-2xl bg-primary/5 p-4 border border-primary/10">
+                <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} className="h-5 w-5" /></FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-sm font-bold">{i.isSavingsAccountLabel}</FormLabel>
+                  <p className="text-xs text-muted-foreground">Mark this as a long-term savings account.</p>
+                </div>
+              </FormItem>
             )}
-            <DialogFooter>
-              <Button type="submit">{editingAccount ? i.updateAccountButton : i.addAccountButton}</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  )
+          />
+
+          <Button type="submit" className="w-full h-12 rounded-full text-lg font-bold shadow-lg shadow-primary/20">
+            {editingAccount ? "Update Account" : "Create Account"}
+          </Button>
+        </form>
+      </Form>
+    </FormLayout>
+  );
 }

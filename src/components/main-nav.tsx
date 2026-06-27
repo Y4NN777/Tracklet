@@ -2,15 +2,11 @@
 
 import {
   LayoutDashboard,
-  ReceiptText,
-  Target,
-  Sparkles,
-  Lightbulb,
-  Settings,
-  User,
   Wallet,
-  Tag,
-  GraduationCap,
+  TrendingUp,
+  Sparkles,
+  Settings,
+  ShieldCheck,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -19,6 +15,9 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
 } from '@/components/ui/sidebar';
 
 export function MainNav() {
@@ -26,35 +25,56 @@ export function MainNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/dashboard', label: i.dashboard, icon: LayoutDashboard },
-    { href: '/accounts', label: i.accounts, icon: Wallet },
-    { href: '/transactions', label: i.transactions, icon: ReceiptText },
-    { href: '/settings/categories', label: i.categories, icon: Tag },
-    { href: '/budgets', label: i.budgetsAndGoals, icon: Target },
-    { href: '/savings', label: i.savingsAI, icon: Sparkles },
-    { href: '/insights', label: i.financialInsights, icon: Lightbulb },
-    { href: '/learning', label: i.learningCenter, icon: GraduationCap },
-    { href: '/settings', label: i.settings, icon: Settings },
-    { href: '/settings/profile', label: i.profile, icon: User },
+    { href: '/dashboard', label: i.home, icon: LayoutDashboard },
+    { href: '/wallet', label: i.wallet, icon: Wallet },
+    { href: '/growth', label: i.growth, icon: TrendingUp },
+    { href: '/assistant', label: i.assistant, icon: Sparkles },
   ];
 
   return (
-    <SidebarMenu>
-      {navItems.map((item) => (
-        <SidebarMenuItem key={item.href}>
-          <SidebarMenuButton
-            asChild
-            isActive={pathname === item.href}
-            tooltip={item.label}
-            className="md:py-2"
-          >
-            <Link href={item.href}>
-              <item.icon className="h-4 w-4 md:h-5 md:w-5" />
-              <span className="text-sm md:text-base">{item.label}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
-    </SidebarMenu>
+    <div className="space-y-4 pt-4">
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {navItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith(item.href)}
+                  tooltip={item.label}
+                  className="py-6"
+                >
+                  <Link href={item.href} className="flex items-center gap-3">
+                    <item.icon className="h-5 w-5" />
+                    <span className="text-base font-medium">{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <div className="mt-auto">
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith('/settings')}
+                  tooltip={i.settings}
+                >
+                  <Link href="/settings">
+                    <Settings className="h-5 w-5" />
+                    <span>{i.settings}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </div>
+    </div>
   );
 }
