@@ -1,0 +1,12 @@
+{
+  "_comment": "MISHKAN project-level settings template. Seeded by /mishkan-init into <project>/.claude/settings.json. Committed. Default-deny: agents get explicit allow via their frontmatter tools: field. Hooks are inherited from the user-level ~/.claude/settings.json.",
+  "permissions": {
+    "defaultMode": "auto",
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(ssh:*)",
+      "Bash(sudo:*)",
+      "Bash(docker exec:*)"
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "_comment": "MISHKAN MCP template. /mishkan-init renders this to the project root as .mcp.json, substituting __MISHKAN_WORK_PORT__ with this project's work-store port (printed by ensure-work-store.sh). THREE cognee doorways (the alias is the doorway; the backend behind it differs): 'cognee' = this project's OWN per-project WORK store (embedded Ladybug; its own container mishkan-work-tracklet + volume + port; physically isolated per ADR D-012) for project knowledge; 'cognee-memory' = the SHARED per-client session-memory store (claude_code_memory; the kept Neo4j box on :7777) — one continuous memory across all your work; 'cognee-curated' = the shared CURATED reference library (mishkan-curated-* on :7730, decision D-007). All run from ~/.claude/mishkan/cognee/. Refs: https://docs.cognee.ai/cognee-mcp/mcp-local-setup",
+  "_isolation_warning": "Isolation is by topology, NOT cognee's datasets= filter (advisory-only; does NOT isolate). 'cognee' is THIS project's own store — physically separate from other projects (D-012). 'cognee-memory' is intentionally SHARED across projects (session memory is cross-project by nature) — so keep it scrubbed of project secrets/PII, same ingest discipline.",
+  "mcpServers": {
+    "cognee": {
+      "type": "http",
+      "url": "http://127.0.0.1:7858/mcp"
+    },
+    "cognee-memory": {
+      "type": "http",
+      "url": "http://127.0.0.1:7777/mcp"
+    },
+    "cognee-curated": {
+      "type": "http",
+      "url": "http://localhost:7730/mcp"
+    }
+  },
+  "_stdio_alternative": {
+    "cognee": {
+      "command": "uv",
+      "args": ["--directory", "/absolute/path/to/cognee/cognee-mcp", "run", "cognee-mcp"],
+      "env": {
+        "LLM_API_KEY": "${LLM_API_KEY}"
+      }
+    }
+  }
+}
