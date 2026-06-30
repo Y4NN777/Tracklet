@@ -1,13 +1,14 @@
 import { type IDBPDatabase, openDB, type IDBPTransaction, type StoreNames, type StoreValue } from "idb";
 
 const DB_NAME = "tracklet";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export interface TrackletDB {
   pockets: StoreValue<unknown, "pockets">;
   transactions: StoreValue<unknown, "transactions">;
   categories: StoreValue<unknown, "categories">;
   debts: StoreValue<unknown, "debts">;
+  goals: StoreValue<unknown, "goals">;
 }
 
 export type TrackletTransaction = IDBPTransaction<
@@ -50,6 +51,11 @@ export function getDB(): Promise<IDBPDatabase<TrackletDB>> {
           debtStore.createIndex("realm", "realm");
           debtStore.createIndex("person", "person");
         }
+        if (!db.objectStoreNames.contains("goals")) {
+          const goalStore = db.createObjectStore("goals", { keyPath: "id" });
+          goalStore.createIndex("realm", "realm");
+          goalStore.createIndex("sourcePocketId", "sourcePocketId");
+        }
       },
     });
   }
@@ -60,7 +66,6 @@ export async function seedDefaults(db: IDBPDatabase<TrackletDB>) {
   const count = await db.count("categories");
   if (count > 0) return;
 
-  const now = new Date().toISOString();
   const defaultCategories = [
     // Expense categories
     { id: crypto.randomUUID(), name: "Food & Drinks", icon: "🍽️", color: "#EF4444", type: "expense" as const, realm: "personal" as const },

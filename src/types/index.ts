@@ -52,4 +52,22 @@ export interface Debt {
   updatedAt: string;
 }
 
-export type Page = "dashboard" | "pockets" | "transactions" | "debts" | "reports";
+export interface Goal {
+  id: string;
+  name: string;
+  targetAmount: number;
+  savedAmount: number;
+  sourcePocketId: string | null;
+  realm: Realm;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CashPosition {
+  available: number;
+  committed: number;
+  toReceive: number;
+  totalBalance: number;
+}
+
+export type Page = "dashboard" | "pockets" | "transactions" | "debts" | "goals" | "reports";

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Realm } from "../types";
-import type { Transaction } from "../types";
+import type { Transaction, CashPosition as CashPositionType } from "../types";
 import type { Insight } from "../domain/insight";
 import { usePocketBalances } from "../hooks/usePockets";
 import { useTransactionSummary } from "../hooks/useTransactions";
@@ -9,6 +9,7 @@ import { getRecentTransactions } from "../domain/transaction";
 import { getAllDebts } from "../db/repositories/debt";
 import { getActivePockets } from "../db/repositories/pocket";
 import { generateInsights } from "../domain/insight";
+import { getCashPosition } from "../domain/cash-position";
 import { EmptyState } from "../components/EmptyState";
 import { format } from "date-fns";
 
@@ -22,16 +23,19 @@ export function Dashboard({ realm }: DashboardProps) {
   const debtSummary = useDebtSummary(realm);
   const [recent, setRecent] = useState<Transaction[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
+  const [cashPosition, setCashPosition] = useState<CashPositionType | null>(null);
 
   useEffect(() => {
     (async () => {
-      const [txns, debts, pockets] = await Promise.all([
+      const [txns, debts, pockets, cashPos] = await Promise.all([
         getRecentTransactions(5, realm),
         getAllDebts(realm),
         getActivePockets(realm),
+        getCashPosition(realm),
       ]);
       setRecent(txns);
       setInsights(generateInsights(txns, pockets, debts));
+      setCashPosition(cashPos);
     })();
   }, [realm]);
 
@@ -52,6 +56,30 @@ export function Dashboard({ realm }: DashboardProps) {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-on-surface">Dashboard</h1>
+
+      {/* Cash Position */}
+      {cashPosition && (
+        <div className="rounded-xl border border-border-light bg-gradient-to-br from-primary to-primary-light p-5 text-on-primary">
+          <p className="text-sm font-medium opacity-80">Available Cash Position</p>
+          <p className="mt-1 text-3xl font-bold">
+            {cashPosition.available.toLocaleString()} FCFA
+          </p>
+          <div className="mt-3 flex gap-6 text-xs">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-green-300" />
+              Total: {cashPosition.totalBalance.toLocaleString()} FCFA
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-amber-300" />
+              Committed: −{cashPosition.committed.toLocaleString()} FCFA
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-blue-300" />
+              To receive: +{cashPosition.toReceive.toLocaleString()} FCFA
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
