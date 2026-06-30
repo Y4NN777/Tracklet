@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import type { Realm } from "../types";
+import { AgentPanel } from "./AgentPanel";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: IconDashboard },
@@ -20,6 +21,8 @@ interface LayoutProps {
 
 export function Layout({ realm, onRealmChange }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const currentPage = location.pathname.replace("/", "") || "dashboard";
 
   return (
     <div className="flex min-h-svh bg-surface">
@@ -113,6 +116,8 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
         <main className="flex-1 overflow-auto p-4 pb-20 sm:p-6 lg:pb-6">
           <Outlet />
         </main>
+
+        <AgentPanel page={currentPage} realm={realm} />
 
         {/* Bottom nav (mobile) */}
         <nav className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-border-light bg-white lg:hidden">
