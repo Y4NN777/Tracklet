@@ -8,8 +8,10 @@ import { Pockets } from "./pages/Pockets";
 import { PocketDetail } from "./pages/PocketDetail";
 import { Transactions } from "./pages/Transactions";
 import { Debts } from "./pages/Debts";
+import { Goals } from "./pages/Goals";
 import { Sales } from "./pages/Sales";
 import { Reports } from "./pages/Reports";
+import { CashPosition } from "./pages/CashPosition";
 
 function App() {
   const [realm, setRealm] = useState<Realm>("personal");
@@ -27,6 +29,7 @@ function App() {
           <Route path="/goals" element={<Goals realm={realm} />} />
           <Route path="/sales" element={<Sales realm={realm} />} />
           <Route path="/reports" element={<Reports realm={realm} />} />
+          <Route path="/cash-position" element={<CashPosition realm={realm} />} />
           </Route>
         </Routes>
       </ToastProvider>

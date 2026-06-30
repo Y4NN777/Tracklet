@@ -90,4 +90,4 @@ export interface CashPosition {
   totalBalance: number;
 }
 
-export type Page = "dashboard" | "pockets" | "transactions" | "debts" | "goals" | "sales" | "reports";
+export type Page = "dashboard" | "pockets" | "transactions" | "debts" | "goals" | "sales" | "reports" | "cash-position";

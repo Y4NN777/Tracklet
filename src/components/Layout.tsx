@@ -10,6 +10,7 @@ const navItems = [
   { to: "/goals", label: "Goals", icon: IconGoals },
   { to: "/sales", label: "Sales", icon: IconSales },
   { to: "/reports", label: "Reports", icon: IconReports },
+  { to: "/cash-position", label: "Cash", icon: IconCashPosition },
 ];
 
 interface LayoutProps {
@@ -203,6 +204,16 @@ function IconSales() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
       <path d="M3 10h3l2-5 4 10 2-5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconCashPosition() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="2" y="5" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="10" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M2 7.5h16" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 }
