@@ -7,6 +7,7 @@ import { createTransaction } from "../db/repositories/transaction";
 import { useCategories } from "../hooks/useCategories";
 import { Modal } from "../components/Modal";
 import { EmptyState } from "../components/EmptyState";
+import { useToast } from "../components/Toast";
 import type { PocketBalance } from "../domain/pocket";
 import { format } from "date-fns";
 
@@ -152,6 +153,7 @@ function AddTransactionModal({
   realm: Realm;
   onDone: () => void;
 }) {
+  const { addToast } = useToast();
   const { categories } = useCategories();
   const [form, setForm] = useState({
     type: "expense" as "income" | "expense",
@@ -192,6 +194,7 @@ function AddTransactionModal({
       tags: "",
     });
     onClose();
+    addToast("success", "Transaction added");
     onDone();
   };
 

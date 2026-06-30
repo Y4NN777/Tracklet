@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
-import type { Pocket } from "../types";
-import { getDB } from "./schema";
+import type { Pocket } from "../../types";
+import { getDB } from "../schema";
 
 export async function getAllPockets(realm?: string): Promise<Pocket[]> {
   const db = await getDB();

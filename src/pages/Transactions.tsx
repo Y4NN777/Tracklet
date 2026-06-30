@@ -6,6 +6,7 @@ import { useCategories } from "../hooks/useCategories";
 import { createTransaction } from "../db/repositories/transaction";
 import { Modal } from "../components/Modal";
 import { EmptyState } from "../components/EmptyState";
+import { useToast } from "../components/Toast";
 import { format } from "date-fns";
 
 interface TransactionsProps {
@@ -16,6 +17,7 @@ export function Transactions({ realm }: TransactionsProps) {
   const { transactions, loading, refresh } = useTransactions(realm);
   const { pockets } = usePockets(realm);
   const { categories } = useCategories();
+  const { addToast } = useToast();
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState<string>("all");
 
@@ -59,6 +61,7 @@ export function Transactions({ realm }: TransactionsProps) {
       tags: "",
     });
     setShowAdd(false);
+    addToast("success", "Transaction created");
     refresh();
   };
 

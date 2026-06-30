@@ -1,5 +1,8 @@
 # dependencies
 /node_modules
+
+# graphify code-structure graph (regenerated on every `graphify update .`)
+graphify-out/
 /.pnp
 .pnp.*
 .yarn/*

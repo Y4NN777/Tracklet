@@ -4,6 +4,8 @@ import { useDebts } from "../hooks/useDebts";
 import { createDebt, settleDebt, writeOffDebt, deleteDebt } from "../db/repositories/debt";
 import { Modal } from "../components/Modal";
 import { EmptyState } from "../components/EmptyState";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { useToast } from "../components/Toast";
 import { format } from "date-fns";
 
 interface DebtsProps {
@@ -12,6 +14,7 @@ interface DebtsProps {
 
 export function Debts({ realm }: DebtsProps) {
   const { debts, loading, refresh } = useDebts(realm);
+  const { addToast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [form, setForm] = useState({
@@ -22,6 +25,7 @@ export function Debts({ realm }: DebtsProps) {
     date: new Date().toISOString().slice(0, 10),
   });
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const filtered = filter === "all"
     ? debts
@@ -54,6 +58,26 @@ export function Debts({ realm }: DebtsProps) {
       date: new Date().toISOString().slice(0, 10),
     });
     setShowCreate(false);
+    addToast("success", `Debt recorded with ${form.person}`);
+    refresh();
+  };
+
+  const handleSettle = async (id: string) => {
+    await settleDebt(id);
+    addToast("success", "Debt marked as settled");
+    refresh();
+  };
+
+  const handleWriteOff = async (id: string) => {
+    await writeOffDebt(id);
+    addToast("info", "Debt written off");
+    refresh();
+  };
+
+  const handleDelete = async (id: string) => {
+    setConfirmDelete(null);
+    await deleteDebt(id);
+    addToast("info", "Debt record deleted");
     refresh();
   };
 
@@ -121,9 +145,9 @@ export function Debts({ realm }: DebtsProps) {
           <DebtCard
             key={debt.id}
             debt={debt}
-            onSettle={async () => { await settleDebt(debt.id); refresh(); }}
-            onWriteOff={async () => { await writeOffDebt(debt.id); refresh(); }}
-            onDelete={async () => { await deleteDebt(debt.id); refresh(); }}
+            onSettle={() => handleSettle(debt.id)}
+            onWriteOff={() => handleWriteOff(debt.id)}
+            onDelete={() => setConfirmDelete(debt.id)}
           />
         ))}
       </div>
@@ -135,6 +159,16 @@ export function Debts({ realm }: DebtsProps) {
         setForm={setForm}
         saving={saving}
         onSubmit={handleCreate}
+      />
+
+      <ConfirmDialog
+        open={confirmDelete !== null}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => handleDelete(confirmDelete!)}
+        title="Delete Debt"
+        message="Are you sure you want to permanently delete this debt record? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
       />
     </div>
   );

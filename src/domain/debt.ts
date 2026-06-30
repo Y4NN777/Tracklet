@@ -1,5 +1,4 @@
 import * as debtRepo from "../db/repositories/debt";
-import type { Debt } from "../types";
 
 export interface DebtSummary {
   totalLent: number;

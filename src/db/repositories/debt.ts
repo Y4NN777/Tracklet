@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
-import type { Debt } from "../types";
-import { getDB } from "./schema";
+import type { Debt } from "../../types";
+import { getDB } from "../schema";
 
 export async function getAllDebts(realm?: string): Promise<Debt[]> {
   const db = await getDB();

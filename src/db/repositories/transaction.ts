@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
-import type { Transaction } from "../types";
-import { getDB } from "./schema";
+import type { Transaction } from "../../types";
+import { getDB } from "../schema";
 
 export async function getAllTransactions(
   filters?: {

@@ -5,6 +5,7 @@ import { usePocketBalances } from "../hooks/usePockets";
 import { createPocket } from "../db/repositories/pocket";
 import { Modal } from "../components/Modal";
 import { EmptyState } from "../components/EmptyState";
+import { useToast } from "../components/Toast";
 
 interface PocketsProps {
   realm: Realm;
@@ -12,6 +13,7 @@ interface PocketsProps {
 
 export function Pockets({ realm }: PocketsProps) {
   const { balances, total, loading, refresh } = usePocketBalances(realm);
+  const { addToast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: "", description: "" });
   const [saving, setSaving] = useState(false);
@@ -27,6 +29,7 @@ export function Pockets({ realm }: PocketsProps) {
     setForm({ name: "", description: "" });
     setSaving(false);
     setShowCreate(false);
+    addToast("success", `Pocket "${form.name.trim()}" created`);
     refresh();
   };
 

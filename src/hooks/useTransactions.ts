@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import * as txnRepo from "../db/repositories/transaction";
 import { getRecentTransactions, getTransactionSummary } from "../domain/transaction";
 import type { Transaction } from "../types";
 import type { TransactionSummary } from "../domain/transaction";

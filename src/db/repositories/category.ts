@@ -1,5 +1,5 @@
-import { getDB } from "./schema";
-import type { Category } from "../types";
+import { getDB } from "../schema";
+import type { Category } from "../../types";
 
 export async function getAllCategories(): Promise<Category[]> {
   const db = await getDB();
