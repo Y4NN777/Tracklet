@@ -1,154 +1,331 @@
-import { useState, useEffect } from "react";
-import type { Realm, Sale } from "../types";
+import { useState, useEffect, useMemo } from "react";
+import type { Realm, Transaction, Sale, Category } from "../types";
 import type { Insight } from "../domain/insight";
 import type { ProfitReport } from "../domain/profitability";
-import { getRecentTransactions } from "../domain/transaction";
-import { getAllDebts } from "../db/repositories/debt";
-import { getActivePockets } from "../db/repositories/pocket";
+import type { CategoryBreakdown, MonthlyTrend, ReportFilters } from "../domain/report";
 import { getSales } from "../db/repositories/sale";
 import { getAllTransactions } from "../db/repositories/transaction";
+import { getAllCategories } from "../db/repositories/category";
+import { getAllDebts } from "../db/repositories/debt";
+import { getActivePockets } from "../db/repositories/pocket";
+import { getRecentTransactions } from "../domain/transaction";
 import { generateInsights } from "../domain/insight";
-import { computeProfitReport, computeYearToDate } from "../domain/profitability";
+import { computeProfitReport } from "../domain/profitability";
+import {
+  defaultDateRange,
+  computeCategoryBreakdown,
+  computeMonthlyTrends,
+  transactionsToCSV,
+  salesToCSV,
+  downloadCSV,
+} from "../domain/report";
 import { EmptyState } from "../components/EmptyState";
+import { format, parseISO } from "date-fns";
 
 interface ReportsProps {
   realm: Realm;
 }
 
 export function Reports({ realm }: ReportsProps) {
+  const [filters, setFilters] = useState<ReportFilters>(defaultDateRange);
+  const [allTxns, setAllTxns] = useState<Transaction[]>([]);
+  const [allSales, setAllSales] = useState<Sale[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [profitReport, setProfitReport] = useState<ProfitReport | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [txns, debts, pockets, sales, allTxns] = await Promise.all([
+      const [
+        recentTxns,
+        sales,
+        txns,
+        cats,
+        debts,
+        pockets,
+      ] = await Promise.all([
         getRecentTransactions(200, realm),
-        getAllDebts(realm),
-        getActivePockets(realm),
         getSales({ realm }),
         getAllTransactions({ realm }),
+        getAllCategories(),
+        getAllDebts(realm),
+        getActivePockets(realm),
       ]);
-      setInsights(generateInsights(txns, pockets, debts));
-      setProfitReport(computeProfitReport(sales, allTxns));
+      setAllTxns(txns);
+      setAllSales(sales);
+      setCategories(cats);
+      setInsights(generateInsights(recentTxns, pockets, debts));
+      setProfitReport(computeProfitReport(sales, txns));
       setLoading(false);
     })();
   }, [realm]);
 
+  // Filter transactions by date range
+  const filteredTxns = useMemo(() => {
+    return allTxns.filter((t) => {
+      if (filters.startDate && t.date < filters.startDate) return false;
+      if (filters.endDate && t.date > filters.endDate) return false;
+      return true;
+    });
+  }, [allTxns, filters]);
+
+  // Filter sales by date range
+  const filteredSales = useMemo(() => {
+    return allSales.filter((s) => {
+      if (filters.startDate && s.date < filters.startDate) return false;
+      if (filters.endDate && s.date > filters.endDate) return false;
+      return true;
+    });
+  }, [allSales, filters]);
+
+  // Category breakdown (from filtered expenses)
+  const breakdown = useMemo(
+    () => computeCategoryBreakdown(filteredTxns, categories),
+    [filteredTxns, categories],
+  );
+
+  // Monthly trends (last 6 months)
+  const monthlyTrends = useMemo(
+    () => computeMonthlyTrends(allTxns, allSales, 6),
+    [allTxns, allSales],
+  );
+
+  // Summary numbers for filtered range
+  const filteredIncome = filteredTxns
+    .filter((t) => t.type === "income")
+    .reduce((s, t) => s + t.amount, 0);
+  const filteredExpenses = filteredTxns
+    .filter((t) => t.type === "expense")
+    .reduce((s, t) => s + t.amount, 0);
+  const filteredRevenue = filteredSales.reduce((s, x) => s + x.total, 0);
+  const filteredProfit = filteredRevenue - filteredExpenses;
+
   if (loading) {
-    return <div className="text-sm text-on-surface-muted">Loading insights...</div>;
+    return <div className="text-sm text-on-surface-muted">Loading reports...</div>;
   }
-
-  if (insights.length === 0) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Reports & Insights</h1>
-        <EmptyState
-          title="No insights yet"
-          message="Add some transactions and debts to generate financial insights."
-        />
-      </div>
-    );
-  }
-
-  const byType = (type: Insight["type"]) => insights.filter((i) => i.type === type);
-  const typeLabels: Record<Insight["type"], string> = {
-    success: "Achievements",
-    warning: "Needs Attention",
-    info: "Information",
-    tip: "Tips",
-  };
-  const typeColors: Record<Insight["type"], string> = {
-    success: "border-green-200 bg-green-50",
-    warning: "border-amber-200 bg-amber-50",
-    info: "border-blue-200 bg-blue-50",
-    tip: "border-purple-200 bg-purple-50",
-  };
-  const dotColors: Record<Insight["type"], string> = {
-    success: "bg-green-500",
-    warning: "bg-amber-500",
-    info: "bg-blue-500",
-    tip: "bg-purple-500",
-  };
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-on-surface">
-        Reports & Insights
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-on-surface">Reports</h1>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              const csv = transactionsToCSV(filteredTxns);
+              downloadCSV(csv, `tracklet-transactions-${filters.startDate}-${filters.endDate}.csv`);
+            }}
+            className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
+          >
+            Export TXNs
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const csv = salesToCSV(filteredSales);
+              downloadCSV(csv, `tracklet-sales-${filters.startDate}-${filters.endDate}.csv`);
+            }}
+            className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
+          >
+            Export Sales
+          </button>
+        </div>
+      </div>
 
-      {/* Profitability section */}
+      {/* Date range filter */}
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <label className="block text-xs font-medium text-on-surface-muted mb-1">From</label>
+          <input
+            type="date"
+            value={filters.startDate}
+            onChange={(e) => setFilters((f) => ({ ...f, startDate: e.target.value }))}
+            className="rounded-lg border border-border-light px-3 py-1.5 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-on-surface-muted mb-1">To</label>
+          <input
+            type="date"
+            value={filters.endDate}
+            onChange={(e) => setFilters((f) => ({ ...f, endDate: e.target.value }))}
+            className="rounded-lg border border-border-light px-3 py-1.5 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div className="flex gap-1">
+          {[
+            { label: "3M", months: 3 },
+            { label: "6M", months: 6 },
+            { label: "1Y", months: 12 },
+          ].map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => {
+                const end = new Date();
+                const start = new Date();
+                start.setMonth(start.getMonth() - preset.months);
+                setFilters({
+                  startDate: format(start, "yyyy-MM-dd"),
+                  endDate: format(end, "yyyy-MM-dd"),
+                });
+              }}
+              className="rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Summary cards for filtered range */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <SummaryCard
+          label="Revenue"
+          value={`${filteredRevenue.toLocaleString()} FCFA`}
+          color="text-success"
+        />
+        <SummaryCard
+          label="Expenses"
+          value={`${filteredExpenses.toLocaleString()} FCFA`}
+          color="text-danger"
+        />
+        <SummaryCard
+          label="Profit"
+          value={`${filteredProfit.toLocaleString()} FCFA`}
+          color={filteredProfit >= 0 ? "text-success" : "text-danger"}
+        />
+        <SummaryCard
+          label="Margin"
+          value={filteredRevenue > 0 ? `${Math.round((filteredProfit / filteredRevenue) * 100)}%` : "—"}
+          color={filteredProfit >= 0 ? "text-success" : "text-danger"}
+        />
+      </div>
+
+      {/* Monthly trends */}
+      {monthlyTrends.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-lg font-semibold text-on-surface">
+            Monthly Trends
+          </h2>
+          <div className="rounded-xl border border-border-light bg-white p-4">
+            <div className="flex items-end gap-2" style={{ height: 160 }}>
+              {monthlyTrends.map((month, i) => {
+                const maxVal = Math.max(
+                  ...monthlyTrends.map((m) => Math.max(m.revenue, m.costs, 1)),
+                );
+                const revPct = (month.revenue / maxVal) * 100;
+                const costPct = (month.costs / maxVal) * 100;
+                return (
+                  <div
+                    key={month.month}
+                    className="flex flex-1 flex-col items-center justify-end gap-0.5"
+                  >
+                    <div className="flex flex-col-reverse items-center w-full" style={{ height: 140 }}>
+                      <div
+                        className="w-full max-w-[32px] rounded-t bg-danger/40"
+                        style={{ height: `${Math.max(costPct, 2)}%` }}
+                        title={`Costs: ${month.costs.toLocaleString()} FCFA`}
+                      />
+                      <div
+                        className="w-full max-w-[32px] rounded-t bg-success"
+                        style={{ height: `${Math.max(revPct, 2)}%` }}
+                        title={`Revenue: ${month.revenue.toLocaleString()} FCFA`}
+                      />
+                    </div>
+                    <span className="text-[10px] text-on-surface-muted mt-1">
+                      {format(parseISO(month.month + "-01"), "MMM")}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-2 flex justify-center gap-4 text-xs text-on-surface-muted">
+              <span className="flex items-center gap-1">
+                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-success" /> Revenue
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-danger/40" /> Costs
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Category breakdown */}
+      {breakdown.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-lg font-semibold text-on-surface">
+            Spending by Category
+          </h2>
+          <div className="space-y-2">
+            {breakdown.map((cat) => (
+              <div
+                key={cat.categoryId}
+                className="rounded-lg border border-border-light bg-white px-4 py-2.5"
+              >
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-block h-3 w-3 rounded-full"
+                      style={{ backgroundColor: cat.categoryColor }}
+                    />
+                    <span className="font-medium text-on-surface">
+                      {cat.categoryName}
+                    </span>
+                    <span className="text-xs text-on-surface-muted">
+                      ({cat.count})
+                    </span>
+                  </div>
+                  <span className="font-semibold text-on-surface">
+                    {cat.total.toLocaleString()} FCFA
+                  </span>
+                </div>
+                <div className="mt-1.5 h-2 w-full rounded-full bg-surface-alt">
+                  <div
+                    className="h-2 rounded-full transition-all"
+                    style={{
+                      width: `${cat.percentage}%`,
+                      backgroundColor: cat.categoryColor,
+                    }}
+                  />
+                </div>
+                <p className="mt-0.5 text-right text-[10px] text-on-surface-muted">
+                  {cat.percentage}%
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Profitability month-over-month */}
       {profitReport && profitReport.currentMonth.revenue > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-on-surface">
-            Profitability
+            Month-over-Month Profitability
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-border-light bg-white p-4">
               <p className="text-xs text-on-surface-muted">Current Month</p>
-              <div className="mt-2 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-on-surface-muted">Revenue</span>
-                  <span className="font-semibold text-success">
-                    +{profitReport.currentMonth.revenue.toLocaleString()} FCFA
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-on-surface-muted">Costs</span>
-                  <span className="font-semibold text-danger">
-                    −{profitReport.currentMonth.costs.toLocaleString()} FCFA
-                  </span>
-                </div>
-                <div className="border-t border-border-light pt-2">
-                  <div className="flex justify-between text-sm font-bold">
-                    <span className={profitReport.currentMonth.profit >= 0 ? "text-success" : "text-danger"}>
-                      Profit
-                    </span>
-                    <span className={profitReport.currentMonth.profit >= 0 ? "text-success" : "text-danger"}>
-                      {profitReport.currentMonth.profit >= 0 ? "+" : ""}
-                      {profitReport.currentMonth.profit.toLocaleString()} FCFA
-                    </span>
-                  </div>
-                  <p className="mt-1 text-right text-xs text-on-surface-muted">
-                    Margin: {profitReport.currentMonth.margin}% ·{" "}
-                    {profitReport.currentMonth.saleCount} sale{profitReport.currentMonth.saleCount > 1 ? "s" : ""}
-                  </p>
-                </div>
+              <div className="mt-2 space-y-1.5">
+                <Row label="Revenue" value={`+${profitReport.currentMonth.revenue.toLocaleString()} FCFA`} valueClass="text-success" />
+                <Row label="Costs" value={`−${profitReport.currentMonth.costs.toLocaleString()} FCFA`} valueClass="text-danger" />
+                <Row label="Profit" value={`${profitReport.currentMonth.profit >= 0 ? "+" : ""}${profitReport.currentMonth.profit.toLocaleString()} FCFA`} valueClass={profitReport.currentMonth.profit >= 0 ? "text-success" : "text-danger"} bold />
+                <p className="mt-1 text-xs text-on-surface-muted">Margin: {profitReport.currentMonth.margin}%</p>
               </div>
             </div>
             <div className="rounded-xl border border-border-light bg-white p-4">
               <p className="text-xs text-on-surface-muted">Previous Month</p>
-              <div className="mt-2 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-on-surface-muted">Revenue</span>
-                  <span className="font-semibold text-success">
-                    +{profitReport.previousMonth.revenue.toLocaleString()} FCFA
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-on-surface-muted">Costs</span>
-                  <span className="font-semibold text-danger">
-                    −{profitReport.previousMonth.costs.toLocaleString()} FCFA
-                  </span>
-                </div>
-                <div className="border-t border-border-light pt-2">
-                  <div className="flex justify-between text-sm font-bold">
-                    <span className={profitReport.previousMonth.profit >= 0 ? "text-success" : "text-danger"}>
-                      Profit
-                    </span>
-                    <span className={profitReport.previousMonth.profit >= 0 ? "text-success" : "text-danger"}>
-                      {profitReport.previousMonth.profit >= 0 ? "+" : ""}
-                      {profitReport.previousMonth.profit.toLocaleString()} FCFA
-                    </span>
-                  </div>
-                  <p className="mt-1 text-right text-xs text-on-surface-muted">
-                    Margin: {profitReport.previousMonth.margin}% ·{" "}
-                    {profitReport.previousMonth.saleCount} sale{profitReport.previousMonth.saleCount > 1 ? "s" : ""}
-                  </p>
-                </div>
+              <div className="mt-2 space-y-1.5">
+                <Row label="Revenue" value={`+${profitReport.previousMonth.revenue.toLocaleString()} FCFA`} valueClass="text-success" />
+                <Row label="Costs" value={`−${profitReport.previousMonth.costs.toLocaleString()} FCFA`} valueClass="text-danger" />
+                <Row label="Profit" value={`${profitReport.previousMonth.profit >= 0 ? "+" : ""}${profitReport.previousMonth.profit.toLocaleString()} FCFA`} valueClass={profitReport.previousMonth.profit >= 0 ? "text-success" : "text-danger"} bold />
+                <p className="mt-1 text-xs text-on-surface-muted">Margin: {profitReport.previousMonth.margin}%</p>
               </div>
-              <div className="mt-3 flex items-center gap-2 border-t border-border-light pt-3">
-                <span className={`text-xs font-medium ${
+              <div className="mt-2 border-t border-border-light pt-2 text-xs">
+                <span className={`font-medium ${
                   profitReport.trend === "up" ? "text-success" : profitReport.trend === "down" ? "text-danger" : "text-on-surface-muted"
                 }`}>
                   {profitReport.trend === "up" ? "▲" : profitReport.trend === "down" ? "▼" : "◆"} Trend:{" "}
@@ -160,39 +337,76 @@ export function Reports({ realm }: ReportsProps) {
         </section>
       )}
 
-      {(["success", "warning", "info", "tip"] as const).map((type) => {
-        const items = byType(type);
-        if (items.length === 0) return null;
-        return (
-          <section key={type}>
-            <h2 className="mb-3 text-lg font-semibold text-on-surface">
-              {typeLabels[type]}
-            </h2>
-            <div className="space-y-2">
-              {items.map((insight) => (
+      {/* Insights */}
+      {insights.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-lg font-semibold text-on-surface">Insights</h2>
+          <div className="space-y-2">
+            {insights.map((insight) => {
+              const colors: Record<string, string> = {
+                info: "border-blue-200 bg-blue-50",
+                warning: "border-amber-200 bg-amber-50",
+                success: "border-green-200 bg-green-50",
+                tip: "border-purple-200 bg-purple-50",
+              };
+              return (
                 <div
                   key={insight.id}
-                  className={`rounded-lg border px-4 py-3 ${typeColors[insight.type]}`}
+                  className={`rounded-lg border px-4 py-3 ${colors[insight.type]}`}
                 >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={`mt-1 block h-2 w-2 shrink-0 rounded-full ${dotColors[insight.type]}`}
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-on-surface">
-                        {insight.title}
-                      </p>
-                      <p className="mt-0.5 text-xs text-on-surface-muted">
-                        {insight.message}
-                      </p>
-                    </div>
-                  </div>
+                  <p className="text-sm font-medium text-on-surface">{insight.title}</p>
+                  <p className="mt-0.5 text-xs text-on-surface-muted">{insight.message}</p>
                 </div>
-              ))}
-            </div>
-          </section>
-        );
-      })}
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {!loading && filteredTxns.length === 0 && filteredSales.length === 0 && insights.length === 0 && (
+        <EmptyState
+          title="No data in this range"
+          message="Adjust the date range or add some transactions and sales to see reports."
+        />
+      )}
+    </div>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border-light bg-white p-4">
+      <p className="text-xs text-on-surface-muted">{label}</p>
+      <p className={`mt-1 text-lg font-bold ${color}`}>{value}</p>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  valueClass,
+  bold = false,
+}: {
+  label: string;
+  value: string;
+  valueClass: string;
+  bold?: boolean;
+}) {
+  return (
+    <div className="flex justify-between text-sm">
+      <span className="text-on-surface-muted">{label}</span>
+      <span className={`${valueClass} ${bold ? "font-bold" : "font-semibold"}`}>
+        {value}
+      </span>
     </div>
   );
 }
