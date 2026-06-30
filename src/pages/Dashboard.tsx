@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
 import type { Realm } from "../types";
-import type { Transaction, CashPosition as CashPositionType } from "../types";
+import type { Transaction, Sale, CashPosition as CashPositionType } from "../types";
 import type { Insight } from "../domain/insight";
+import type { ProfitReport } from "../domain/profitability";
 import { usePocketBalances } from "../hooks/usePockets";
 import { useTransactionSummary } from "../hooks/useTransactions";
 import { useDebtSummary } from "../hooks/useDebts";
 import { getRecentTransactions } from "../domain/transaction";
 import { getAllDebts } from "../db/repositories/debt";
 import { getActivePockets } from "../db/repositories/pocket";
+import { getSales } from "../db/repositories/sale";
+import { getAllTransactions } from "../db/repositories/transaction";
 import { generateInsights } from "../domain/insight";
 import { getCashPosition } from "../domain/cash-position";
+import { computeProfitReport } from "../domain/profitability";
 import { EmptyState } from "../components/EmptyState";
 import { format } from "date-fns";
 
@@ -24,18 +28,22 @@ export function Dashboard({ realm }: DashboardProps) {
   const [recent, setRecent] = useState<Transaction[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [cashPosition, setCashPosition] = useState<CashPositionType | null>(null);
+  const [profitReport, setProfitReport] = useState<ProfitReport | null>(null);
 
   useEffect(() => {
     (async () => {
-      const [txns, debts, pockets, cashPos] = await Promise.all([
+      const [txns, debts, pockets, cashPos, sales, allTxns] = await Promise.all([
         getRecentTransactions(5, realm),
         getAllDebts(realm),
         getActivePockets(realm),
         getCashPosition(realm),
+        getSales({ realm }),
+        getAllTransactions({ realm }),
       ]);
       setRecent(txns);
       setInsights(generateInsights(txns, pockets, debts));
       setCashPosition(cashPos);
+      setProfitReport(computeProfitReport(sales, allTxns));
     })();
   }, [realm]);
 
@@ -100,6 +108,50 @@ export function Dashboard({ realm }: DashboardProps) {
           value={`${debtSummary.summary.activeCount}`}
         />
       </div>
+
+      {/* Profitability (when sales data exists) */}
+      {profitReport && profitReport.currentMonth.revenue > 0 && (
+        <div className="rounded-xl border border-border-light bg-white p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-on-surface">
+              Monthly Profitability
+            </p>
+            {profitReport.currentMonth.saleCount > 0 && (
+              <span className={`text-xs font-medium ${
+                profitReport.trend === "up" ? "text-success" : profitReport.trend === "down" ? "text-danger" : "text-on-surface-muted"
+              }`}>
+                {profitReport.trend === "up" ? "▲" : profitReport.trend === "down" ? "▼" : "◆"}{" "}
+                {Math.abs(profitReport.trendPercentage)}% vs last month
+              </span>
+            )}
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-lg font-bold text-success">
+                +{profitReport.currentMonth.revenue.toLocaleString()} FCFA
+              </p>
+              <p className="text-xs text-on-surface-muted">Revenue</p>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-danger">
+                −{profitReport.currentMonth.costs.toLocaleString()} FCFA
+              </p>
+              <p className="text-xs text-on-surface-muted">Costs</p>
+            </div>
+            <div>
+              <p className={`text-lg font-bold ${
+                profitReport.currentMonth.profit >= 0 ? "text-success" : "text-danger"
+              }`}>
+                {profitReport.currentMonth.profit >= 0 ? "+" : ""}
+                {profitReport.currentMonth.profit.toLocaleString()} FCFA
+              </p>
+              <p className="text-xs text-on-surface-muted">
+                Profit ({profitReport.currentMonth.margin}% margin)
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Insights */}
       {insights.length > 0 && (
