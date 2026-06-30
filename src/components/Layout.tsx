@@ -8,6 +8,7 @@ const navItems = [
   { to: "/transactions", label: "Transactions", icon: IconTransactions },
   { to: "/debts", label: "Debts", icon: IconDebts },
   { to: "/goals", label: "Goals", icon: IconGoals },
+  { to: "/sales", label: "Sales", icon: IconSales },
   { to: "/reports", label: "Reports", icon: IconReports },
 ];
 
@@ -194,6 +195,14 @@ function IconGoals() {
       <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="10" cy="10" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+function IconSales() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M3 10h3l2-5 4 10 2-5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

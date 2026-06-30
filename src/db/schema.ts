@@ -1,7 +1,7 @@
 import { type IDBPDatabase, openDB, type IDBPTransaction, type StoreNames, type StoreValue } from "idb";
 
 const DB_NAME = "tracklet";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 export interface TrackletDB {
   pockets: StoreValue<unknown, "pockets">;
@@ -9,6 +9,7 @@ export interface TrackletDB {
   categories: StoreValue<unknown, "categories">;
   debts: StoreValue<unknown, "debts">;
   goals: StoreValue<unknown, "goals">;
+  sales: StoreValue<unknown, "sales">;
 }
 
 export type TrackletTransaction = IDBPTransaction<
@@ -55,6 +56,12 @@ export function getDB(): Promise<IDBPDatabase<TrackletDB>> {
           const goalStore = db.createObjectStore("goals", { keyPath: "id" });
           goalStore.createIndex("realm", "realm");
           goalStore.createIndex("sourcePocketId", "sourcePocketId");
+        }
+        if (!db.objectStoreNames.contains("sales")) {
+          const saleStore = db.createObjectStore("sales", { keyPath: "id" });
+          saleStore.createIndex("realm", "realm");
+          saleStore.createIndex("pocketId", "pocketId");
+          saleStore.createIndex("date", "date");
         }
       },
     });

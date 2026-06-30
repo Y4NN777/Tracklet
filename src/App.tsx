@@ -8,7 +8,7 @@ import { Pockets } from "./pages/Pockets";
 import { PocketDetail } from "./pages/PocketDetail";
 import { Transactions } from "./pages/Transactions";
 import { Debts } from "./pages/Debts";
-import { Goals } from "./pages/Goals";
+import { Sales } from "./pages/Sales";
 import { Reports } from "./pages/Reports";
 
 function App() {
@@ -25,6 +25,7 @@ function App() {
             <Route path="/transactions" element={<Transactions realm={realm} />} />
           <Route path="/debts" element={<Debts realm={realm} />} />
           <Route path="/goals" element={<Goals realm={realm} />} />
+          <Route path="/sales" element={<Sales realm={realm} />} />
           <Route path="/reports" element={<Reports realm={realm} />} />
           </Route>
         </Routes>

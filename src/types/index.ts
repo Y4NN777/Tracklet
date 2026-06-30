@@ -63,6 +63,26 @@ export interface Goal {
   updatedAt: string;
 }
 
+export interface Sale {
+  id: string;
+  product: string;
+  quantity: number;
+  unitPrice: number;
+  total: number; // auto-calculated: quantity * unitPrice
+  pocketId: string;
+  date: string; // ISO date (YYYY-MM-DD)
+  realm: Realm;
+  tags: string[];
+  createdAt: string;
+}
+
+export interface SaleAggregation {
+  period: string; // ISO date for day, ISO week-start for week, ISO month for month
+  totalSales: number;
+  saleCount: number;
+  sales: Sale[];
+}
+
 export interface CashPosition {
   available: number;
   committed: number;
@@ -70,4 +90,4 @@ export interface CashPosition {
   totalBalance: number;
 }
 
-export type Page = "dashboard" | "pockets" | "transactions" | "debts" | "goals" | "reports";
+export type Page = "dashboard" | "pockets" | "transactions" | "debts" | "goals" | "sales" | "reports";
