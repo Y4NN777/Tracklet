@@ -12,6 +12,7 @@ Tracklet is a local-first financial copilot for young micro-entrepreneurs in Bur
 
 ## Alpha features
 
+- Public French landing page with a direct entry into the local application
 - Pockets and balances
 - Income, expenses, and atomic transfers between pockets
 - Debts and receivables
@@ -57,4 +58,4 @@ Browser storage is the source of truth. Clearing site data or uninstalling the P
 - Goal contributions track progress but do not move pocket balances
 - Contextual tips are local rules, not an LLM
 
-The legacy Next.js/Supabase application remains in Git history and on the `legacy/tracklet-finance-app` branch. The current product direction lives on `feat/repurpose-tracklet`.
+The legacy Next.js/Supabase application remains in Git history and on the `legacy/tracklet-finance-app` branch. The local-first product is the current direction on `main`.

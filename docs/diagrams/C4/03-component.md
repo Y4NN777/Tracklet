@@ -2,7 +2,8 @@
 
 ```mermaid
 flowchart LR
-  pages[Pages and forms]
+  landing[Public landing page]
+  pages[Financial pages and forms]
   hooks[React data hooks]
   calcs[Domain calculations]
   tips[Rule-based tips]
@@ -11,6 +12,7 @@ flowchart LR
   validation[Input validation]
   db[(IndexedDB)]
 
+  landing --> pages
   pages --> hooks
   pages --> backup
   pages --> repositories

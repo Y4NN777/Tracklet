@@ -24,12 +24,18 @@ React UI + HashRouter
 
 - React 19 and React Router
 - Vite 8 with the PWA plugin
-- TypeScript 6
+- TypeScript 7
 - Tailwind CSS 4
 - IndexedDB through `idb`
 - Vitest and `fake-indexeddb` for automated verification
 
 `index.html`, `vite.config.ts`, TypeScript configuration, and PWA assets are source-controlled. `dist/` is generated and ignored.
+
+## Presentation and routes
+
+The hash route `/#/` renders the public French landing page without the application shell. It presents only implemented product capabilities and links to `/#/dashboard`. Financial routes render inside the authenticated-free application layout; they remain directly addressable for existing bookmarks.
+
+The installed PWA starts at `/#/dashboard`, so returning users enter their financial workspace directly instead of passing through the marketing page on every launch.
 
 ## Data model
 
