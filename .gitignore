@@ -1,7 +1,8 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
+
+# graphify code-structure graph (regenerated on every `graphify update .`)
+graphify-out/
 /.pnp
 .pnp.*
 .yarn/*
@@ -17,11 +18,9 @@
 /.next/
 /out/
 
-*.md
-*.sh
-
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -30,7 +29,7 @@
 # debug
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
+yarn-error-log.*
 .pnpm-debug.log*
 
 # vercel
@@ -40,14 +39,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.genkit/*
-.env*
+# env files
+.env*.local
+.env*.production
 
-# firebase
-firebase-debug.log
-firestore-debug.log
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
-plan.md
-
-# intlayer
-/.intlayer/
+# os
+.DS_Store
+Thumbs.db
