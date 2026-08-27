@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Epilogue Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/epilogue/files/epilogue-latin-wght-normal.woff2") format("woff2-variations");
+}
+
 @theme {
   --color-primary: #185FA5;
   --color-primary-light: #378ADD;
@@ -67,16 +75,42 @@ body {
   flex-direction: column;
 }
 
-.landing-page {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+.landing-organic {
+  position: relative;
+  isolation: isolate;
+  font-family: "Epilogue Variable", Epilogue, system-ui, sans-serif;
 }
 
-.landing-grid {
-  background-color: #ffffff;
-  background-image:
-    linear-gradient(rgba(0, 47, 167, 0.075) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 47, 167, 0.075) 1px, transparent 1px);
-  background-size: 48px 48px;
+.landing-organic::before {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.35'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.landing-organic :focus-visible {
+  outline: 3px solid #e8dcc7;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px #30351f;
+}
+
+.organic-breathe {
+  animation: organic-arrive 500ms ease-out both;
+}
+
+@keyframes organic-arrive {
+  from {
+    opacity: 0.88;
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -84,7 +118,10 @@ body {
     scroll-behavior: auto;
   }
 
-  .landing-page * {
+  .landing-organic *,
+  .organic-breathe {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }

@@ -211,16 +211,17 @@ The aesthetic draws from modern fintech apps (Revolut, Chime) adapted to the loc
 
 ## Public landing direction
 
-The public landing page uses a Swiss editorial system distinct from the operational app shell. Its purpose is explanation and orientation, not financial data entry.
+The public landing page uses an organic visual system distinct from conventional blue fintech marketing. Its purpose is explanation and orientation, not financial data entry.
 
-- **Surface:** pure white (`#FFFFFF`) and neutral (`#F7F7F8`).
-- **Accent:** Yves Klein blue (`#002FA7`) only.
-- **Typography:** Helvetica Neue or a system Helvetica/Arial fallback, left aligned with tightly tracked display headings.
-- **Structure:** asymmetric sections, visible 1px grid lines, square controls, and large numerals as composition elements.
-- **Restrictions:** no gradients, grain, decorative shadows, fabricated balances, customer counts, or testimonials.
-- **Signature motif:** personal and business pockets remain visibly separated before converging into one cash-position explanation.
+- **Surface:** sand (`#E8DCC7`) and oat (`#D4B895`). Pure white and cold grey are excluded.
+- **Palette:** deep moss (`#465024`) for accessible text and controls, sage (`#8B9D83`), clay (`#B08B6E`), ochre (`#C08E3A`), terracotta (`#C66B3D`), and soft terracotta (`#D98E69`) for large surfaces.
+- **Typography:** Epilogue Variable, bundled with the application for offline use.
+- **Structure:** rounded 16–32px containers, generous reading space, large left-aligned headings, and one primary action repeated consistently.
+- **Texture and motion:** 2.5% SVG grain plus a single 500ms hero arrival; reduced-motion preferences disable it.
+- **Restrictions:** no blue fintech palette, chapter numbering, bento wall, fabricated balances, customer counts, or testimonials.
+- **Signature motif:** personal and business money follow separate curved streams before converging into the cash-position explanation.
 
-The product mockup on the landing names real Tracklet concepts but never pretends that sample balances are user data. Once the user opens `/#/dashboard`, the operational interface returns to the mobile-first tokens documented below.
+The landing organizes content around three user outcomes and progressively disclosed questions. All controls meet at least a 44px touch target, focus remains visible, and the mobile navigation exposes every section. Once the user opens `/#/dashboard`, the operational interface returns to the mobile-first tokens documented below.
 
 ## Colors
 
