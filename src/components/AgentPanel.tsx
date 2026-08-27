@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import type { AgentTip } from "../domain/agent";
-import { generateTips } from "../domain/agent";
+import { generateTips, markTipShown } from "../domain/agent";
 import { getCashPosition } from "../domain/cash-position";
 import { getSales } from "../db/repositories/sale";
 import { getAllDebts } from "../db/repositories/debt";
-import { getRecentTransactions } from "../domain/transaction";
+import { getGoals } from "../db/repositories/goal";
 import type { Realm } from "../types";
+import { Link } from "react-router-dom";
 import {
   AlertTriangle,
   BarChart3,
@@ -15,7 +16,6 @@ import {
   Wallet,
   TrendingUp,
   FileText,
-  X,
 } from "lucide-react";
 
 interface AgentPanelProps {
@@ -36,11 +36,11 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
     let cancelled = false;
 
     (async () => {
-      const [position, sales, debts, txns] = await Promise.all([
+      const [position, sales, debts, goals] = await Promise.all([
         getCashPosition(realm).catch(() => null),
         getSales({ realm }).catch(() => []),
         getAllDebts(realm).catch(() => []),
-        getRecentTransactions(20, realm).catch(() => []),
+        getGoals(realm).catch(() => []),
       ]);
 
       if (cancelled) return;
@@ -49,11 +49,12 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
         position,
         recentSales: sales,
         debts,
-        recentTxns: txns,
+        goals,
         page,
       }).filter((t) => !dismissed.has(t.id));
 
       setTips(newTips);
+      newTips.forEach((tip) => markTipShown(tip.id));
     })();
 
     return () => { cancelled = true; };
@@ -88,7 +89,7 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
             ? "bg-primary text-on-primary hover:bg-primary-light"
             : "bg-white text-on-surface-muted border border-border-light"
         }`}
-        aria-label={open ? "Close tips" : `${hasTips ? `${tips.length} tip${tips.length > 1 ? "s" : ""} available` : "No tips"}`}
+        aria-label={open ? "Fermer les conseils" : hasTips ? `${tips.length} conseil${tips.length > 1 ? "s" : ""}` : "Aucun conseil"}
       >
         {hasTips && !open && (
           <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white">
@@ -123,16 +124,16 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
         <div className="fixed bottom-36 right-4 z-50 w-80 max-w-[calc(100vw-2rem)] lg:bottom-20">
           <div className="rounded-xl border border-border-light bg-white shadow-xl">
             <div className="border-b border-border-light px-4 py-3">
-              <p className="text-sm font-semibold text-on-surface">Tracklet Tips</p>
-              <p className="text-xs text-on-surface-muted">Contextual advice for your finances</p>
+              <p className="text-sm font-semibold text-on-surface">Conseils Tracklet</p>
+              <p className="text-xs text-on-surface-muted">Des repères simples basés sur vos chiffres</p>
             </div>
 
             <div className="max-h-80 space-y-0 overflow-y-auto">
               {tips.length === 0 ? (
                 <div className="px-4 py-6 text-center text-sm text-on-surface-muted">
-                  No tips for this page right now.
+                  Aucun conseil pour cette page.
                   <br />
-                  <span className="text-xs">Add more data to get personalized advice.</span>
+                  <span className="text-xs">Ajoutez des données pour obtenir des conseils utiles.</span>
                 </div>
               ) : (
                 tips.map((tip) => (
@@ -146,20 +147,20 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
                         <p className="text-sm font-medium text-on-surface">{tip.title}</p>
                         <p className="mt-0.5 text-xs text-on-surface-muted">{tip.message}</p>
                         {tip.action && (
-                          <a
-                            href={tip.action.to}
+                          <Link
+                            to={tip.action.to}
                             className="mt-1.5 inline-block text-xs font-medium text-primary hover:underline"
                             onClick={() => dismiss(tip.id)}
                           >
                             {tip.action.label} →
-                          </a>
+                          </Link>
                         )}
                       </div>
                       <button
                         type="button"
                         onClick={() => dismiss(tip.id)}
                         className="shrink-0 rounded p-0.5 text-on-surface-muted hover:text-on-surface"
-                        aria-label="Dismiss tip"
+                        aria-label="Masquer le conseil"
                       >
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                           <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

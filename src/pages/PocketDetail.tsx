@@ -25,19 +25,25 @@ export function PocketDetail({ realm }: PocketDetailProps) {
   const load = async () => {
     if (!id) return;
     setLoading(true);
-    const [bal, recent] = await Promise.all([
-      getPocketBalance(id),
-      getRecentTransactions(50, realm),
-    ]);
-    setData(bal);
-    setTxns(recent.filter((t) => t.pocketId === id));
-    setLoading(false);
+    try {
+      const [bal, recent] = await Promise.all([
+        getPocketBalance(id, realm),
+        getRecentTransactions(50, realm),
+      ]);
+      setData(bal);
+      setTxns(recent.filter((transaction) => transaction.pocketId === id));
+    } catch {
+      setData(null);
+      setTxns([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, [id, realm]);
 
-  if (loading) return <div className="p-4 text-sm text-on-surface-muted">Loading...</div>;
-  if (!data) return <div className="p-4 text-sm text-danger">Pocket not found</div>;
+  if (loading) return <div className="p-4 text-sm text-on-surface-muted">Chargement…</div>;
+  if (!data) return <div className="p-4 text-sm text-danger">Poche introuvable</div>;
 
   return (
     <div className="space-y-6">
@@ -46,7 +52,7 @@ export function PocketDetail({ realm }: PocketDetailProps) {
           to="/pockets"
           className="text-sm text-primary hover:underline"
         >
-          ← Back to Pockets
+          ← Retour aux poches
         </Link>
         <div className="mt-2 flex items-center justify-between">
           <div>
@@ -64,23 +70,23 @@ export function PocketDetail({ realm }: PocketDetailProps) {
             onClick={() => setShowAdd(true)}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
           >
-            + Add Transaction
+            + Ajouter une opération
           </button>
         </div>
       </div>
 
       {/* Balance card */}
       <div className="rounded-xl border border-border-light bg-white p-6">
-        <p className="text-xs text-on-surface-muted">Current Balance</p>
+        <p className="text-xs text-on-surface-muted">Solde actuel</p>
         <p className="mt-1 text-3xl font-bold text-on-surface">
           {data.balance.toLocaleString()} FCFA
         </p>
         <div className="mt-3 flex gap-6 text-sm">
           <span className="text-success">
-            Income: +{data.income.toLocaleString()} FCFA
+            Entrées : +{data.income.toLocaleString()} FCFA
           </span>
           <span className="text-danger">
-            Expenses: −{data.expense.toLocaleString()} FCFA
+            Sorties : −{data.expense.toLocaleString()} FCFA
           </span>
         </div>
       </div>
@@ -88,14 +94,14 @@ export function PocketDetail({ realm }: PocketDetailProps) {
       {/* Transactions */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-on-surface">
-          Transactions
+          Opérations
         </h2>
         {txns.length === 0 ? (
           <EmptyState
-            title="No transactions"
-            message="Add your first transaction to this pocket."
+            title="Aucune opération"
+            message="Ajoutez la première opération de cette poche."
             action={{
-              label: "Add Transaction",
+              label: "Ajouter une opération",
               onClick: () => setShowAdd(true),
             }}
           />
@@ -154,7 +160,7 @@ function AddTransactionModal({
   onDone: () => void;
 }) {
   const { addToast } = useToast();
-  const { categories } = useCategories();
+  const { categories } = useCategories(realm);
   const [form, setForm] = useState({
     type: "expense" as "income" | "expense",
     amount: "",
@@ -174,32 +180,37 @@ function AddTransactionModal({
     const catId = form.categoryId ||
       (form.type === "income" ? categories.find((c) => c.type === "income")?.id : categories.find((c) => c.type === "expense")?.id) ||
       "";
-    await createTransaction({
-      pocketId,
-      type: form.type,
-      amount: Number(form.amount),
-      description: form.description.trim(),
-      categoryId: catId,
-      date: form.date,
-      realm,
-      tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-    });
-    setSaving(false);
-    setForm({
-      type: "expense",
-      amount: "",
-      description: "",
-      categoryId: "",
-      date: new Date().toISOString().slice(0, 10),
-      tags: "",
-    });
-    onClose();
-    addToast("success", "Transaction added");
-    onDone();
+    try {
+      await createTransaction({
+        pocketId,
+        type: form.type,
+        amount: Number(form.amount),
+        description: form.description.trim(),
+        categoryId: catId,
+        date: form.date,
+        realm,
+        tags: form.tags ? form.tags.split(",").map((tag) => tag.trim()).filter(Boolean) : [],
+      });
+      setForm({
+        type: "expense",
+        amount: "",
+        description: "",
+        categoryId: "",
+        date: new Date().toISOString().slice(0, 10),
+        tags: "",
+      });
+      onClose();
+      addToast("success", "Opération ajoutée");
+      await onDone();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible d’ajouter l’opération");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Add Transaction">
+    <Modal open={open} onClose={onClose} title="Ajouter une opération">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex gap-2">
           {(["expense", "income"] as const).map((t) => (
@@ -213,19 +224,19 @@ function AddTransactionModal({
                   : "border border-border-light text-on-surface-muted hover:bg-surface-alt"
               }`}
             >
-              {t}
+              {t === "income" ? "Entrée" : "Dépense"}
             </button>
           ))}
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Amount (FCFA)</label>
+          <label className="block text-sm font-medium text-on-surface">Montant (FCFA)</label>
           <input
             type="number"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="0"
-            min="0"
+            min="1"
             required
           />
         </div>
@@ -236,18 +247,18 @@ function AddTransactionModal({
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="What was this for?"
+            placeholder="À quoi correspond cette opération ?"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Category</label>
+          <label className="block text-sm font-medium text-on-surface">Catégorie</label>
           <select
             value={form.categoryId}
             onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
           >
-            <option value="">Select a category</option>
+            <option value="">Choisir une catégorie</option>
             {filteredCats.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.icon} {c.name}
@@ -266,13 +277,13 @@ function AddTransactionModal({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Tags (optional, comma-separated)</label>
+          <label className="block text-sm font-medium text-on-surface">Mots-clés (facultatif, séparés par des virgules)</label>
           <input
             type="text"
             value={form.tags}
             onChange={(e) => setForm({ ...form, tags: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="groceries, weekly"
+            placeholder="stock, semaine"
           />
         </div>
         <div className="flex justify-end gap-2">
@@ -281,14 +292,14 @@ function AddTransactionModal({
             onClick={onClose}
             className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
-            Cancel
+            Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.amount || !form.description}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
-            {saving ? "Adding..." : "Add"}
+            {saving ? "Enregistrement…" : "Ajouter"}
           </button>
         </div>
       </form>

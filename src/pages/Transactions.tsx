@@ -3,7 +3,7 @@ import type { Realm } from "../types";
 import { useTransactions } from "../hooks/useTransactions";
 import { usePockets } from "../hooks/usePockets";
 import { useCategories } from "../hooks/useCategories";
-import { createTransaction } from "../db/repositories/transaction";
+import { createTransaction, createTransfer } from "../db/repositories/transaction";
 import { Modal } from "../components/Modal";
 import { EmptyState } from "../components/EmptyState";
 import { useToast } from "../components/Toast";
@@ -16,7 +16,7 @@ interface TransactionsProps {
 export function Transactions({ realm }: TransactionsProps) {
   const { transactions, loading, refresh } = useTransactions(realm);
   const { pockets } = usePockets(realm);
-  const { categories } = useCategories();
+  const { categories } = useCategories(realm);
   const { addToast } = useToast();
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState<string>("all");
@@ -27,6 +27,7 @@ export function Transactions({ realm }: TransactionsProps) {
     description: "",
     categoryId: "",
     pocketId: "",
+    destinationPocketId: "",
     date: new Date().toISOString().slice(0, 10),
     tags: "",
   });
@@ -40,29 +41,49 @@ export function Transactions({ realm }: TransactionsProps) {
     e.preventDefault();
     if (!form.amount || !form.description || !form.pocketId) return;
     setSaving(true);
-    await createTransaction({
-      pocketId: form.pocketId,
-      type: form.type,
-      amount: Number(form.amount),
-      description: form.description.trim(),
-      categoryId: form.categoryId,
-      date: form.date,
-      realm,
-      tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-    });
-    setSaving(false);
-    setForm({
-      type: "expense",
-      amount: "",
-      description: "",
-      categoryId: "",
-      pocketId: "",
-      date: new Date().toISOString().slice(0, 10),
-      tags: "",
-    });
-    setShowAdd(false);
-    addToast("success", "Transaction created");
-    refresh();
+    try {
+      const tags = form.tags ? form.tags.split(",").map((tag) => tag.trim()).filter(Boolean) : [];
+      if (form.type === "transfer") {
+        if (!form.destinationPocketId) throw new Error("Select a destination pocket");
+        await createTransfer({
+          sourcePocketId: form.pocketId,
+          destinationPocketId: form.destinationPocketId,
+          amount: Number(form.amount),
+          description: form.description,
+          date: form.date,
+          realm,
+          tags,
+        });
+      } else {
+        await createTransaction({
+          pocketId: form.pocketId,
+          type: form.type,
+          amount: Number(form.amount),
+          description: form.description,
+          categoryId: form.categoryId,
+          date: form.date,
+          realm,
+          tags,
+        });
+      }
+      setForm({
+        type: "expense",
+        amount: "",
+        description: "",
+        categoryId: "",
+        pocketId: "",
+        destinationPocketId: "",
+        date: new Date().toISOString().slice(0, 10),
+        tags: "",
+      });
+      setShowAdd(false);
+      addToast("success", form.type === "transfer" ? "Transfert effectué" : "Opération enregistrée");
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible d’enregistrer l’opération");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const catMap = new Map(categories.map((c) => [c.id, c]));
@@ -70,19 +91,19 @@ export function Transactions({ realm }: TransactionsProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-on-surface">Transactions</h1>
+        <h1 className="text-2xl font-semibold text-on-surface">Opérations</h1>
         <button
           type="button"
           onClick={() => setShowAdd(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
-          + New Transaction
+          + Nouvelle opération
         </button>
       </div>
 
       {/* Filter tabs */}
       <div className="flex gap-2">
-        {["all", "expense", "income", "transfer"].map((f) => (
+        {(["all", "expense", "income", "transfer"] as const).map((f) => (
           <button
             key={f}
             type="button"
@@ -93,7 +114,7 @@ export function Transactions({ realm }: TransactionsProps) {
                 : "text-on-surface-muted hover:bg-surface-alt"
             }`}
           >
-            {f}
+            {{ all: "Toutes", expense: "Dépenses", income: "Entrées", transfer: "Transferts" }[f]}
           </button>
         ))}
       </div>
@@ -101,9 +122,9 @@ export function Transactions({ realm }: TransactionsProps) {
       {/* List */}
       {!loading && filtered.length === 0 ? (
         <EmptyState
-          title="No transactions"
-          message="Add your first transaction to start tracking."
-          action={{ label: "New Transaction", onClick: () => setShowAdd(true) }}
+          title="Aucune opération"
+          message="Ajoutez votre première entrée ou dépense."
+          action={{ label: "Nouvelle opération", onClick: () => setShowAdd(true) }}
         />
       ) : (
         <div className="space-y-1">
@@ -139,7 +160,7 @@ export function Transactions({ realm }: TransactionsProps) {
                         : "text-info"
                   }`}
                 >
-                  {txn.type === "income" ? "+" : txn.type === "expense" ? "−" : "↔"}
+                  {txn.type === "income" ? "+" : txn.type === "expense" ? "−" : txn.transferDirection === "in" ? "←" : "→"}
                   {txn.amount.toLocaleString()} FCFA
                 </span>
               </div>
@@ -149,7 +170,7 @@ export function Transactions({ realm }: TransactionsProps) {
       )}
 
       {/* Add modal */}
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="New Transaction">
+      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Nouvelle opération">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-2">
             {(["expense", "income", "transfer"] as const).map((t) => (
@@ -163,55 +184,71 @@ export function Transactions({ realm }: TransactionsProps) {
                     : "border border-border-light text-on-surface-muted hover:bg-surface-alt"
                 }`}
               >
-                {t}
+                {{ expense: "Dépense", income: "Entrée", transfer: "Transfert" }[t]}
               </button>
             ))}
           </div>
           <div>
-            <label className="block text-sm font-medium text-on-surface">Pocket</label>
+            <label className="block text-sm font-medium text-on-surface">Poche source</label>
             <select
               value={form.pocketId}
               onChange={(e) => setForm({ ...form, pocketId: e.target.value })}
               className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
               required
             >
-              <option value="">Select a pocket</option>
+              <option value="">Choisir une poche</option>
               {pockets.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
           </div>
+          {form.type === "transfer" && (
+            <div>
+              <label className="block text-sm font-medium text-on-surface">Poche de destination</label>
+              <select
+                value={form.destinationPocketId}
+                onChange={(e) => setForm({ ...form, destinationPocketId: e.target.value })}
+                className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+                required
+              >
+                <option value="">Choisir une destination</option>
+                {pockets.filter((p) => p.id !== form.pocketId).map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
-            <label className="block text-sm font-medium text-on-surface">Amount (FCFA)</label>
+            <label className="block text-sm font-medium text-on-surface">Montant (FCFA)</label>
             <input
               type="number"
               value={form.amount}
               onChange={(e) => setForm({ ...form, amount: e.target.value })}
               className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
               placeholder="0"
-              min="0"
+              min="1"
               required
             />
           </div>
-          <div>
+          {form.type !== "transfer" && <div>
             <label className="block text-sm font-medium text-on-surface">Description</label>
             <input
               type="text"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
-              placeholder="What was this for?"
+              placeholder="À quoi correspond cette opération ?"
               required
             />
-          </div>
+          </div>}
           <div>
-            <label className="block text-sm font-medium text-on-surface">Category</label>
+            <label className="block text-sm font-medium text-on-surface">Catégorie</label>
             <select
               value={form.categoryId}
               onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
               className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             >
-              <option value="">Select a category</option>
+              <option value="">Choisir une catégorie</option>
               {categories
                 .filter((c) => c.type === form.type || form.type === "transfer")
                 .map((c) => (
@@ -237,14 +274,14 @@ export function Transactions({ realm }: TransactionsProps) {
               onClick={() => setShowAdd(false)}
               className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
             >
-              Cancel
+              Annuler
             </button>
             <button
               type="submit"
-              disabled={saving || !form.amount || !form.description || !form.pocketId}
+              disabled={saving || !form.amount || !form.description || !form.pocketId || (form.type === "transfer" && !form.destinationPocketId)}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
             >
-              {saving ? "Adding..." : "Add"}
+              {saving ? "Enregistrement…" : "Enregistrer"}
             </button>
           </div>
         </form>

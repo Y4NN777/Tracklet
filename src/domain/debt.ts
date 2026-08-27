@@ -14,7 +14,8 @@ export async function getDebtSummary(realm?: string): Promise<DebtSummary> {
   let activeCount = 0;
 
   for (const d of debts) {
-    if (d.status === "active") activeCount++;
+    if (d.status !== "active") continue;
+    activeCount++;
     if (d.direction === "lent") totalLent += d.amount;
     else totalBorrowed += d.amount;
   }

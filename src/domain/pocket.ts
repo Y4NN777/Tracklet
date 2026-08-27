@@ -11,9 +11,10 @@ export interface PocketBalance {
 
 export async function getPocketBalance(
   pocketId: string,
+  expectedRealm?: string,
 ): Promise<PocketBalance> {
   const pocket = await pocketRepo.getPocket(pocketId);
-  if (!pocket) throw new Error("Pocket not found");
+  if (!pocket || (expectedRealm && pocket.realm !== expectedRealm)) throw new Error("Poche introuvable");
 
   const txns = await txnRepo.getAllTransactions({ pocketId });
   let balance = 0;
@@ -25,6 +26,12 @@ export async function getPocketBalance(
       balance += t.amount;
       income += t.amount;
     } else if (t.type === "expense") {
+      balance -= t.amount;
+      expense += t.amount;
+    } else if (t.transferDirection === "in") {
+      balance += t.amount;
+      income += t.amount;
+    } else if (t.transferDirection === "out") {
       balance -= t.amount;
       expense += t.amount;
     }

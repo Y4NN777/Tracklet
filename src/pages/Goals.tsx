@@ -34,27 +34,36 @@ export function Goals({ realm }: GoalsProps) {
   const handleCreate = async () => {
     if (!form.name.trim() || !form.targetAmount) return;
     setSaving(true);
-    await createGoal({
-      name: form.name.trim(),
-      targetAmount: Number(form.targetAmount),
-      savedAmount: Number(form.savedAmount) || 0,
-      sourcePocketId: form.sourcePocketId || null,
-      realm,
-    });
-    setSaving(false);
-    setShowCreate(false);
-    resetForm();
-    addToast("success", `Goal "${form.name.trim()}" created`);
-    refresh();
+    try {
+      await createGoal({
+        name: form.name.trim(),
+        targetAmount: Number(form.targetAmount),
+        savedAmount: Number(form.savedAmount) || 0,
+        sourcePocketId: form.sourcePocketId || null,
+        realm,
+      });
+      setShowCreate(false);
+      resetForm();
+      addToast("success", `Objectif « ${form.name.trim()} » créé`);
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible de créer l’objectif");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleContribute = async (goalId: string, increment: number) => {
     const goal = goals.find((g) => g.id === goalId);
     if (!goal) return;
     const newSaved = goal.savedAmount + increment;
-    await updateGoal(goalId, { savedAmount: newSaved });
-    addToast("success", `Added ${increment.toLocaleString()} FCFA to "${goal.name}"`);
-    refresh();
+    try {
+      await updateGoal(goalId, { savedAmount: newSaved });
+      addToast("success", `${increment.toLocaleString()} FCFA ajoutés à « ${goal.name} »`);
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible de mettre à jour l’objectif");
+    }
   };
 
   const handleDelete = async () => {
@@ -62,19 +71,23 @@ export function Goals({ realm }: GoalsProps) {
     if (!id) return;
     setDeleteGoalId(null);
     const goal = goals.find((g) => g.id === id);
-    await deleteGoal(id);
-    addToast("info", `Goal "${goal?.name ?? ''}" deleted`);
-    refresh();
+    try {
+      await deleteGoal(id);
+      addToast("info", `Objectif « ${goal?.name ?? ""} » supprimé`);
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible de supprimer l’objectif");
+    }
   };
 
   if (!loading && goals.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Goals</h1>
+        <h1 className="text-2xl font-semibold text-on-surface">Objectifs</h1>
         <EmptyState
-          title="No goals yet"
-          message="Set a savings goal to start tracking your progress."
-          action={{ label: "New Goal", onClick: () => setShowCreate(true) }}
+          title="Aucun objectif"
+          message="Fixez un montant à atteindre et suivez votre progression."
+          action={{ label: "Nouvel objectif", onClick: () => setShowCreate(true) }}
         />
         <GoalModal
           open={showCreate}
@@ -84,7 +97,7 @@ export function Goals({ realm }: GoalsProps) {
           saving={saving}
           pockets={pockets}
           onSubmit={handleCreate}
-          title="New Goal"
+          title="Nouvel objectif"
         />
       </div>
     );
@@ -94,10 +107,10 @@ export function Goals({ realm }: GoalsProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-on-surface">Goals</h1>
+          <h1 className="text-2xl font-semibold text-on-surface">Objectifs</h1>
           <p className="text-sm text-on-surface-muted">
-            {goals.filter((g) => g.savedAmount >= g.targetAmount).length} of{" "}
-            {goals.length} completed
+            {goals.filter((g) => g.savedAmount >= g.targetAmount).length} sur{" "}
+            {goals.length} terminé{goals.length > 1 ? "s" : ""}
           </p>
         </div>
         <button
@@ -105,7 +118,7 @@ export function Goals({ realm }: GoalsProps) {
           onClick={() => setShowCreate(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
-          + New Goal
+          + Nouvel objectif
         </button>
       </div>
 
@@ -124,8 +137,8 @@ export function Goals({ realm }: GoalsProps) {
                   <h3 className="font-semibold text-on-surface">{goal.name}</h3>
                   <p className="mt-0.5 text-xs text-on-surface-muted">
                     {goal.sourcePocketId
-                      ? `Linked to ${pockets.find((p) => p.id === goal.sourcePocketId)?.name ?? "pocket"}`
-                      : "No linked pocket"}
+                      ? `Lié à ${pockets.find((p) => p.id === goal.sourcePocketId)?.name ?? "une poche"}`
+                      : "Aucune poche liée"}
                   </p>
                 </div>
                 {!progress.isCompleted && (
@@ -134,7 +147,7 @@ export function Goals({ realm }: GoalsProps) {
                     onClick={() => setDeleteGoalId(goal.id)}
                     className="rounded-md px-2 py-0.5 text-xs text-danger hover:bg-danger/10 transition-colors"
                   >
-                    Delete
+                    Supprimer
                   </button>
                 )}
               </div>
@@ -146,7 +159,7 @@ export function Goals({ realm }: GoalsProps) {
                     {goal.savedAmount.toLocaleString()} FCFA
                   </span>
                   <span className="text-on-surface-muted">
-                    of {goal.targetAmount.toLocaleString()} FCFA
+                    sur {goal.targetAmount.toLocaleString()} FCFA
                   </span>
                 </div>
                 <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-surface-alt">
@@ -161,28 +174,31 @@ export function Goals({ realm }: GoalsProps) {
                   <span>{progress.percentage}%</span>
                   {!progress.isCompleted && (
                     <span>
-                      {progress.remaining.toLocaleString()} FCFA remaining
+                      reste {progress.remaining.toLocaleString()} FCFA
                     </span>
                   )}
                   {progress.isCompleted && (
-                    <span className="font-medium text-success">Completed</span>
+                    <span className="font-medium text-success">Terminé</span>
                   )}
                 </div>
               </div>
 
               {/* Quick contribute */}
               {!progress.isCompleted && (
-                <div className="mt-3 flex gap-2">
-                  {[5000, 10000, 25000, 50000].map((amount) => (
-                    <button
-                      key={amount}
-                      type="button"
-                      onClick={() => handleContribute(goal.id, amount)}
-                      className="flex-1 rounded-md border border-border-light py-1 text-xs font-medium text-on-surface-muted hover:bg-surface-alt hover:text-on-surface transition-colors"
-                    >
-                      +{amount.toLocaleString()}
-                    </button>
-                  ))}
+                <div className="mt-3">
+                  <div className="flex gap-2">
+                    {[5000, 10000, 25000, 50000].map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        onClick={() => handleContribute(goal.id, amount)}
+                        className="flex-1 rounded-md border border-border-light py-1 text-xs font-medium text-on-surface-muted hover:bg-surface-alt hover:text-on-surface transition-colors"
+                      >
+                        +{amount.toLocaleString()}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-1.5 text-[10px] text-on-surface-muted">Suivi uniquement : cette action ne déplace pas l’argent d’une poche.</p>
                 </div>
               )}
             </div>
@@ -198,16 +214,16 @@ export function Goals({ realm }: GoalsProps) {
         saving={saving}
         pockets={pockets}
         onSubmit={handleCreate}
-        title="New Goal"
+        title="Nouvel objectif"
       />
 
       <ConfirmDialog
         open={deleteGoalId !== null}
         onClose={() => setDeleteGoalId(null)}
         onConfirm={handleDelete}
-        title="Delete Goal"
-        message="Are you sure you want to delete this goal? Progress will be lost."
-        confirmLabel="Delete"
+        title="Supprimer cet objectif ?"
+        message="La progression enregistrée sera perdue."
+        confirmLabel="Supprimer"
         variant="danger"
       />
     </div>
@@ -240,18 +256,18 @@ function GoalModal({
         className="space-y-4"
       >
         <div>
-          <label className="block text-sm font-medium text-on-surface">Goal Name</label>
+          <label className="block text-sm font-medium text-on-surface">Nom de l’objectif</label>
           <input
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="e.g. New oven"
+            placeholder="Ex. Nouveau four"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Target Amount (FCFA)</label>
+          <label className="block text-sm font-medium text-on-surface">Montant cible (FCFA)</label>
           <input
             type="number"
             value={form.targetAmount}
@@ -263,7 +279,7 @@ function GoalModal({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Already Saved (FCFA)</label>
+          <label className="block text-sm font-medium text-on-surface">Déjà épargné (FCFA)</label>
           <input
             type="number"
             value={form.savedAmount}
@@ -274,13 +290,13 @@ function GoalModal({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Link Pocket (optional)</label>
+          <label className="block text-sm font-medium text-on-surface">Poche liée (facultatif)</label>
           <select
             value={form.sourcePocketId}
             onChange={(e) => setForm({ ...form, sourcePocketId: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
           >
-            <option value="">No pocket</option>
+            <option value="">Aucune poche</option>
             {pockets.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -292,14 +308,14 @@ function GoalModal({
             onClick={onClose}
             className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
-            Cancel
+            Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.name || !form.targetAmount}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
-            {saving ? "Creating..." : "Create Goal"}
+            {saving ? "Création…" : "Créer l’objectif"}
           </button>
         </div>
       </form>

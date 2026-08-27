@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 
 interface ModalProps {
   open: boolean;
@@ -10,6 +10,8 @@ interface ModalProps {
 
 export function Modal({ open, onClose, title, children }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     if (!open) return;
@@ -17,7 +19,13 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.setTimeout(() => dialogRef.current?.querySelector<HTMLElement>("button, input, select, textarea")?.focus(), 0);
+    return () => {
+      document.removeEventListener("keydown", handler);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -30,13 +38,20 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         if (e.target === overlayRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="max-h-[calc(100svh-2rem)] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-lg"
+      >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-on-surface">{title}</h2>
+          <h2 id={titleId} className="text-lg font-semibold text-on-surface">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             className="rounded-md p-1 text-on-surface-muted hover:bg-surface-alt"
+            aria-label="Fermer"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path

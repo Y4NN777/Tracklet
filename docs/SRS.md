@@ -1,105 +1,48 @@
-# Tracklet — Software Requirements Specification
+# Tracklet — Software Requirements
 
-- **Status:** Draft
-- **Date:** 2026-06-29
-- **Author:** Y4NN (Nathan)
-- **Source:** [PRD](./PRD.md)
+- **Status:** Alpha 0.2.0 baseline
+- **Updated:** 2026-08-27
 
----
+## Implemented requirements
 
-## 1. PERSO Realm
+### Personal and business spaces
 
-### P01 — Money Tracking
-- The user can create and manage pockets: Cash, Orange Money, Moov Money
-- The user can credit and debit each pocket
-- The user can transfer between pockets
-- Total personal balance = sum of all personal pockets
+- Users can create named money pockets and record income or expenses.
+- Users can transfer money atomically between pockets in the same space.
+- Personal and business queries remain isolated.
+- The dashboard shows balances, cash position, recent activity, debts, and contextual tips.
 
-### P02 — Debts & Receivables
-- The user can record a receivable: debtor name, amount, date
-- The user can record a debt: creditor name, amount, date
-- Status: pending / partially paid / settled
-- Reminders on unsettled receivables
+### Debts and goals
 
-### P03 — Personal Goals
-- The user defines a goal: name, target amount, optional source pocket
-- Display: amount saved, amount remaining, estimated time at current pace
+- Users can record money lent or borrowed, settle it, write it off, or delete an erroneous record.
+- Cash position uses active debts only.
+- Users can create savings goals, link an optional same-space pocket, and update explicit progress.
 
-### P04 — Personal Cash Position
-- Available balance = total pockets - outstanding debts + receivables due
-- Displayed as one clear line: *"You have X FCFA available"*
-- Breakdown: available / committed / to receive
+### Business activity
 
----
+- Users can record and search sales by day, week, or month.
+- Recording a sale credits its selected business pocket.
+- Profitability compares sales with expense transactions for the current and previous month.
 
-## 2. BUSINESS Realm
+### Reports and ownership
 
-### B01 — Business Money Tracking
-- The user can create and manage pockets: Cash Desk, Orange Money, Moov Money
-- The user can credit and debit each pocket
-- The user can transfer between pockets
-- Total business balance = sum of all business pockets
+- Users can filter reports by date and inspect trends and categories.
+- Transaction and sales CSV files can be downloaded.
+- A versioned full-data JSON backup can be downloaded and restored.
 
-### B02 — Sales Tracking
-- The user logs a sale: product/service name, quantity, unit price, receiving pocket, date (auto)
-- Total sale = quantity × unit price (auto-calculated)
-- Aggregation by day / week / month
-- Searchable history
+### Experience
 
-### B03 — Business Expense Tracking
-- The user records an expense: name, amount, category (material cost / fixed cost / other), debited pocket, date (auto)
-- Display by category and period
+- The primary interface is French and formatted in FCFA.
+- Core operations work offline after the PWA shell is cached.
+- Mobile primary navigation contains four destinations; all destinations remain available in the drawer.
+- Errors during user-triggered writes are reported without leaving forms permanently busy.
 
-### B04 — Business Debts & Receivables
-- Client receivable: name, amount, linked sale (optional), date, status
-- Supplier debt: name, amount, date, status
-- Status: pending / partially paid / settled
-- Reminders on unsettled receivables
+## Deferred requirements
 
-### B05 — Profitability Check
-- Gross margin = sales - material costs
-- Net result = gross margin - fixed costs
-- Simple language: *"This month you earned X FCFA after expenses"*
-- Current period vs previous period comparison
-
-### B06 — Business Cash Position
-- Available balance = total pockets - supplier debts + client receivables
-- Displayed as: *"Your cash desk says X FCFA"*
-- Breakdown: available / committed / to receive
-
-### B07 — Business Goals
-- The user defines a goal: name, target amount, optional source pocket
-- Display: amount remaining, sales needed at current pace, estimated time
-
-### B08 — Simple Report
-- Summary: sales / expenses / margin / net result / debts & receivables / goals
-- Selectable period
-- Export as PDF or image
-
----
-
-## 3. CROSS-REALM
-
-### C01 — Contextual Learning (Free)
-- Short insight after each action, tied to that action
-- Maximum 1 insight per action
-- No repetition of the same insight twice in a row
-- Dismissable in one tap
-- Tone: simple, direct, not condescending
-
-### C02 — Native Agent (Premium)
-- User chooses the agent's name and personality at setup
-- Hybrid: proactive when it detects something, reactive to user questions
-- Scope: app data + general finance questions
-- Memory of past exchanges
-
-### C03 — Mobile First + Offline
-- All data stored locally on device
-- No action requires an internet connection
-- PWA installable on Android
-- Every primary action accessible in max 2 taps
-
-### C04 — Native FCFA
-- FCFA displayed everywhere by default
-- No currency conversion
-- Local formatting: 1 500 FCFA
+- Partial debt payments and due-date notifications
+- PDF or image reports
+- Automatic backup or multi-device sync
+- Biometric application lock or encrypted backup
+- Conversational/premium agent
+- Bank and mobile-money integrations
+- Formal accounting and tax workflows

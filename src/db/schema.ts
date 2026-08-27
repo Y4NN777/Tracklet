@@ -1,7 +1,7 @@
-import { type IDBPDatabase, openDB, type IDBPTransaction, type StoreNames, type StoreValue } from "idb";
+import { deleteDB, type IDBPDatabase, openDB, type IDBPTransaction, type StoreNames, type StoreValue } from "idb";
 
 const DB_NAME = "tracklet";
-const DB_VERSION = 3;
+export const DB_VERSION = 3;
 
 export interface TrackletDB {
   pockets: StoreValue<unknown, "pockets">;
@@ -69,28 +69,34 @@ export function getDB(): Promise<IDBPDatabase<TrackletDB>> {
   return _dbPromise;
 }
 
+export async function resetDatabaseForTests(): Promise<void> {
+  if (_dbPromise) (await _dbPromise).close();
+  _dbPromise = null;
+  await deleteDB(DB_NAME);
+}
+
 export async function seedDefaults(db: IDBPDatabase<TrackletDB>) {
   const count = await db.count("categories");
   if (count > 0) return;
 
   const defaultCategories = [
     // Expense categories
-    { id: crypto.randomUUID(), name: "Food & Drinks", icon: "🍽️", color: "#EF4444", type: "expense" as const, realm: "personal" as const },
+    { id: crypto.randomUUID(), name: "Alimentation", icon: "🍽️", color: "#EF4444", type: "expense" as const, realm: "personal" as const },
     { id: crypto.randomUUID(), name: "Transport", icon: "🚗", color: "#F97316", type: "expense" as const, realm: "personal" as const },
-    { id: crypto.randomUUID(), name: "Shopping", icon: "🛍️", color: "#EAB308", type: "expense" as const, realm: "personal" as const },
-    { id: crypto.randomUUID(), name: "Bills & Utilities", icon: "💡", color: "#22C55E", type: "expense" as const, realm: "personal" as const },
-    { id: crypto.randomUUID(), name: "Health", icon: "💊", color: "#06B6D4", type: "expense" as const, realm: "personal" as const },
-    { id: crypto.randomUUID(), name: "Entertainment", icon: "🎬", color: "#8B5CF6", type: "expense" as const, realm: "personal" as const },
+    { id: crypto.randomUUID(), name: "Achats", icon: "🛍️", color: "#EAB308", type: "expense" as const, realm: "personal" as const },
+    { id: crypto.randomUUID(), name: "Factures", icon: "💡", color: "#22C55E", type: "expense" as const, realm: "personal" as const },
+    { id: crypto.randomUUID(), name: "Santé", icon: "💊", color: "#06B6D4", type: "expense" as const, realm: "personal" as const },
+    { id: crypto.randomUUID(), name: "Loisirs", icon: "🎬", color: "#8B5CF6", type: "expense" as const, realm: "personal" as const },
     // Income categories
-    { id: crypto.randomUUID(), name: "Salary", icon: "💰", color: "#16A34A", type: "income" as const, realm: "personal" as const },
+    { id: crypto.randomUUID(), name: "Salaire", icon: "💰", color: "#16A34A", type: "income" as const, realm: "personal" as const },
     { id: crypto.randomUUID(), name: "Freelance", icon: "💼", color: "#2563EB", type: "income" as const, realm: "personal" as const },
-    { id: crypto.randomUUID(), name: "Gifts", icon: "🎁", color: "#EC4899", type: "income" as const, realm: "personal" as const },
+    { id: crypto.randomUUID(), name: "Cadeaux", icon: "🎁", color: "#EC4899", type: "income" as const, realm: "personal" as const },
     // Business categories
-    { id: crypto.randomUUID(), name: "Revenue", icon: "📈", color: "#16A34A", type: "income" as const, realm: "business" as const },
-    { id: crypto.randomUUID(), name: "Inventory", icon: "📦", color: "#F97316", type: "expense" as const, realm: "business" as const },
-    { id: crypto.randomUUID(), name: "Marketing", icon: "📢", color: "#EC4899", type: "expense" as const, realm: "business" as const },
-    { id: crypto.randomUUID(), name: "Salaries", icon: "👥", color: "#8B5CF6", type: "expense" as const, realm: "business" as const },
-    { id: crypto.randomUUID(), name: "Rent", icon: "🏢", color: "#EF4444", type: "expense" as const, realm: "business" as const },
+    { id: crypto.randomUUID(), name: "Ventes", icon: "📈", color: "#16A34A", type: "income" as const, realm: "business" as const },
+    { id: crypto.randomUUID(), name: "Stock et matières", icon: "📦", color: "#F97316", type: "expense" as const, realm: "business" as const },
+    { id: crypto.randomUUID(), name: "Communication", icon: "📢", color: "#EC4899", type: "expense" as const, realm: "business" as const },
+    { id: crypto.randomUUID(), name: "Personnel", icon: "👥", color: "#8B5CF6", type: "expense" as const, realm: "business" as const },
+    { id: crypto.randomUUID(), name: "Loyer", icon: "🏢", color: "#EF4444", type: "expense" as const, realm: "business" as const },
   ];
 
   const tx = db.transaction("categories", "readwrite");

@@ -1,4 +1,4 @@
-import type { CashPosition, Sale, Goal, Debt, Transaction } from "../types";
+import type { CashPosition, Sale, Goal, Debt } from "../types";
 
 export interface AgentTip {
   id: string;
@@ -19,12 +19,15 @@ function getShownTips(): Set<string> {
   }
 }
 
-function markShown(id: string) {
-  const shown = getShownTips();
-  shown.add(id);
-  // Keep only last 50 to avoid unbounded growth
-  const arr = Array.from(shown).slice(-50);
-  localStorage.setItem(SHOWN_TIPS_KEY, JSON.stringify(arr));
+export function markTipShown(id: string) {
+  try {
+    const shown = getShownTips();
+    shown.add(id);
+    const arr = Array.from(shown).slice(-50);
+    localStorage.setItem(SHOWN_TIPS_KEY, JSON.stringify(arr));
+  } catch {
+    // Storage can be unavailable in private or restricted browser contexts.
+  }
 }
 
 export function generateTips(params: {
@@ -32,12 +35,11 @@ export function generateTips(params: {
   recentSales?: Sale[];
   goals?: Goal[];
   debts?: Debt[];
-  recentTxns?: Transaction[];
   page: string;
 }): AgentTip[] {
   const shown = getShownTips();
   const tips: AgentTip[] = [];
-  const { position, recentSales, goals, debts, recentTxns, page } = params;
+  const { position, recentSales, goals, debts, page } = params;
 
   // ── Page-agnostic tips ──
 
@@ -46,11 +48,10 @@ export function generateTips(params: {
     tips.push({
       id: "cash-negative",
       icon: "AlertTriangle",
-      title: "Cash running low",
-      message: `You have ${position.available.toLocaleString()} FCFA available after debts. Consider collecting receivables or reducing committed expenses.`,
-      action: { label: "View Cash Position", to: "/cash-position" },
+      title: "Trésorerie faible",
+      message: `Il vous reste ${position.available.toLocaleString()} FCFA après les dettes. Pensez aux sommes à récupérer ou aux dépenses à réduire.`,
+      action: { label: "Voir la trésorerie", to: "/cash-position" },
     });
-    markShown("cash-negative");
   }
 
   // Recent sales — no sales in the last 7 days
@@ -62,11 +63,10 @@ export function generateTips(params: {
       tips.push({
         id: "no-recent-sales",
         icon: "BarChart3",
-        title: "No sales this week",
-        message: "You haven't logged a sale in the last 7 days. Record any recent sales to keep your revenue tracking accurate.",
-        action: { label: "Log a Sale", to: "/sales" },
+        title: "Aucune vente cette semaine",
+        message: "Aucune vente n’a été enregistrée depuis 7 jours. Ajoutez les ventes récentes pour garder des chiffres fiables.",
+        action: { label: "Enregistrer une vente", to: "/sales" },
       });
-      markShown("no-recent-sales");
     }
   }
 
@@ -83,25 +83,24 @@ export function generateTips(params: {
       tips.push({
         id: "goal-progress",
         icon: "Target",
-        title: `Almost there: ${nearest.goal.name}`,
-        message: `You're ${Math.round(nearest.progress)}% toward your goal of ${nearest.goal.targetAmount.toLocaleString()} FCFA. Just ${(nearest.goal.targetAmount - nearest.goal.savedAmount).toLocaleString()} FCFA to go!`,
-        action: { label: "View Goals", to: "/goals" },
+        title: `Presque atteint : ${nearest.goal.name}`,
+        message: `Vous êtes à ${Math.round(nearest.progress)} %. Il reste ${(nearest.goal.targetAmount - nearest.goal.savedAmount).toLocaleString()} FCFA.`,
+        action: { label: "Voir les objectifs", to: "/goals" },
       });
-      markShown("goal-progress");
     }
   }
 
   // Debt tip — multiple active debts
-  if (debts && debts.length > 2 && !shown.has("many-debts-tip")) {
-    const smallest = Math.min(...debts.filter(d => d.status === "active").map(d => d.amount));
+  const activeDebts = debts?.filter((debt) => debt.status === "active") ?? [];
+  if (activeDebts.length > 2 && !shown.has("many-debts-tip")) {
+    const smallest = Math.min(...activeDebts.map((debt) => debt.amount));
     tips.push({
       id: "many-debts-tip",
       icon: "Lightbulb",
-      title: `${debts.filter(d => d.status === "active").length} active debts`,
-      message: `The smallest active debt is ${smallest.toLocaleString()} FCFA. Settling it first can simplify your finances.`,
-      action: { label: "Manage Debts", to: "/debts" },
+      title: `${activeDebts.length} dettes actives`,
+      message: `La plus petite est de ${smallest.toLocaleString()} FCFA. La régler peut simplifier votre situation.`,
+      action: { label: "Gérer les dettes", to: "/debts" },
     });
-    markShown("many-debts-tip");
   }
 
   // ── Page-specific tips ──
@@ -110,10 +109,9 @@ export function generateTips(params: {
     tips.push({
       id: "dashboard-tip",
       icon: "Hand",
-      title: "Welcome to your Dashboard",
-      message: "This is your financial command center. Add transactions, log sales, and set goals to get the most out of Tracklet.",
+      title: "Votre argent en un coup d’œil",
+      message: "Ajoutez vos opérations, vos ventes et vos objectifs pour obtenir une vue fiable.",
     });
-    markShown("dashboard-tip");
   }
 
   if (page === "sales" && recentSales && recentSales.length > 5 && !shown.has("sales-pricing")) {
@@ -121,40 +119,36 @@ export function generateTips(params: {
     tips.push({
       id: "sales-pricing",
       icon: "Wallet",
-      title: `Avg sale: ${Math.round(avgPrice).toLocaleString()} FCFA`,
-      message: "Consider reviewing your pricing if this seems low. Even small price adjustments can significantly impact your margins.",
+      title: `Vente moyenne : ${Math.round(avgPrice).toLocaleString()} FCFA`,
+      message: "Vérifiez vos prix si ce montant vous semble faible. Un petit ajustement peut améliorer votre marge.",
     });
-    markShown("sales-pricing");
   }
 
   if (page === "reports" && !shown.has("reports-tip")) {
     tips.push({
       id: "reports-tip",
       icon: "TrendingUp",
-      title: "Use date filters",
-      message: "Adjust the date range to compare different periods. The monthly trend chart helps spot patterns in your revenue and costs.",
+      title: "Utilisez les filtres de date",
+      message: "Comparez différentes périodes pour repérer les changements dans vos ventes et dépenses.",
     });
-    markShown("reports-tip");
   }
 
   if (page === "goals" && goals && goals.length === 0 && !shown.has("goals-create")) {
     tips.push({
       id: "goals-create",
       icon: "Target",
-      title: "Set your first goal",
-      message: "Goals help you stay motivated. Start with something achievable and track your progress over time.",
+      title: "Créez votre premier objectif",
+      message: "Commencez par un montant réaliste puis suivez votre progression.",
     });
-    markShown("goals-create");
   }
 
   if (page === "debts" && debts && debts.length === 0 && !shown.has("debts-reminder")) {
     tips.push({
       id: "debts-reminder",
       icon: "FileText",
-      title: "Track your debts",
-      message: "Recording who owes you money and what you owe helps you never miss a payment or forget a receivable.",
+      title: "Suivez vos dettes",
+      message: "Notez qui vous doit de l’argent et ce que vous devez pour ne rien oublier.",
     });
-    markShown("debts-reminder");
   }
 
   // Return at most 2 tips per call to avoid overwhelming

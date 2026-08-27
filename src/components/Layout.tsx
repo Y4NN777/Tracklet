@@ -4,14 +4,15 @@ import type { Realm } from "../types";
 import { AgentPanel } from "./AgentPanel";
 
 const navItems = [
-  { to: "/", label: "Dashboard", icon: IconDashboard },
-  { to: "/pockets", label: "Pockets", icon: IconPockets },
-  { to: "/transactions", label: "Transactions", icon: IconTransactions },
-  { to: "/debts", label: "Debts", icon: IconDebts },
-  { to: "/goals", label: "Goals", icon: IconGoals },
-  { to: "/sales", label: "Sales", icon: IconSales },
-  { to: "/reports", label: "Reports", icon: IconReports },
-  { to: "/cash-position", label: "Cash", icon: IconCashPosition },
+  { to: "/", label: "Accueil", icon: IconDashboard },
+  { to: "/pockets", label: "Poches", icon: IconPockets },
+  { to: "/transactions", label: "Opérations", icon: IconTransactions },
+  { to: "/debts", label: "Dettes", icon: IconDebts },
+  { to: "/goals", label: "Objectifs", icon: IconGoals },
+  { to: "/sales", label: "Ventes", icon: IconSales, businessOnly: true },
+  { to: "/reports", label: "Rapports", icon: IconReports },
+  { to: "/cash-position", label: "Trésorerie", icon: IconCashPosition },
+  { to: "/settings", label: "Réglages", icon: IconSettings },
 ];
 
 interface LayoutProps {
@@ -23,6 +24,10 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const currentPage = location.pathname.replace("/", "") || "dashboard";
+  const visibleNavItems = navItems.filter((item) => !item.businessOnly || realm === "business");
+  const mobileNavItems = visibleNavItems.filter((item) =>
+    ["/", "/transactions", realm === "business" ? "/sales" : "/pockets", "/cash-position"].includes(item.to),
+  );
 
   return (
     <div className="flex min-h-svh bg-surface">
@@ -50,7 +55,7 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
 
         {/* Nav items */}
         <nav className="flex-1 space-y-0.5 px-3 py-4">
-          {navItems.map(({ to, label, icon: Icon }) => (
+          {visibleNavItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -72,7 +77,7 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
 
         {/* Realm toggle */}
         <div className="border-t border-border-light px-4 py-4">
-          <p className="mb-2 text-xs font-medium text-on-surface-muted">Realm</p>
+          <p className="mb-2 text-xs font-medium text-on-surface-muted">Espace financier</p>
           <div className="flex overflow-hidden rounded-lg border border-border-light text-sm">
             {(["personal", "business"] as const).map((r) => (
               <button
@@ -85,7 +90,7 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
                     : "bg-white text-on-surface-muted hover:bg-surface-alt"
                 }`}
               >
-                {r}
+                {r === "personal" ? "Personnel" : "Activité"}
               </button>
             ))}
           </div>
@@ -100,7 +105,7 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
             type="button"
             onClick={() => setSidebarOpen(true)}
             className="rounded-lg p-1.5 text-on-surface-muted hover:bg-surface-alt"
-            aria-label="Open menu"
+            aria-label="Ouvrir le menu"
           >
             <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
               <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -121,7 +126,7 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
 
         {/* Bottom nav (mobile) */}
         <nav className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-border-light bg-white lg:hidden">
-          {navItems.map(({ to, label, icon: Icon }) => (
+          {mobileNavItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -219,6 +224,15 @@ function IconCashPosition() {
       <rect x="2" y="5" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="10" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="1.5" />
       <path d="M2 7.5h16" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function IconSettings() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }

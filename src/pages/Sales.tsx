@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
-import type { Realm, Sale, SaleAggregation } from "../types";
+import type { Realm, SaleAggregation } from "../types";
 import { useSales } from "../hooks/useSales";
 import { usePockets } from "../hooks/usePockets";
-import { createSale, deleteSale, searchSales } from "../db/repositories/sale";
+import { createSale, deleteSale } from "../db/repositories/sale";
 import { aggregateByDay, aggregateByWeek, aggregateByMonth } from "../domain/sale";
 import { Modal } from "../components/Modal";
 import { EmptyState } from "../components/EmptyState";
@@ -65,36 +65,54 @@ export function Sales({ realm }: SalesProps) {
   const handleCreate = async () => {
     if (!form.product.trim() || !form.unitPrice || !form.pocketId) return;
     setSaving(true);
-    await createSale({
-      product: form.product.trim(),
-      quantity: Number(form.quantity) || 1,
-      unitPrice: Number(form.unitPrice),
-      pocketId: form.pocketId,
-      date: form.date,
-      realm,
-      tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-    });
-    setSaving(false);
-    setShowCreate(false);
-    resetForm();
-    addToast("success", `Sale recorded: ${form.product.trim()}`);
-    refresh();
+    try {
+      await createSale({
+        product: form.product.trim(),
+        quantity: Number(form.quantity) || 1,
+        unitPrice: Number(form.unitPrice),
+        pocketId: form.pocketId,
+        date: form.date,
+        realm,
+        tags: form.tags ? form.tags.split(",").map((tag) => tag.trim()).filter(Boolean) : [],
+      });
+      setShowCreate(false);
+      resetForm();
+      addToast("success", `Vente enregistrée : ${form.product.trim()}`);
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible d’enregistrer la vente");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (saleId: string, product: string) => {
-    await deleteSale(saleId);
-    addToast("info", `Sale deleted: ${product}`);
-    refresh();
+    try {
+      await deleteSale(saleId);
+      addToast("info", `Vente supprimée : ${product}`);
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible de supprimer la vente");
+    }
   };
+
+  if (realm === "personal") {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-on-surface">Ventes</h1>
+        <EmptyState title="Réservé à l’activité" message="Passez dans l’espace Activité pour enregistrer vos ventes." />
+      </div>
+    );
+  }
 
   if (!loading && sales.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Sales</h1>
+        <h1 className="text-2xl font-semibold text-on-surface">Ventes</h1>
         <EmptyState
-          title="No sales yet"
-          message="Log your first sale to start tracking your revenue."
-          action={{ label: "Record Sale", onClick: () => setShowCreate(true) }}
+          title="Aucune vente"
+          message="Enregistrez votre première vente pour suivre votre chiffre d’affaires."
+          action={{ label: "Enregistrer une vente", onClick: () => setShowCreate(true) }}
         />
         <SaleModal
           open={showCreate}
@@ -117,9 +135,9 @@ export function Sales({ realm }: SalesProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-on-surface">Sales</h1>
+          <h1 className="text-2xl font-semibold text-on-surface">Ventes</h1>
           <p className="text-sm text-on-surface-muted">
-            Total revenue: {totalRevenue.toLocaleString()} FCFA
+            Chiffre d’affaires total : {totalRevenue.toLocaleString()} FCFA
           </p>
         </div>
         <button
@@ -127,7 +145,7 @@ export function Sales({ realm }: SalesProps) {
           onClick={() => setShowCreate(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
-          + Record Sale
+          + Enregistrer une vente
         </button>
       </div>
 
@@ -137,7 +155,7 @@ export function Sales({ realm }: SalesProps) {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search sales..."
+          placeholder="Rechercher une vente…"
           className="w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary sm:max-w-xs"
         />
         <div className="flex gap-1 rounded-lg border border-border-light p-0.5">
@@ -152,7 +170,7 @@ export function Sales({ realm }: SalesProps) {
                   : "text-on-surface-muted hover:text-on-surface"
               }`}
             >
-              {mode}
+              {{ day: "Jour", week: "Semaine", month: "Mois" }[mode]}
             </button>
           ))}
         </div>
@@ -161,7 +179,7 @@ export function Sales({ realm }: SalesProps) {
       {/* Aggregations */}
       <div className="space-y-3">
         {aggregations.length === 0 ? (
-          <p className="text-sm text-on-surface-muted">No sales found.</p>
+          <p className="text-sm text-on-surface-muted">Aucune vente trouvée.</p>
         ) : (
           aggregations.map((agg) => (
             <div
@@ -171,8 +189,8 @@ export function Sales({ realm }: SalesProps) {
               <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
                 <span className="text-sm font-semibold text-on-surface">
                   {format(new Date(agg.period), "MMM d, yyyy")}
-                  {aggMode === "week" && " (week)"}
-                  {aggMode === "month" && " (month)"}
+                  {aggMode === "week" && " (semaine)"}
+                  {aggMode === "month" && " (mois)"}
                 </span>
                 <span className="text-sm font-bold text-success">
                   +{agg.totalSales.toLocaleString()} FCFA
@@ -206,8 +224,8 @@ export function Sales({ realm }: SalesProps) {
                       <button
                         type="button"
                         onClick={() => handleDelete(sale.id, sale.product)}
-                        className="rounded-md px-1.5 py-0.5 text-xs text-danger opacity-0 hover:opacity-100 transition-opacity"
-                        aria-label="Delete sale"
+                        className="rounded-md px-1.5 py-0.5 text-xs text-danger opacity-60 hover:opacity-100 transition-opacity"
+                        aria-label="Supprimer la vente"
                       >
                         ✕
                       </button>
@@ -261,25 +279,25 @@ function SaleModal({
   onSubmit: () => void;
 }) {
   return (
-    <Modal open={open} onClose={onClose} title="Record Sale">
+    <Modal open={open} onClose={onClose} title="Enregistrer une vente">
       <form
         onSubmit={(e) => { e.preventDefault(); onSubmit(); }}
         className="space-y-4"
       >
         <div>
-          <label className="block text-sm font-medium text-on-surface">Product / Service</label>
+          <label className="block text-sm font-medium text-on-surface">Produit ou service</label>
           <input
             type="text"
             value={form.product}
             onChange={(e) => setForm({ ...form, product: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="e.g. Cakes, pastries"
+            placeholder="Ex. Gâteaux, couture, photo"
             required
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-on-surface">Quantity</label>
+            <label className="block text-sm font-medium text-on-surface">Quantité</label>
             <input
               type="number"
               value={form.quantity}
@@ -290,33 +308,33 @@ function SaleModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-on-surface">Unit Price (FCFA)</label>
+            <label className="block text-sm font-medium text-on-surface">Prix unitaire (FCFA)</label>
             <input
               type="number"
               value={form.unitPrice}
               onChange={(e) => setForm({ ...form, unitPrice: e.target.value })}
               className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
               placeholder="0"
-              min="0"
+              min="1"
               required
             />
           </div>
         </div>
         <div className="rounded-lg bg-surface-alt px-3 py-2 text-sm">
-          <span className="text-on-surface-muted">Total: </span>
+          <span className="text-on-surface-muted">Total : </span>
           <span className="font-bold text-success">
             +{computedTotal.toLocaleString()} FCFA
           </span>
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Receiving Pocket</label>
+          <label className="block text-sm font-medium text-on-surface">Poche de réception</label>
           <select
             value={form.pocketId}
             onChange={(e) => setForm({ ...form, pocketId: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             required
           >
-            <option value="">Select a pocket</option>
+            <option value="">Choisir une poche</option>
             {pockets.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -333,13 +351,13 @@ function SaleModal({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Tags (optional)</label>
+          <label className="block text-sm font-medium text-on-surface">Mots-clés (facultatif)</label>
           <input
             type="text"
             value={form.tags}
             onChange={(e) => setForm({ ...form, tags: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="bakery, wholesale"
+            placeholder="pâtisserie, commande"
           />
         </div>
         <div className="flex justify-end gap-2">
@@ -348,14 +366,14 @@ function SaleModal({
             onClick={onClose}
             className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
-            Cancel
+            Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.product || !form.unitPrice || !form.pocketId}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
-            {saving ? "Saving..." : "Record Sale"}
+            {saving ? "Enregistrement…" : "Enregistrer"}
           </button>
         </div>
       </form>

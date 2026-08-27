@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Realm } from "../types";
-import type { Transaction, Sale, CashPosition as CashPositionType } from "../types";
+import type { Transaction, CashPosition as CashPositionType } from "../types";
 import type { Insight } from "../domain/insight";
 import type { ProfitReport } from "../domain/profitability";
 import { usePocketBalances } from "../hooks/usePockets";
@@ -52,10 +52,10 @@ export function Dashboard({ realm }: DashboardProps) {
   if (isEmpty) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-on-surface">Vue d’ensemble</h1>
         <EmptyState
-          title="Welcome to Tracklet"
-          message="Create a pocket and add your first transaction to get started with tracking your finances."
+          title="Bienvenue dans Tracklet"
+          message="Créez une poche puis ajoutez votre première opération pour commencer."
         />
       </div>
     );
@@ -63,27 +63,27 @@ export function Dashboard({ realm }: DashboardProps) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-on-surface">Dashboard</h1>
+      <h1 className="text-2xl font-semibold text-on-surface">Vue d’ensemble</h1>
 
       {/* Cash Position */}
       {cashPosition && (
         <div className="rounded-xl border border-border-light bg-gradient-to-br from-primary to-primary-light p-5 text-on-primary">
-          <p className="text-sm font-medium opacity-80">Available Cash Position</p>
+          <p className="text-sm font-medium opacity-80">Trésorerie disponible</p>
           <p className="mt-1 text-3xl font-bold">
             {cashPosition.available.toLocaleString()} FCFA
           </p>
           <div className="mt-3 flex gap-6 text-xs">
             <span className="flex items-center gap-1.5">
               <span className="inline-block h-2 w-2 rounded-full bg-green-300" />
-              Total: {cashPosition.totalBalance.toLocaleString()} FCFA
+              Solde : {cashPosition.totalBalance.toLocaleString()} FCFA
             </span>
             <span className="flex items-center gap-1.5">
               <span className="inline-block h-2 w-2 rounded-full bg-amber-300" />
-              Committed: −{cashPosition.committed.toLocaleString()} FCFA
+              À payer : −{cashPosition.committed.toLocaleString()} FCFA
             </span>
             <span className="flex items-center gap-1.5">
               <span className="inline-block h-2 w-2 rounded-full bg-blue-300" />
-              To receive: +{cashPosition.toReceive.toLocaleString()} FCFA
+              À recevoir : +{cashPosition.toReceive.toLocaleString()} FCFA
             </span>
           </div>
         </div>
@@ -92,19 +92,19 @@ export function Dashboard({ realm }: DashboardProps) {
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card
-          label="Total Balance"
+          label="Solde total"
           value={`${total.toLocaleString()} FCFA`}
         />
         <Card
-          label="Income (This Month)"
+          label="Entrées totales"
           value={`${summary.totalIncome.toLocaleString()} FCFA`}
         />
         <Card
-          label="Expenses"
+          label="Dépenses totales"
           value={`${summary.totalExpense.toLocaleString()} FCFA`}
         />
         <Card
-          label="Active Debts"
+          label="Dettes actives"
           value={`${debtSummary.summary.activeCount}`}
         />
       </div>
@@ -114,14 +114,14 @@ export function Dashboard({ realm }: DashboardProps) {
         <div className="rounded-xl border border-border-light bg-white p-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-on-surface">
-              Monthly Profitability
+              Résultat du mois
             </p>
             {profitReport.currentMonth.saleCount > 0 && (
               <span className={`text-xs font-medium ${
                 profitReport.trend === "up" ? "text-success" : profitReport.trend === "down" ? "text-danger" : "text-on-surface-muted"
               }`}>
                 {profitReport.trend === "up" ? "▲" : profitReport.trend === "down" ? "▼" : "◆"}{" "}
-                {Math.abs(profitReport.trendPercentage)}% vs last month
+                {Math.abs(profitReport.trendPercentage)}% par rapport au mois dernier
               </span>
             )}
           </div>
@@ -130,13 +130,13 @@ export function Dashboard({ realm }: DashboardProps) {
               <p className="text-lg font-bold text-success">
                 +{profitReport.currentMonth.revenue.toLocaleString()} FCFA
               </p>
-              <p className="text-xs text-on-surface-muted">Revenue</p>
+              <p className="text-xs text-on-surface-muted">Ventes</p>
             </div>
             <div>
               <p className="text-lg font-bold text-danger">
                 −{profitReport.currentMonth.costs.toLocaleString()} FCFA
               </p>
-              <p className="text-xs text-on-surface-muted">Costs</p>
+              <p className="text-xs text-on-surface-muted">Dépenses</p>
             </div>
             <div>
               <p className={`text-lg font-bold ${
@@ -146,7 +146,7 @@ export function Dashboard({ realm }: DashboardProps) {
                 {profitReport.currentMonth.profit.toLocaleString()} FCFA
               </p>
               <p className="text-xs text-on-surface-muted">
-                Profit ({profitReport.currentMonth.margin}% margin)
+                Résultat ({profitReport.currentMonth.margin}% de marge)
               </p>
             </div>
           </div>
@@ -157,7 +157,7 @@ export function Dashboard({ realm }: DashboardProps) {
       {insights.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-on-surface">
-            Insights
+            Conseils
           </h2>
           <div className="space-y-2">
             {insights.map((insight) => {
@@ -184,10 +184,10 @@ export function Dashboard({ realm }: DashboardProps) {
       {/* Recent transactions */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-on-surface">
-          Recent Activity
+          Activité récente
         </h2>
         {recent.length === 0 ? (
-          <p className="text-sm text-on-surface-muted">No transactions yet.</p>
+          <p className="text-sm text-on-surface-muted">Aucune opération pour le moment.</p>
         ) : (
           <div className="space-y-1">
             {recent.map((txn) => (

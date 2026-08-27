@@ -24,6 +24,6 @@ See [runbooks](./runbooks/) for operational procedures.
 
 ## Project Status
 
-- **Version:** alpha
+- **Version:** 0.2.0 alpha
 - **Branch:** `feat/repurpose-tracklet`
-- **Sprint:** S0
+- **State:** stabilized, buildable, and covered by automated tests

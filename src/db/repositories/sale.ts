@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import type { Sale } from "../../types";
 import { getDB } from "../schema";
+import { assertDate, assertPositiveMoney, cleanRequiredText, cleanTags } from "../../domain/validation";
 
 export async function getSales(opts?: {
   realm?: string;
@@ -46,20 +47,71 @@ export async function getSale(id: string): Promise<Sale | undefined> {
 export async function createSale(
   data: Omit<Sale, "id" | "total" | "createdAt">,
 ): Promise<Sale> {
-  const sale: Sale = {
-    id: nanoid(),
-    ...data,
-    total: data.quantity * data.unitPrice,
-    createdAt: new Date().toISOString(),
-  };
+  if (data.realm !== "business") throw new Error("Les ventes appartiennent à l’espace Activité");
+  assertPositiveMoney(data.quantity, "Quantité");
+  assertPositiveMoney(data.unitPrice, "Prix unitaire");
+  assertDate(data.date);
+
   const db = await getDB();
-  await db.add("sales", sale);
+  const tx = db.transaction(["pockets", "categories", "sales", "transactions"], "readwrite");
+  const pocket = await tx.objectStore("pockets").get(data.pocketId);
+  if (!pocket || pocket.realm !== "business") {
+    throw new Error("Choisissez une poche de l’espace Activité");
+  }
+
+  const categories = await tx.objectStore("categories").index("realm").getAll("business");
+  const revenueCategory = categories.find((category) => category.type === "income");
+  const saleId = `sale_${nanoid()}`;
+  const transactionId = `txn_${nanoid()}`;
+  const product = cleanRequiredText(data.product, "Product or service");
+  const tags = cleanTags(data.tags);
+  const createdAt = new Date().toISOString();
+  const total = data.quantity * data.unitPrice;
+  const sale: Sale = {
+    id: saleId,
+    ...data,
+    product,
+    tags,
+    total,
+    transactionId,
+    createdAt,
+  };
+  await Promise.all([
+    tx.objectStore("sales").add(sale),
+    tx.objectStore("transactions").add({
+      id: transactionId,
+      pocketId: data.pocketId,
+      type: "income",
+      amount: total,
+      description: `Vente : ${product}`,
+      categoryId: revenueCategory?.id ?? "",
+      date: data.date,
+      realm: "business",
+      tags,
+      sourceType: "sale",
+      sourceId: saleId,
+      createdAt,
+    }),
+  ]);
+  await tx.done;
   return sale;
 }
 
 export async function deleteSale(id: string): Promise<void> {
   const db = await getDB();
-  await db.delete("sales", id);
+  const tx = db.transaction(["sales", "transactions"], "readwrite");
+  const sale = await tx.objectStore("sales").get(id);
+  if (!sale) {
+    throw new Error("Vente introuvable");
+  }
+  await tx.objectStore("sales").delete(id);
+  if (sale.transactionId) {
+    const linked = await tx.objectStore("transactions").get(sale.transactionId);
+    if (linked?.sourceType === "sale" && linked.sourceId === id) {
+      await tx.objectStore("transactions").delete(sale.transactionId);
+    }
+  }
+  await tx.done;
 }
 
 export async function searchSales(

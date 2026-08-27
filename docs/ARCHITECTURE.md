@@ -1,321 +1,73 @@
 # Tracklet — Architecture
 
-- **Status:** Draft
-- **Date:** 2026-06-29
-- **Authors:** Bezalel, Nathan
+- **Status:** Stabilized alpha
+- **Version:** 0.2.0
+- **Updated:** 2026-08-27
 
----
+## System overview
 
-## 1. System Overview
+Tracklet is a single-user, local-first progressive web app. The browser origin on the user's device is the source of truth. Core operations do not call a backend and do not depend on connectivity.
 
-Tracklet is a **local-first, offline-capable PWA** — a single-user financial
-copilot that runs entirely on the user's Android device. There is no backend
-server, no cloud sync, and no network dependency for any core operation.
-
-The architecture follows three structural decisions:
-
-1. **Local-first.** All data is created, read, updated, and deleted on-device.
-   The device is the source of truth.
-2. **Realm isolation.** Personal and Business finances are separate data
-   partitions within the same storage engine, never mixed at query time.
-3. **Action-driven.** Every user action (log a sale, record an expense, transfer
-   between pockets) is a single atomic write. The UI updates reactively from
-   the same local store.
-
----
-
-## 2. Container Diagram
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Android Device                         │
-│                                                           │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
-│  │  Home    │  │Analytics │  │  Goals   │  │ Settings │  │
-│  │  Screen  │  │  View    │  │  View    │  │  View    │  │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘  │
-│       │              │              │              │       │
-│  ┌────┴──────────────┴──────────────┴──────────────┴────┐  │
-│  │              PWA Shell (Next.js / React)              │  │
-│  │  - App Router                                         │  │
-│  │  - Client Components only (no server)                 │  │
-│  │  - Service Worker (cache, installability)             │  │
-│  └────────────────────────┬─────────────────────────────┘  │
-│                           │                                 │
-│  ┌────────────────────────┴─────────────────────────────┐  │
-│  │              Application Logic Layer                  │  │
-│  │  - Action handlers (atomic write operations)          │  │
-│  │  - Calculation engine (margin, balance, cash pos.)   │  │
-│  │  - Insight engine (contextual learning dispatch)     │  │
-│  │  - Report generator (PDF/image export)               │  │
-│  └────────────────────────┬─────────────────────────────┘  │
-│                           │                                 │
-│  ┌────────────────────────┴─────────────────────────────┐  │
-│  │              Data Access Layer                        │  │
-│  │  - IndexedDB (or SQLite via opfs)                    │  │
-│  │  - Repository pattern (per entity)                   │  │
-│  │  - Transactional writes                              │  │
-│  └────────────────────────┬─────────────────────────────┘  │
-│                           │                                 │
-│  ┌────────────────────────┴─────────────────────────────┐  │
-│  │              Local Database                           │  │
-│  │  - IndexedDB (primary store)                         │  │
-│  │  - Persisted after every mutation                    │  │
-│  │  - No sync, no remote copy                           │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                                                           │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │              Device Capabilities                      │  │
-│  │  - File system (PDF/image export)                     │  │
-│  │  - Local notifications (reminders)                    │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+```text
+React UI + HashRouter
+        │
+        ├── hooks: asynchronous view state
+        │
+        ├── domain: balances, cash position, profit, reports, tips
+        │
+        └── repositories: validation and IndexedDB transactions
+                         │
+                         └── IndexedDB (tracklet, schema v3)
 ```
 
----
+## Runtime stack
 
-## 3. Component Architecture
+- React 19 and React Router
+- Vite 8 with the PWA plugin
+- TypeScript 6
+- Tailwind CSS 4
+- IndexedDB through `idb`
+- Vitest and `fake-indexeddb` for automated verification
 
-### 3.1 Presentation Layer (React Components)
+`index.html`, `vite.config.ts`, TypeScript configuration, and PWA assets are source-controlled. `dist/` is generated and ignored.
 
-| Component | Responsibility |
-|---|---|
-| `BalanceCard` | Hero display of total balance per realm |
-| `RealmTabs` | Perso/Business switcher |
-| `PocketCardGrid` | 3-column grid (Cash, OM, Moov) |
-| `QuickActions` | Income/Expense/Transfer/Debt buttons |
-| `InsightCard` | Contextual learning banner (dismissable) |
-| `TransactionForm` | Modal form for credits/debits/transfers |
-| `SaleForm` | Business-only: log a sale |
-| `ExpenseForm` | Business-only: log an expense |
-| `DebtForm` | Record debt or receivable |
-| `GoalForm` | Set a goal |
-| `MarginView` | Business-only: margin breakdown |
-| `CashPositionView` | Available / committed / to receive |
-| `ReportView` | Period selector + export |
-| `BottomNav` | Home / Analytics / Goals / Agent / Settings |
+## Data model
 
-### 3.2 Application Logic Layer
+Every financial record is scoped to `personal` or `business`.
 
-**Action Handlers** (one per user operation):
-- `createPocket`, `creditPocket`, `debitPocket`, `transferBetweenPockets`
-- `createSale`, `createExpense`
-- `createDebt`, `createReceivable`, `updateDebtStatus`
-- `createGoal`
-- `dismissInsight`
+- `pockets`: named stores of money
+- `transactions`: income, expense, and linked transfer ledger entries
+- `categories`: realm-scoped income/expense categories
+- `debts`: active, settled, or written-off debts and receivables
+- `goals`: explicitly tracked savings progress
+- `sales`: business sales linked to their generated income transaction
 
-**Calculation Engine** (stateless, recomputes on read):
-- `calculateBalance(pocketId)` — sum credits − sum debits
-- `calculateTotalBalance(realm)` — sum of all pocket balances
-- `calculateCashPosition(realm)` — available / committed / receivables
-- `calculateGrossMargin(period)` — sales − material costs
-- `calculateNetResult(period)` — gross margin − fixed costs
-- `calculateGoalProgress(goalId)` — saved / target / remaining
+Existing alpha data remains readable. New identifiers use a resource prefix, but earlier unprefixed identifiers remain valid.
 
-**Insight Engine**:
-- Maps action type → insight template
-- Tracks which insights have been shown (session scoped)
-- Enforces non-repetition rule
+## Correctness boundaries
 
-### 3.3 Data Access Layer (Repository Pattern)
+Repository functions validate realm, whole-FCFA amounts, references, and dates before persistence. A transfer creates linked outgoing and incoming entries in one IndexedDB transaction; either both writes commit or neither does. A new sale and its pocket credit are also committed atomically. Deleting a linked sale removes only the income entry created by that sale.
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   Repository                         │
-├─────────────────────────────────────────────────────┤
-│ PocketRepository    — CRUD + balance query           │
-│ TransactionRepo     — ledger by pocket               │
-│ SaleRepository      — CRUD + aggregation by period   │
-│ ExpenseRepository   — CRUD + aggregation by category │
-│ DebtRepository      — CRUD + status transitions      │
-│ GoalRepository      — CRUD + progress queries        │
-│ InsightRepository   — read/dismiss/session state     │
-└─────────────────────────────────────────────────────┘
-```
+Balances and reports are computed from ledger records rather than stored aggregates. Legacy transfer records without a direction are treated as neutral because their financial intent cannot be inferred safely.
 
-Each repository operates within a **realm scope** — all queries include
-`WHERE realm = 'perso' | 'business'` to enforce isolation.
+## Backup and recovery
 
----
+A backup is a versioned JSON document containing all six stores plus format, schema, application version, and export timestamp. Restore validates the envelope and record identifiers, then replaces every store in one IndexedDB transaction. The UI requires an explicit destructive confirmation.
 
-## 4. Data Model
+## PWA behavior
 
-### Entity Relationships
+The service worker precaches the compiled application shell. There is no runtime cache for arbitrary network traffic. Updates use the plugin's automatic-update strategy; IndexedDB data is not stored in the service-worker cache.
 
-```
-Realm (perso | business)
-  ├── Pocket (3 per realm: cash, orange_money, moov_money)
-  │     └── Transaction (ledger entries: credit, debit, transfer)
-  ├── Debt / Receivable
-  ├── Goal
-  └── [Business only] Sale
-      └── Expense
-```
+## Security model
 
-### Key Entity Shapes
+- No credentials, API tokens, telemetry, or remote financial-data transmission
+- React's default text escaping; no `dangerouslySetInnerHTML`
+- A restrictive HTML Content Security Policy
+- Origin-scoped IndexedDB storage
+- Backup files are unencrypted and must be protected by the user
 
-**Pocket**
-```
-{
-  id: "pocket_xxx",
-  realm: "perso" | "business",
-  type: "cash" | "orange_money" | "moov_money",
-  name: string,
-  balance: number,          // computed, not stored
-  created_at: string        // ISO 8601
-}
-```
+Device access and browser-profile access remain the primary risks. Biometric locking and encrypted backups are deferred.
 
-**Transaction**
-```
-{
-  id: "txn_xxx",
-  pocket_id: string,
-  type: "credit" | "debit" | "transfer",
-  amount: number,            // FCFA minor units
-  source_pocket_id?: string, // for transfers
-  dest_pocket_id?: string,   // for transfers
-  description?: string,
-  created_at: string
-}
-```
+## Deliberate limits
 
-**Debt / Receivable**
-```
-{
-  id: "debt_xxx",
-  realm: "perso" | "business",
-  type: "debt" | "receivable",
-  counterparty_name: string,
-  amount: number,
-  amount_paid: number,       // 0 to amount
-  status: "pending" | "partially_paid" | "settled",
-  linked_sale_id?: string,   // business receivables only
-  due_date?: string,
-  created_at: string
-}
-```
-
-**Sale** (business only)
-```
-{
-  id: "sale_xxx",
-  product_name: string,
-  quantity: number,
-  unit_price: number,
-  total: number,             // computed: quantity × unit_price
-  pocket_id: string,
-  created_at: string
-}
-```
-
-**Expense** (business only)
-```
-{
-  id: "expense_xxx",
-  name: string,
-  amount: number,
-  category: "material_cost" | "fixed_cost" | "other",
-  pocket_id: string,
-  created_at: string
-}
-```
-
-**Goal**
-```
-{
-  id: "goal_xxx",
-  realm: "perso" | "business",
-  name: string,
-  target_amount: number,
-  source_pocket_id?: string,
-  created_at: string
-}
-```
-
----
-
-## 5. Key Design Decisions
-
-### D01 — No backend server
-Tracklet is a single-user offline app. No data leaves the device. This
-eliminates the entire surface area of auth, sync conflicts, latency, CORS,
-rate limiting, and server costs. The trade-off: no multi-device, no cloud
-backup, no collaborative features.
-
-### D02 — Realm isolation at the query layer
-Personal and Business data live in the same database but are separated by
-a `realm` discriminator on every entity. The repository layer enforces this
-— no query ever crosses realms. This avoids two databases (simpler code)
-while maintaining the hard separation the user needs.
-
-### D03 — Computed values over stored
-Balance, margin, cash position, and goal progress are computed on read
-from transaction data, not stored as pre-aggregated fields. This guarantees
-consistency (no stale aggregate) at the cost of recomputation. Acceptable
-because the data volume per user is low (thousands of transactions, not
-millions).
-
-### D04 — Atomic transfers
-A transfer between pockets is either fully committed or fully rolled back.
-This prevents money disappearing from the system due to partial writes.
-
-### D05 — Insight engine is rule-based, not ML
-Insights are hand-written templates mapped to action types. No ML model,
-no API call, no latency. The non-repetition guarantee is enforced by a
-session-scoped seen-IDs set.
-
-### D06 — Export is file-system only
-PDF and image export writes to the device's file system. No email, no
-cloud upload, no share-by-link in alpha.
-
----
-
-## 6. Offline / PWA Strategy
-
-- **Service Worker:** caches app shell for instant loading. No dynamic
-  caching (no network requests to cache).
-- **Installability:** manifest.json + service worker → "Add to Home Screen"
-  on Android.
-- **Storage:** IndexedDB is the primary data store. All mutations go through
-  a thin repository wrapper that opens a transaction, writes, and confirms.
-- **No online mode:** The app has no concept of "online." It works the same
-  way whether the device has connectivity or not.
-
----
-
-## 7. Security Model
-
-- **No authentication.** Single-user device-local app. Device-level security
-  (screen lock) is the user's responsibility.
-- **No data leaves the device.** No network requests, no telemetry, no
-  analytics.
-- **Export files** are written to the app's private directory (or user-chosen
-  location) and may contain sensitive financial data. The user is responsible
-  for securing exported files.
-
----
-
-## 8. Performance Constraints
-
-- Target: all operations complete in < 50ms on a mid-range Android device
-  (4GB RAM, Snapdragon 6-series).
-- Pocket balance queries: indexed by pocket_id, O(n) over transaction count
-  for that pocket (acceptable for < 10k transactions per pocket).
-- Aggregation queries (monthly sales): filtered by date range, computed in
-  JavaScript from the full result set (acceptable for < 5k records).
-- No pagination needed — local data is always sub-10k records per entity.
-
----
-
-## 9. Future Considerations (not in alpha)
-
-- **Export sync** (Google Drive / OneDrive backup) — would require adding
-  an online mode and a sync protocol.
-- **Multi-device** — would require a backend, conflict resolution, and
-  authentication. Architectural impact is large.
-- **Agent (premium)** — the Native Agent feature (C02 in SRS) will add an
-  on-device LLM or prompt-based reasoning engine that works offline. The
-  memory store will be an extension of the existing IndexedDB schema.
-- **Biometrics** — app-level lock via fingerprint / face unlock on supported
-  devices.
+Cloud sync, multi-device conflict resolution, bank integrations, partial debt schedules, PDF/image reports, and a conversational premium agent are outside alpha 0.2.0.

@@ -1,4 +1,4 @@
-import type { Transaction, Category, Sale } from "../types";
+import type { Transaction, Category, Sale, Realm } from "../types";
 import {
   startOfMonth,
   endOfMonth,
@@ -86,6 +86,7 @@ export function computeMonthlyTrends(
   txns: Transaction[],
   sales: Sale[],
   months: number,
+  realm: Realm = "business",
 ): MonthlyTrend[] {
   const now = new Date();
   const trends: MonthlyTrend[] = [];
@@ -97,12 +98,20 @@ export function computeMonthlyTrends(
     const monthKey = format(date, "yyyy-MM");
     const label = format(date, "MMM yyyy");
 
-    const revenue = sales
-      .filter((s) => {
-        const d = parseISO(s.date);
-        return d >= mStart && d <= mEnd;
-      })
-      .reduce((sum, s) => sum + s.total, 0);
+    const revenue = realm === "business"
+      ? sales
+          .filter((sale) => {
+            const date = parseISO(sale.date);
+            return date >= mStart && date <= mEnd;
+          })
+          .reduce((sum, sale) => sum + sale.total, 0)
+      : txns
+          .filter((transaction) => {
+            if (transaction.type !== "income") return false;
+            const date = parseISO(transaction.date);
+            return date >= mStart && date <= mEnd;
+          })
+          .reduce((sum, transaction) => sum + transaction.amount, 0);
 
     const costs = txns
       .filter((t) => {

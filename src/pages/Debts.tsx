@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Realm } from "../types";
+import type { Debt, Realm } from "../types";
 import { useDebts } from "../hooks/useDebts";
 import { createDebt, settleDebt, writeOffDebt, deleteDebt } from "../db/repositories/debt";
 import { Modal } from "../components/Modal";
@@ -41,54 +41,71 @@ export function Debts({ realm }: DebtsProps) {
   const handleCreate = async () => {
     if (!form.person.trim() || !form.amount) return;
     setSaving(true);
-    await createDebt({
-      person: form.person.trim(),
-      amount: Number(form.amount),
-      description: form.description.trim(),
-      direction: form.direction,
-      date: form.date,
-      realm,
-    });
-    setSaving(false);
-    setForm({
-      person: "",
-      amount: "",
-      description: "",
-      direction: "lent",
-      date: new Date().toISOString().slice(0, 10),
-    });
-    setShowCreate(false);
-    addToast("success", `Debt recorded with ${form.person}`);
-    refresh();
+    try {
+      await createDebt({
+        person: form.person.trim(),
+        amount: Number(form.amount),
+        description: form.description.trim(),
+        direction: form.direction,
+        date: form.date,
+        realm,
+      });
+      setForm({
+        person: "",
+        amount: "",
+        description: "",
+        direction: "lent",
+        date: new Date().toISOString().slice(0, 10),
+      });
+      setShowCreate(false);
+      addToast("success", `Dette enregistrée avec ${form.person}`);
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible d’enregistrer la dette");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSettle = async (id: string) => {
-    await settleDebt(id);
-    addToast("success", "Debt marked as settled");
-    refresh();
+    try {
+      await settleDebt(id);
+      addToast("success", "Dette marquée comme réglée");
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible de modifier la dette");
+    }
   };
 
   const handleWriteOff = async (id: string) => {
-    await writeOffDebt(id);
-    addToast("info", "Debt written off");
-    refresh();
+    try {
+      await writeOffDebt(id);
+      addToast("info", "Dette classée sans suite");
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible de modifier la dette");
+    }
   };
 
   const handleDelete = async (id: string) => {
     setConfirmDelete(null);
-    await deleteDebt(id);
-    addToast("info", "Debt record deleted");
-    refresh();
+    try {
+      await deleteDebt(id);
+      addToast("info", "Dette supprimée");
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible de supprimer la dette");
+    }
   };
 
   if (!loading && debts.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Debts</h1>
+        <h1 className="text-2xl font-semibold text-on-surface">Dettes et créances</h1>
         <EmptyState
-          title="No debts recorded"
-          message="Track money you've lent or borrowed."
-          action={{ label: "Record Debt", onClick: () => setShowCreate(true) }}
+          title="Aucune dette enregistrée"
+          message="Notez l’argent prêté ou emprunté."
+          action={{ label: "Ajouter une dette", onClick: () => setShowCreate(true) }}
         />
         <CreateModal
           open={showCreate}
@@ -106,9 +123,9 @@ export function Debts({ realm }: DebtsProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-on-surface">Debts</h1>
+          <h1 className="text-2xl font-semibold text-on-surface">Dettes et créances</h1>
           <p className="text-sm text-on-surface-muted">
-            Lent: {totalLent.toLocaleString()} FCFA · Borrowed:{" "}
+            Prêté : {totalLent.toLocaleString()} FCFA · Emprunté :{" "}
             {totalBorrowed.toLocaleString()} FCFA
           </p>
         </div>
@@ -117,13 +134,13 @@ export function Debts({ realm }: DebtsProps) {
           onClick={() => setShowCreate(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
-          + Record Debt
+          + Ajouter
         </button>
       </div>
 
       {/* Filter */}
       <div className="flex gap-2">
-        {["all", "active", "settled", "written-off"].map((f) => (
+        {(["all", "active", "settled", "written-off"] as const).map((f) => (
           <button
             key={f}
             type="button"
@@ -134,7 +151,7 @@ export function Debts({ realm }: DebtsProps) {
                 : "text-on-surface-muted hover:bg-surface-alt"
             }`}
           >
-            {f}
+            {{ all: "Toutes", active: "Actives", settled: "Réglées", "written-off": "Sans suite" }[f]}
           </button>
         ))}
       </div>
@@ -165,9 +182,9 @@ export function Debts({ realm }: DebtsProps) {
         open={confirmDelete !== null}
         onClose={() => setConfirmDelete(null)}
         onConfirm={() => handleDelete(confirmDelete!)}
-        title="Delete Debt"
-        message="Are you sure you want to permanently delete this debt record? This action cannot be undone."
-        confirmLabel="Delete"
+        title="Supprimer cette dette ?"
+        message="Cette action est définitive."
+        confirmLabel="Supprimer"
         variant="danger"
       />
     </div>
@@ -180,16 +197,7 @@ function DebtCard({
   onWriteOff,
   onDelete,
 }: {
-  debt: {
-    id: string;
-    person: string;
-    amount: number;
-    direction: "lent" | "borrowed";
-    description: string;
-    status: string;
-    date: string;
-    settledAt: string | null;
-  };
+  debt: Debt;
   onSettle: () => void;
   onWriteOff: () => void;
   onDelete: () => void;
@@ -213,7 +221,7 @@ function DebtCard({
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[debt.status]}`}
               >
-                {debt.status}
+                {{ active: "active", settled: "réglée", "written-off": "sans suite" }[debt.status] ?? debt.status}
               </span>
             </div>
             {debt.description && (
@@ -222,7 +230,7 @@ function DebtCard({
             <p className="mt-1 text-xs text-on-surface-muted">
               {format(new Date(debt.date), "MMM d, yyyy")}
               {debt.settledAt &&
-                ` · Settled ${format(new Date(debt.settledAt), "MMM d, yyyy")}`}
+                ` · Réglée le ${format(new Date(debt.settledAt), "dd/MM/yyyy")}`}
             </p>
           </div>
         </div>
@@ -242,21 +250,21 @@ function DebtCard({
                 onClick={onSettle}
                 className="rounded-md bg-success/10 px-2 py-0.5 text-xs font-medium text-success hover:bg-success/20 transition-colors"
               >
-                Settle
+                Régler
               </button>
               <button
                 type="button"
                 onClick={onWriteOff}
                 className="rounded-md border border-border-light px-2 py-0.5 text-xs text-on-surface-muted hover:bg-surface-alt transition-colors"
               >
-                Write off
+                Sans suite
               </button>
               <button
                 type="button"
                 onClick={onDelete}
                 className="rounded-md px-2 py-0.5 text-xs text-danger hover:bg-danger/10 transition-colors"
               >
-                Delete
+                Supprimer
               </button>
             </div>
           )}
@@ -288,7 +296,7 @@ function CreateModal({
   onSubmit: () => void;
 }) {
   return (
-    <Modal open={open} onClose={onClose} title="Record Debt">
+    <Modal open={open} onClose={onClose} title="Ajouter une dette ou créance">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -308,30 +316,30 @@ function CreateModal({
                   : "border border-border-light text-on-surface-muted hover:bg-surface-alt"
               }`}
             >
-              {d === "lent" ? "I Lent" : "I Borrowed"}
+              {d === "lent" ? "J’ai prêté" : "J’ai emprunté"}
             </button>
           ))}
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Person</label>
+          <label className="block text-sm font-medium text-on-surface">Personne</label>
           <input
             type="text"
             value={form.person}
             onChange={(e) => setForm({ ...form, person: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="Name of the person"
+            placeholder="Nom de la personne"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-on-surface">Amount (FCFA)</label>
+          <label className="block text-sm font-medium text-on-surface">Montant (FCFA)</label>
           <input
             type="number"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="0"
-            min="0"
+            min="1"
             required
           />
         </div>
@@ -341,7 +349,7 @@ function CreateModal({
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="What was it for?"
+            placeholder="À quoi correspond cette somme ?"
             rows={2}
           />
         </div>
@@ -361,14 +369,14 @@ function CreateModal({
             onClick={onClose}
             className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
-            Cancel
+            Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.person || !form.amount}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? "Enregistrement…" : "Enregistrer"}
           </button>
         </div>
       </form>

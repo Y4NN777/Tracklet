@@ -32,16 +32,16 @@ export function CashPosition({ realm }: CashPositionProps) {
   }, [realm]);
 
   if (loading) {
-    return <div className="text-sm text-on-surface-muted">Loading cash position...</div>;
+    return <div className="text-sm text-on-surface-muted">Calcul de la trésorerie…</div>;
   }
 
   if (!position || balances.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Cash Position</h1>
+        <h1 className="text-2xl font-semibold text-on-surface">Trésorerie</h1>
         <EmptyState
-          title="No cash data yet"
-          message="Create a pocket and add some transactions to see your cash position."
+          title="Aucune donnée de trésorerie"
+          message="Créez une poche puis ajoutez des opérations."
         />
       </div>
     );
@@ -49,26 +49,26 @@ export function CashPosition({ realm }: CashPositionProps) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-on-surface">Cash Position</h1>
+      <h1 className="text-2xl font-semibold text-on-surface">Trésorerie</h1>
 
       {/* Main position card */}
       <div className="rounded-xl border border-border-light bg-gradient-to-br from-primary to-primary-light p-5 text-on-primary">
-        <p className="text-sm font-medium opacity-80">Available Cash</p>
+        <p className="text-sm font-medium opacity-80">Disponible estimé</p>
         <p className="mt-1 text-3xl font-bold">
           {position.available.toLocaleString()} FCFA
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-xs">
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-green-300" />
-            Total Balance: {position.totalBalance.toLocaleString()} FCFA
+            Solde : {position.totalBalance.toLocaleString()} FCFA
           </span>
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-amber-300" />
-            Committed: −{position.committed.toLocaleString()} FCFA
+            À payer : −{position.committed.toLocaleString()} FCFA
           </span>
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-blue-300" />
-            To Receive: +{position.toReceive.toLocaleString()} FCFA
+            À recevoir : +{position.toReceive.toLocaleString()} FCFA
           </span>
         </div>
       </div>
@@ -76,21 +76,21 @@ export function CashPosition({ realm }: CashPositionProps) {
       {/* Breakdown cards */}
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
-          label="Total Balance"
+          label="Solde total"
           value={`${position.totalBalance.toLocaleString()} FCFA`}
-          description="Sum of all pocket balances"
+          description="Somme des soldes de vos poches"
           color="text-on-surface"
         />
         <StatCard
-          label="You Owe (Committed)"
+          label="Vous devez"
           value={`−${position.committed.toLocaleString()} FCFA`}
-          description="Total borrowed debts"
+          description="Dettes actives à rembourser"
           color="text-danger"
         />
         <StatCard
-          label="You're Owed"
+          label="On vous doit"
           value={`+${position.toReceive.toLocaleString()} FCFA`}
-          description="Total lent to others"
+          description="Sommes actives à récupérer"
           color="text-success"
         />
       </div>
@@ -98,27 +98,27 @@ export function CashPosition({ realm }: CashPositionProps) {
       {/* Debt detail */}
       {debts && debts.activeCount > 0 && (
         <div className="rounded-xl border border-border-light bg-white p-4">
-          <p className="text-sm font-semibold text-on-surface">Active Debts</p>
+          <p className="text-sm font-semibold text-on-surface">Dettes actives</p>
           <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-xs text-on-surface-muted">Lent (to receive)</p>
+              <p className="text-xs text-on-surface-muted">Prêté (à recevoir)</p>
               <p className="font-semibold text-success">
                 +{debts.totalLent.toLocaleString()} FCFA
               </p>
             </div>
             <div>
-              <p className="text-xs text-on-surface-muted">Borrowed (to repay)</p>
+              <p className="text-xs text-on-surface-muted">Emprunté (à rembourser)</p>
               <p className="font-semibold text-danger">
                 −{debts.totalBorrowed.toLocaleString()} FCFA
               </p>
             </div>
           </div>
           <div className="mt-2 border-t border-border-light pt-2 text-xs text-on-surface-muted">
-            Net receivable:{" "}
+            Solde des créances :{" "}
             <span className={debts.netReceivable >= 0 ? "text-success font-medium" : "text-danger font-medium"}>
               {debts.netReceivable >= 0 ? "+" : ""}{debts.netReceivable.toLocaleString()} FCFA
             </span>
-            {" · "}{debts.activeCount} active debt{debts.activeCount > 1 ? "s" : ""}
+            {" · "}{debts.activeCount} dette{debts.activeCount > 1 ? "s" : ""} active{debts.activeCount > 1 ? "s" : ""}
           </div>
         </div>
       )}
@@ -126,7 +126,7 @@ export function CashPosition({ realm }: CashPositionProps) {
       {/* Per-pocket breakdown */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-on-surface">
-          Balance by Pocket
+          Solde par poche
         </h2>
         <div className="space-y-2">
           {balances.map((pb) => {
@@ -156,13 +156,13 @@ export function CashPosition({ realm }: CashPositionProps) {
                       {pb.balance >= 0 ? "+" : ""}{pb.balance.toLocaleString()} FCFA
                     </p>
                     <p className="text-[10px] text-on-surface-muted">
-                      {pctOfTotal}% of total
+                      {pctOfTotal}% du total
                     </p>
                   </div>
                 </div>
                 <div className="mt-2 flex gap-4 text-xs text-on-surface-muted">
-                  <span>In: +{pb.income.toLocaleString()} FCFA</span>
-                  <span>Out: −{pb.expense.toLocaleString()} FCFA</span>
+                  <span>Entrées : +{pb.income.toLocaleString()} FCFA</span>
+                  <span>Sorties : −{pb.expense.toLocaleString()} FCFA</span>
                 </div>
                 <div className="mt-1.5 h-1.5 w-full rounded-full bg-surface-alt">
                   <div
@@ -179,13 +179,13 @@ export function CashPosition({ realm }: CashPositionProps) {
       {/* Reconciliation formula */}
       <details className="rounded-xl border border-border-light bg-white">
         <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors">
-          How is this calculated?
+          Comment ce montant est-il calculé ?
         </summary>
         <div className="border-t border-border-light px-4 py-3 text-xs text-on-surface-muted space-y-1">
-          <p><strong>Available Cash</strong> = Total Balance − Committed + To Receive</p>
-          <p><strong>Total Balance</strong> = Sum of all pocket balances (income − expenses)</p>
-          <p><strong>Committed</strong> = Sum of all active borrowed debts</p>
-          <p><strong>To Receive</strong> = Sum of all active lent debts</p>
+          <p><strong>Disponible estimé</strong> = solde total − sommes à payer + sommes à recevoir</p>
+          <p><strong>Solde total</strong> = entrées − sorties de toutes les poches</p>
+          <p><strong>À payer</strong> = dettes empruntées encore actives</p>
+          <p><strong>À recevoir</strong> = sommes prêtées encore actives</p>
         </div>
       </details>
     </div>

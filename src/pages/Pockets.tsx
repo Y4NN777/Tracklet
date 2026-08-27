@@ -21,26 +21,31 @@ export function Pockets({ realm }: PocketsProps) {
   const handleCreate = async () => {
     if (!form.name.trim()) return;
     setSaving(true);
-    await createPocket({
-      name: form.name.trim(),
-      description: form.description.trim(),
-      realm,
-    });
-    setForm({ name: "", description: "" });
-    setSaving(false);
-    setShowCreate(false);
-    addToast("success", `Pocket "${form.name.trim()}" created`);
-    refresh();
+    try {
+      await createPocket({
+        name: form.name.trim(),
+        description: form.description.trim(),
+        realm,
+      });
+      setForm({ name: "", description: "" });
+      setShowCreate(false);
+      addToast("success", `Poche « ${form.name.trim()} » créée`);
+      await refresh();
+    } catch (error) {
+      addToast("error", error instanceof Error ? error.message : "Impossible de créer la poche");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!loading && balances.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Pockets</h1>
+        <h1 className="text-2xl font-semibold text-on-surface">Poches</h1>
         <EmptyState
-          title="No pockets yet"
-          message="Create your first pocket to start organizing your money."
-          action={{ label: "Create Pocket", onClick: () => setShowCreate(true) }}
+          title="Aucune poche"
+          message="Créez votre première poche : espèces, Orange Money ou Moov Money."
+          action={{ label: "Créer une poche", onClick: () => setShowCreate(true) }}
         />
         <CreateModal
           open={showCreate}
@@ -58,9 +63,9 @@ export function Pockets({ realm }: PocketsProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-on-surface">Pockets</h1>
+          <h1 className="text-2xl font-semibold text-on-surface">Poches</h1>
           <p className="text-sm text-on-surface-muted">
-            Total: {total.toLocaleString()} FCFA
+            Solde total : {total.toLocaleString()} FCFA
           </p>
         </div>
         <button
@@ -68,7 +73,7 @@ export function Pockets({ realm }: PocketsProps) {
           onClick={() => setShowCreate(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
-          + New Pocket
+          + Nouvelle poche
         </button>
       </div>
 
@@ -128,7 +133,7 @@ function CreateModal({
   onSubmit: () => void;
 }) {
   return (
-    <Modal open={open} onClose={onClose} title="New Pocket">
+    <Modal open={open} onClose={onClose} title="Nouvelle poche">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -138,14 +143,14 @@ function CreateModal({
       >
         <div>
           <label className="block text-sm font-medium text-on-surface">
-            Name
+            Nom
           </label>
           <input
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm text-on-surface outline-none focus:border-primary"
-            placeholder="e.g. Daily Expenses"
+            placeholder="Ex. Espèces, Orange Money"
             required
           />
         </div>
@@ -157,7 +162,7 @@ function CreateModal({
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm text-on-surface outline-none focus:border-primary"
-            placeholder="Optional description"
+            placeholder="Description facultative"
             rows={2}
           />
         </div>
@@ -167,14 +172,14 @@ function CreateModal({
             onClick={onClose}
             className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
-            Cancel
+            Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.name.trim()}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
-            {saving ? "Creating..." : "Create"}
+            {saving ? "Création…" : "Créer"}
           </button>
         </div>
       </form>

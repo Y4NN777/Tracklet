@@ -7,7 +7,7 @@
 ## Project
 
 - **Name:** Tracklet
-- **Stack:** Next.js+PWA+IndexedDB (local-first, no backend)
+- **Stack:** React+Vite+PWA+IndexedDB (local-first, no backend)
 - **Cognee namespace:** tracklet
 - **Initialised:** 2026-06-29
 
@@ -24,14 +24,14 @@
 
 ## Current sprint
 
-- **Sprint:** S0
-- **Milestone:** Init
+- **Sprint:** Alpha stabilization
+- **Milestone:** 0.2.0
 - **Mode:** execution
 
 ### Tasks
 
 <!-- maintained by Nehemiah; conforms to sprint-state.schema.json -->
-- Project initialisation via /mishkan-init (this run)
+- Stabilized local-first alpha: data invariants, atomic transfers/sales, backup, French-first UI, tests
 
 ### Blockers
 
@@ -44,4 +44,4 @@ None
 
 ---
 
-*Updated at milestones by Nehemiah. Mirrored to Cognee. Restored by `/mishkan-resume`.*
+*Updated 2026-08-27 for alpha 0.2.0.*

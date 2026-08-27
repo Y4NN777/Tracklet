@@ -1,8 +1,9 @@
 # Tracklet — Product Requirements Document
 
-- **Status:** Draft
+- **Status:** Alpha baseline
 - **Date:** 2026-06-29
 - **Author:** Y4NN
+- **Updated:** 2026-08-27
 
 ---
 

@@ -2,10 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import type { Realm, Transaction, Sale, Category } from "../types";
 import type { Insight } from "../domain/insight";
 import type { ProfitReport } from "../domain/profitability";
-import type { CategoryBreakdown, MonthlyTrend, ReportFilters } from "../domain/report";
+import type { ReportFilters } from "../domain/report";
 import { getSales } from "../db/repositories/sale";
 import { getAllTransactions } from "../db/repositories/transaction";
-import { getAllCategories } from "../db/repositories/category";
+import { getCategoriesByRealm } from "../db/repositories/category";
 import { getAllDebts } from "../db/repositories/debt";
 import { getActivePockets } from "../db/repositories/pocket";
 import { getRecentTransactions } from "../domain/transaction";
@@ -48,7 +48,7 @@ export function Reports({ realm }: ReportsProps) {
         getRecentTransactions(200, realm),
         getSales({ realm }),
         getAllTransactions({ realm }),
-        getAllCategories(),
+        getCategoriesByRealm(realm),
         getAllDebts(realm),
         getActivePockets(realm),
       ]);
@@ -87,8 +87,8 @@ export function Reports({ realm }: ReportsProps) {
 
   // Monthly trends (last 6 months)
   const monthlyTrends = useMemo(
-    () => computeMonthlyTrends(allTxns, allSales, 6),
-    [allTxns, allSales],
+    () => computeMonthlyTrends(allTxns, allSales, 6, realm),
+    [allTxns, allSales, realm],
   );
 
   // Summary numbers for filtered range
@@ -98,17 +98,19 @@ export function Reports({ realm }: ReportsProps) {
   const filteredExpenses = filteredTxns
     .filter((t) => t.type === "expense")
     .reduce((s, t) => s + t.amount, 0);
-  const filteredRevenue = filteredSales.reduce((s, x) => s + x.total, 0);
+  const filteredRevenue = realm === "business"
+    ? filteredSales.reduce((sum, sale) => sum + sale.total, 0)
+    : filteredIncome;
   const filteredProfit = filteredRevenue - filteredExpenses;
 
   if (loading) {
-    return <div className="text-sm text-on-surface-muted">Loading reports...</div>;
+    return <div className="text-sm text-on-surface-muted">Chargement des rapports…</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-on-surface">Reports</h1>
+        <h1 className="text-2xl font-semibold text-on-surface">Rapports</h1>
         <div className="flex gap-2">
           <button
             type="button"
@@ -118,7 +120,7 @@ export function Reports({ realm }: ReportsProps) {
             }}
             className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
-            Export TXNs
+            Exporter les opérations
           </button>
           <button
             type="button"
@@ -128,7 +130,7 @@ export function Reports({ realm }: ReportsProps) {
             }}
             className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
-            Export Sales
+            Exporter les ventes
           </button>
         </div>
       </div>
@@ -136,7 +138,7 @@ export function Reports({ realm }: ReportsProps) {
       {/* Date range filter */}
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <label className="block text-xs font-medium text-on-surface-muted mb-1">From</label>
+          <label className="block text-xs font-medium text-on-surface-muted mb-1">Du</label>
           <input
             type="date"
             value={filters.startDate}
@@ -145,7 +147,7 @@ export function Reports({ realm }: ReportsProps) {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-on-surface-muted mb-1">To</label>
+          <label className="block text-xs font-medium text-on-surface-muted mb-1">Au</label>
           <input
             type="date"
             value={filters.endDate}
@@ -182,22 +184,22 @@ export function Reports({ realm }: ReportsProps) {
       {/* Summary cards for filtered range */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
-          label="Revenue"
+          label={realm === "business" ? "Ventes" : "Entrées"}
           value={`${filteredRevenue.toLocaleString()} FCFA`}
           color="text-success"
         />
         <SummaryCard
-          label="Expenses"
+          label="Dépenses"
           value={`${filteredExpenses.toLocaleString()} FCFA`}
           color="text-danger"
         />
         <SummaryCard
-          label="Profit"
+          label="Résultat"
           value={`${filteredProfit.toLocaleString()} FCFA`}
           color={filteredProfit >= 0 ? "text-success" : "text-danger"}
         />
         <SummaryCard
-          label="Margin"
+          label="Marge"
           value={filteredRevenue > 0 ? `${Math.round((filteredProfit / filteredRevenue) * 100)}%` : "—"}
           color={filteredProfit >= 0 ? "text-success" : "text-danger"}
         />
@@ -207,11 +209,11 @@ export function Reports({ realm }: ReportsProps) {
       {monthlyTrends.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-on-surface">
-            Monthly Trends
+            Évolution mensuelle
           </h2>
           <div className="rounded-xl border border-border-light bg-white p-4">
             <div className="flex items-end gap-2" style={{ height: 160 }}>
-              {monthlyTrends.map((month, i) => {
+              {monthlyTrends.map((month) => {
                 const maxVal = Math.max(
                   ...monthlyTrends.map((m) => Math.max(m.revenue, m.costs, 1)),
                 );
@@ -243,10 +245,10 @@ export function Reports({ realm }: ReportsProps) {
             </div>
             <div className="mt-2 flex justify-center gap-4 text-xs text-on-surface-muted">
               <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-success" /> Revenue
+                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-success" /> Entrées
               </span>
               <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-danger/40" /> Costs
+                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-danger/40" /> Dépenses
               </span>
             </div>
           </div>
@@ -257,7 +259,7 @@ export function Reports({ realm }: ReportsProps) {
       {breakdown.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-on-surface">
-            Spending by Category
+            Dépenses par catégorie
           </h2>
           <div className="space-y-2">
             {breakdown.map((cat) => (
@@ -304,31 +306,31 @@ export function Reports({ realm }: ReportsProps) {
       {profitReport && profitReport.currentMonth.revenue > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-on-surface">
-            Month-over-Month Profitability
+            Résultat mois par mois
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-border-light bg-white p-4">
-              <p className="text-xs text-on-surface-muted">Current Month</p>
+              <p className="text-xs text-on-surface-muted">Mois en cours</p>
               <div className="mt-2 space-y-1.5">
-                <Row label="Revenue" value={`+${profitReport.currentMonth.revenue.toLocaleString()} FCFA`} valueClass="text-success" />
-                <Row label="Costs" value={`−${profitReport.currentMonth.costs.toLocaleString()} FCFA`} valueClass="text-danger" />
-                <Row label="Profit" value={`${profitReport.currentMonth.profit >= 0 ? "+" : ""}${profitReport.currentMonth.profit.toLocaleString()} FCFA`} valueClass={profitReport.currentMonth.profit >= 0 ? "text-success" : "text-danger"} bold />
-                <p className="mt-1 text-xs text-on-surface-muted">Margin: {profitReport.currentMonth.margin}%</p>
+                <Row label="Ventes" value={`+${profitReport.currentMonth.revenue.toLocaleString()} FCFA`} valueClass="text-success" />
+                <Row label="Dépenses" value={`−${profitReport.currentMonth.costs.toLocaleString()} FCFA`} valueClass="text-danger" />
+                <Row label="Résultat" value={`${profitReport.currentMonth.profit >= 0 ? "+" : ""}${profitReport.currentMonth.profit.toLocaleString()} FCFA`} valueClass={profitReport.currentMonth.profit >= 0 ? "text-success" : "text-danger"} bold />
+                <p className="mt-1 text-xs text-on-surface-muted">Marge : {profitReport.currentMonth.margin}%</p>
               </div>
             </div>
             <div className="rounded-xl border border-border-light bg-white p-4">
-              <p className="text-xs text-on-surface-muted">Previous Month</p>
+              <p className="text-xs text-on-surface-muted">Mois précédent</p>
               <div className="mt-2 space-y-1.5">
-                <Row label="Revenue" value={`+${profitReport.previousMonth.revenue.toLocaleString()} FCFA`} valueClass="text-success" />
-                <Row label="Costs" value={`−${profitReport.previousMonth.costs.toLocaleString()} FCFA`} valueClass="text-danger" />
-                <Row label="Profit" value={`${profitReport.previousMonth.profit >= 0 ? "+" : ""}${profitReport.previousMonth.profit.toLocaleString()} FCFA`} valueClass={profitReport.previousMonth.profit >= 0 ? "text-success" : "text-danger"} bold />
-                <p className="mt-1 text-xs text-on-surface-muted">Margin: {profitReport.previousMonth.margin}%</p>
+                <Row label="Ventes" value={`+${profitReport.previousMonth.revenue.toLocaleString()} FCFA`} valueClass="text-success" />
+                <Row label="Dépenses" value={`−${profitReport.previousMonth.costs.toLocaleString()} FCFA`} valueClass="text-danger" />
+                <Row label="Résultat" value={`${profitReport.previousMonth.profit >= 0 ? "+" : ""}${profitReport.previousMonth.profit.toLocaleString()} FCFA`} valueClass={profitReport.previousMonth.profit >= 0 ? "text-success" : "text-danger"} bold />
+                <p className="mt-1 text-xs text-on-surface-muted">Marge : {profitReport.previousMonth.margin}%</p>
               </div>
               <div className="mt-2 border-t border-border-light pt-2 text-xs">
                 <span className={`font-medium ${
                   profitReport.trend === "up" ? "text-success" : profitReport.trend === "down" ? "text-danger" : "text-on-surface-muted"
                 }`}>
-                  {profitReport.trend === "up" ? "▲" : profitReport.trend === "down" ? "▼" : "◆"} Trend:{" "}
+                  {profitReport.trend === "up" ? "▲" : profitReport.trend === "down" ? "▼" : "◆"} Évolution :{" "}
                   {profitReport.trendPercentage > 0 ? "+" : ""}{profitReport.trendPercentage}%
                 </span>
               </div>
@@ -340,7 +342,7 @@ export function Reports({ realm }: ReportsProps) {
       {/* Insights */}
       {insights.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-on-surface">Insights</h2>
+          <h2 className="mb-3 text-lg font-semibold text-on-surface">Conseils</h2>
           <div className="space-y-2">
             {insights.map((insight) => {
               const colors: Record<string, string> = {
@@ -365,8 +367,8 @@ export function Reports({ realm }: ReportsProps) {
 
       {!loading && filteredTxns.length === 0 && filteredSales.length === 0 && insights.length === 0 && (
         <EmptyState
-          title="No data in this range"
-          message="Adjust the date range or add some transactions and sales to see reports."
+          title="Aucune donnée sur cette période"
+          message="Changez les dates ou ajoutez des opérations pour afficher le rapport."
         />
       )}
     </div>

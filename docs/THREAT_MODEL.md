@@ -1,203 +1,63 @@
-# Tracklet — Threat Model
+# Tracklet — Alpha Threat Model
 
-- **Status:** Draft
-- **Date:** 2026-06-29
-- **Author:** Benaiah (Mishmar)
-- **Methodology:** STRIDE
-- **Scope:** Tracklet alpha — local-first PWA, no backend
+- **Status:** Reviewed for 0.2.0
+- **Updated:** 2026-08-27
+- **Scope:** local-first browser PWA
 
----
+## Trust boundaries
 
-## 1. System Context & Assumptions
+Tracklet runs inside a browser or installed PWA profile. Financial records are stored in origin-scoped IndexedDB. The application has no backend, account, analytics, or financial-data API.
 
-Tracklet has a radically reduced attack surface compared to a typical web
-application because:
+Trust crosses a boundary when:
 
-- **No network requests.** All data stays on device. No API, no sync,
-  no telemetry.
-- **No authentication.** Single-user device-local app.
-- **No third-party dependencies at runtime.** The app shell (Next.js/React)
-  and IndexedDB are the only active components.
-- **No user accounts.** No passwords, no tokens, no session management.
+- someone gains access to the unlocked device or browser profile;
+- the user downloads a JSON backup or CSV report;
+- application code or dependencies are updated;
+- a browser extension or compromised browser can inspect origin data.
 
-The primary threat surface is the **device itself** — physical access, data
-leakage via export, and supply chain via app updates.
+## Prioritized risks
 
-### Trust Boundary
+| Risk | Severity | Current control |
+|---|---:|---|
+| Unlocked-device access exposes financial records | High | Device/browser locking is required; biometric app lock is deferred |
+| Backup or CSV file is shared or copied | High | Explicit privacy copy and destructive restore confirmation |
+| Clearing site data removes the only local copy | High | Complete versioned JSON backup and restore |
+| Supply-chain compromise changes shipped code | Medium | Locked npm dependency graph, automated build/tests, zero known audit findings at release |
+| Cross-realm reference corrupts calculations | Medium | Repository validation and integration tests |
+| Partial multi-record write corrupts a transfer or sale | Medium | Single IndexedDB transactions and integration tests |
+| Stored text becomes script execution | Low | React text escaping, no raw HTML rendering, restrictive CSP |
+| Stale service worker loads incompatible UI | Low | App-shell-only precache and auto-update; no arbitrary runtime network cache |
 
-```
-[User] ─── [Android Device] ─── [Tracklet PWA]
-                                      │
-                                      │ (file system export)
-                                      ▼
-                                 [SD card / Downloads]
-```
+## Data flows
 
-The single trust boundary is the device screen lock. Everything inside the
-device is trusted (after app installation). Everything outside (exported
-files, another app reading storage) is untrusted.
+### At rest
 
----
+IndexedDB protection is provided by the browser profile and device storage. The alpha does not encrypt individual records. Root access, a compromised browser, a malicious extension with sufficient privilege, or access to an unlocked profile may expose them.
 
-## 2. STRIDE Analysis
+### In transit
 
-### Spoofing
+Core financial records have no network transit. The Content Security Policy limits connections to the same origin (plus localhost WebSocket access for the Vite development server). Hosting still requires HTTPS so the service worker and origin integrity work as intended.
 
-| Threat | Risk | Mitigation |
-|---|---|---|
-| An attacker impersonates the Tracklet app via a fake app on the Play Store | **Medium** | App signing by the developer. User-side: verify developer name. No server-side API to steal credentials since none exist. |
-| Another app on the device pretends to be Tracklet to read financial data | **Low** | Android sandboxing prevents apps from reading each other's private storage. No inter-app communication or intent handling in alpha. |
+### Exported
 
-**Risk acceptance:** No user authentication exists to spoof. The app is
-single-user by design.
+JSON and CSV exports are ordinary unencrypted files. They may be read by other apps, cloud-backup software, or recipients. Users must store and share them carefully.
 
-### Tampering
+## Integrity controls
 
-| Threat | Risk | Mitigation |
-|---|---|---|
-| Another app modifies Tracklet's IndexedDB data | **Low** | Android sandbox — each app's IndexedDB is in its private storage. Requires root access. |
-| Malicious app update overwrites Tracklet with tampered version | **Medium** | App store code signing; tampered updates would fail signature verification. Mitigation: use official Play Store distribution only. |
-| User modifies exported PDF/image with false data | **Low** | Exported files are static snapshots. The app's internal data is the source of truth. Fake exports cannot be re-imported (no import feature). |
+- Whole-FCFA and date validation at repository boundaries
+- Existing pocket/category and realm checks before writes
+- Atomic paired transfers
+- Atomic sale plus generated pocket credit
+- Atomic full-store restore after envelope validation
+- Terminal debt-state transitions
+- Tests using a real IndexedDB-compatible implementation
 
-**Key mitigation:** IndexedDB data is protected by Android's per-app
-sandbox. Tampering requires root.
+## Deferred controls
 
-### Repudiation
+- Biometric or PIN application lock
+- Encrypted/password-protected backup
+- Signed backup integrity metadata
+- Automatic backup reminders
+- Dependency provenance attestations
 
-| Threat | Risk | Mitigation |
-|---|---|---|
-| User denies making a transaction they recorded | **Low** | All transactions are immutable after creation with timestamps. The app serves a single user who has sole access — repudiation benefit is near-zero. |
-| User claims exported report shows wrong data | **Low** | Reports are computed from immutable transaction data. Discrepancy can be checked by re-exporting. |
-
-**Risk acceptance:** This is a personal finance tool, not an audit system.
-Repudiation is not a practical concern for a single-user offline app.
-
-### Information Disclosure
-
-| Threat | Risk | Mitigation |
-|---|---|---|
-| Someone gains physical access to the unlocked device and opens Tracklet | **High** | No app-level lock in alpha. All financial data is visible. Mitigation: user must lock their device screen. Future: biometric app lock. |
-| Exported PDF/image is shared or leaked | **Medium** | Export writes to user-chosen location (Downloads, SD card). The user controls what they share. Mitigation: clear warning on export about sensitive data. |
-| Service Worker cache retains stale data | **Low** | SW caches only app shell (JS/CSS/HTML), never user data. |
-| IndexedDB data extracted via USB debugging | **Low** | Requires USB debugging enabled + device unlocked. Developer-only surface. |
-
-**Key risks:**
-1. Physical access to unlocked device — **highest risk**. Mitigation is
-   user behavior (screen lock) or future biometric lock.
-2. Exported file leakage — user responsibility, but should be warned.
-
-### Denial of Service
-
-| Threat | Risk | Mitigation |
-|---|---|---|
-| Malicious app fills device storage, preventing IndexedDB writes | **Low** | Device storage management is the OS's responsibility. The app cannot prevent other apps from filling storage. |
-| IndexedDB quota exceeded | **Low** | Tracklet's data volume is small (KB to low MB). IndexedDB quota on Android is typically 50MB+ per origin. |
-| Intentional data corruption via IndexedDB API misuse | **N/A** | Only the app itself writes to its own IndexedDB. No external API surface. |
-
-**Risk acceptance:** DoS threats are handled by the Android OS and are
-not specific to Tracklet.
-
-### Elevation of Privilege
-
-| Threat | Risk | Mitigation |
-|---|---|---|
-| An attacker uses a vulnerability in Tracklet to escalate privileges on the device | **Low** | PWA runs within the browser sandbox (Chrome renderer). No native code, no system API access beyond storage and file download. |
-| XSS via user input fields (counterparty name, product name) leads to data theft | **Medium** | User-entered names are rendered in the UI. If unsanitized, stored XSS could leak data to another origin. Mitigation: sanitize all user text input before rendering. |
-| Malicious service worker update intercepts navigation | **Low** | SW scope is limited to the app's origin. Cannot read other origins' data. |
-
-**Key mitigation:** All user text input must be sanitized before rendering
-(escape HTML entities). The app has no `eval()`, no dynamic imports, no
-`innerHTML` usage.
-
----
-
-## 3. Risk Prioritization
-
-| # | Threat | Severity | Action |
-|---|---|---|---|
-| 1 | Physical access to unlocked device | **High** | Future: biometric app lock. Alpha: device screen lock disclaimer. |
-| 2 | Stored XSS via user input fields | **Medium** | Sanitize all user text input before rendering (DOMPurify or React's built-in escaping). |
-| 3 | Exported file leakage | **Medium** | Warn user on export. Default to app-private directory, not shared Downloads. |
-| 4 | Fake/tampered app update | **Medium** | Distribute only via official app store. |
-| 5 | USB debug data extraction | **Low** | Accept (requires developer mode + unlocked device). |
-| 6 | Sandbox violation by another app | **Low** | Accept (Android sandbox is mature). |
-
----
-
-## 4. Security Controls (Alpha)
-
-### Implemented
-- **Android sandbox**: IndexedDB is per-app private.
-- **React DOM escaping**: React escapes string content by default when
-  rendered via `{expression}`.
-- **Immutable transactions**: No edit/delete of financial records after
-  creation (prevents retrospective manipulation).
-- **No network**: No data transmission means no interception, no MITM,
-  no server-side breach.
-
-### Recommended for Alpha (before release)
-- **Input sanitization**: Even with React's built-in escaping, use
-  `DOMPurify` for any `dangerouslySetInnerHTML` usage (should be zero in
-  the app, but audit).
-- **Export warning**: Show a dialog before export: "This file contains
-  your financial data. Keep it private."
-- **CSP headers**: Set Content-Security-Policy in the PWA manifest to
-  restrict script sources and disallow inline scripts.
-
-### Deferred to Beta
-- Biometric app lock.
-- Encrypted IndexedDB (via Web Crypto API + device keychain).
-- Data integrity checksums.
-- Export password protection.
-
----
-
-## 5. Data Flow Risks
-
-### Data at Rest
-```
-Location: IndexedDB (Chrome private storage)
-Risk: Readable by any app with root access
-Mitigation: Android encryption at rest (FBE) — enabled on all modern Android
-versions. No additional app-level encryption in alpha.
-```
-
-### Data in Transit
-```
-N/A — no network data transmission in alpha.
-```
-
-### Data in Use
-```
-Location: In-memory React state + IndexedDB transaction
-Risk: Another app with debug privileges (adb) could read process memory
-Mitigation: Requires USB debugging + unlocked device. Accept for alpha.
-```
-
-### Data on Export
-```
-Location: Device file system (user-chosen directory)
-Risk: Shared with other apps, backed up to cloud, sent via messaging
-Mitigation: Warning dialog. Future: password-protected PDF.
-```
-
----
-
-## 6. Compliance Notes
-
-Tracklet does not transmit, process, or store user data on any server.
-It is therefore outside the scope of most data protection regulations
-(GDPR, CCPA, etc.) as they relate to data controllers/processors.
-
-The user is solely responsible for:
-- Device-level security (screen lock, OS updates)
-- Security of exported files
-- Physical device access
-
----
-
-## 7. Change Log
-
-| Date | Change | Kind |
-|---|---|---|
-| 2026-06-29 | Initial threat model for alpha | Creation |
+These are beta candidates and are not represented as alpha guarantees.

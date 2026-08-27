@@ -29,8 +29,8 @@ export function generateInsights(
     insights.push({
       id: "high-spend",
       type: "warning",
-      title: "High monthly spending",
-      message: `You've spent ${monthlySpend.toLocaleString()} FCFA this month. Review your expenses.`,
+      title: "Dépenses élevées ce mois-ci",
+      message: `Vous avez dépensé ${monthlySpend.toLocaleString()} FCFA ce mois-ci. Vérifiez vos principales dépenses.`,
     });
   }
 
@@ -39,8 +39,8 @@ export function generateInsights(
     insights.push({
       id: "no-activity",
       type: "info",
-      title: "Getting started",
-      message: "Add your first transaction to start tracking your finances.",
+      title: "Bien démarrer",
+      message: "Ajoutez votre première opération pour commencer le suivi.",
     });
   }
 
@@ -50,17 +50,17 @@ export function generateInsights(
     insights.push({
       id: "many-debts",
       type: "warning",
-      title: `${activeDebts.length} active debts`,
+      title: `${activeDebts.length} dettes actives`,
       message:
-        "You have several active debts. Consider settling some to reduce complexity.",
+        "Vous avez plusieurs dettes actives. Réglez d’abord les plus urgentes.",
     });
   }
   if (activeDebts.length > 0 && activeDebts.length <= 3) {
     insights.push({
       id: "debts-reminder",
       type: "info",
-      title: `${activeDebts.length} active debt${activeDebts.length > 1 ? "s" : ""}`,
-      message: "Keep track of your payment deadlines.",
+      title: `${activeDebts.length} dette${activeDebts.length > 1 ? "s" : ""} active${activeDebts.length > 1 ? "s" : ""}`,
+      message: "Gardez les échéances de paiement à l’œil.",
     });
   }
 
@@ -68,7 +68,11 @@ export function generateInsights(
   const emptyPockets = pockets.filter((p) => {
     const pocketTxns = txns.filter((t) => t.pocketId === p.id);
     const balance = pocketTxns.reduce(
-      (s, t) => s + (t.type === "income" ? t.amount : -t.amount),
+      (sum, transaction) => {
+        if (transaction.type === "income" || transaction.transferDirection === "in") return sum + transaction.amount;
+        if (transaction.type === "expense" || transaction.transferDirection === "out") return sum - transaction.amount;
+        return sum;
+      },
       0,
     );
     return balance === 0;
@@ -77,8 +81,8 @@ export function generateInsights(
     insights.push({
       id: "empty-pockets",
       type: "tip",
-      title: `${emptyPockets.length} pocket${emptyPockets.length > 1 ? "s" : ""} with no funds`,
-      message: `Consider transferring funds to ${emptyPockets.map((p) => p.name).join(", ")}.`,
+      title: `${emptyPockets.length} poche${emptyPockets.length > 1 ? "s" : ""} sans fonds`,
+      message: `Vous pouvez transférer de l’argent vers ${emptyPockets.map((p) => p.name).join(", ")}.`,
     });
   }
 
@@ -90,8 +94,8 @@ export function generateInsights(
     insights.push({
       id: "tracking-income",
       type: "success",
-      title: "Income tracking active",
-      message: `You've recorded ${totalIncome.toLocaleString()} FCFA in income.`,
+      title: "Suivi des entrées actif",
+      message: `Vous avez enregistré ${totalIncome.toLocaleString()} FCFA d’entrées.`,
     });
   }
 

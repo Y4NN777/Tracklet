@@ -26,6 +26,11 @@ export interface Transaction {
   date: string; // ISO date (YYYY-MM-DD)
   realm: Realm;
   tags: string[];
+  transferId?: string;
+  transferDirection?: "in" | "out";
+  relatedPocketId?: string;
+  sourceType?: "manual" | "sale";
+  sourceId?: string;
   createdAt: string;
 }
 
@@ -73,7 +78,23 @@ export interface Sale {
   date: string; // ISO date (YYYY-MM-DD)
   realm: Realm;
   tags: string[];
+  transactionId?: string;
   createdAt: string;
+}
+
+export interface TrackletBackup {
+  format: "tracklet-backup";
+  schemaVersion: number;
+  appVersion: string;
+  exportedAt: string;
+  data: {
+    pockets: Pocket[];
+    transactions: Transaction[];
+    categories: Category[];
+    debts: Debt[];
+    goals: Goal[];
+    sales: Sale[];
+  };
 }
 
 export interface SaleAggregation {
