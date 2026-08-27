@@ -66,3 +66,26 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+.landing-page {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.landing-grid {
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(rgba(0, 47, 167, 0.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 47, 167, 0.075) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  .landing-page * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -32,6 +32,8 @@
 
 ### Experience
 
+- The public root route explains the implemented product, offline model, personal/business separation, and local-data limits before linking to the dashboard.
+- The installed PWA opens the dashboard directly; the landing page remains available at the root route.
 - The primary interface is French and formatted in FCFA.
 - Core operations work offline after the PWA shell is cached.
 - Mobile primary navigation contains four destinations; all destinations remain available in the drawer.

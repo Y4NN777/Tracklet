@@ -4,7 +4,7 @@ import type { Realm } from "../types";
 import { AgentPanel } from "./AgentPanel";
 
 const navItems = [
-  { to: "/", label: "Accueil", icon: IconDashboard },
+  { to: "/dashboard", label: "Accueil", icon: IconDashboard },
   { to: "/pockets", label: "Poches", icon: IconPockets },
   { to: "/transactions", label: "Opérations", icon: IconTransactions },
   { to: "/debts", label: "Dettes", icon: IconDebts },
@@ -26,7 +26,7 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
   const currentPage = location.pathname.replace("/", "") || "dashboard";
   const visibleNavItems = navItems.filter((item) => !item.businessOnly || realm === "business");
   const mobileNavItems = visibleNavItems.filter((item) =>
-    ["/", "/transactions", realm === "business" ? "/sales" : "/pockets", "/cash-position"].includes(item.to),
+    ["/dashboard", "/transactions", realm === "business" ? "/sales" : "/pockets", "/cash-position"].includes(item.to),
   );
 
   return (
@@ -59,7 +59,7 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
             <NavLink
               key={to}
               to={to}
-              end={to === "/"}
+              end={to === "/dashboard"}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
@@ -130,7 +130,7 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
             <NavLink
               key={to}
               to={to}
-              end={to === "/"}
+              end={to === "/dashboard"}
               className={({ isActive }) =>
                 `flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors ${
                   isActive

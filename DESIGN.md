@@ -209,6 +209,19 @@ The aesthetic draws from modern fintech apps (Revolut, Chime) adapted to the loc
 
 **Guiding principle**: every screen must answer a question in under 2 seconds without the user having to search. Key financial information (balance, margin, debts) is always front and center.
 
+## Public landing direction
+
+The public landing page uses a Swiss editorial system distinct from the operational app shell. Its purpose is explanation and orientation, not financial data entry.
+
+- **Surface:** pure white (`#FFFFFF`) and neutral (`#F7F7F8`).
+- **Accent:** Yves Klein blue (`#002FA7`) only.
+- **Typography:** Helvetica Neue or a system Helvetica/Arial fallback, left aligned with tightly tracked display headings.
+- **Structure:** asymmetric sections, visible 1px grid lines, square controls, and large numerals as composition elements.
+- **Restrictions:** no gradients, grain, decorative shadows, fabricated balances, customer counts, or testimonials.
+- **Signature motif:** personal and business pockets remain visibly separated before converging into one cash-position explanation.
+
+The product mockup on the landing names real Tracklet concepts but never pretends that sample balances are user data. Once the user opens `/#/dashboard`, the operational interface returns to the mobile-first tokens documented below.
+
 ## Colors
 
 The palette is built around a single strong royal blue (`#185FA5`) as the primary color — a universal fintech trust color, readable on white backgrounds, strong in mobile contexts.

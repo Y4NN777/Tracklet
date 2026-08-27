@@ -45,3 +45,4 @@ A young Burkinabe micro-entrepreneur (pastry chef, freelancer, reseller, tailor,
 6. Set savings goals for my business or personal life
 7. Get simple, contextual financial tips that help me make better decisions
 8. Access everything offline since internet is not always available
+9. Understand what Tracklet does and how it protects local data before opening the application
