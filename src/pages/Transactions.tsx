@@ -104,7 +104,7 @@ export function Transactions({ realm }: TransactionsProps) {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Filtrer les opérations">
+      <div className="scrollbar-hidden flex gap-2 overflow-x-auto pb-1" aria-label="Filtrer les opérations">
         {(["all", "expense", "income", "transfer"] as const).map((f) => (
           <button
             key={f}

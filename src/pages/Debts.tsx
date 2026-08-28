@@ -141,7 +141,7 @@ export function Debts({ realm }: DebtsProps) {
       </div>
 
       {/* Filter */}
-      <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Filtrer les dettes et créances">
+      <div className="scrollbar-hidden flex gap-2 overflow-x-auto pb-1" aria-label="Filtrer les dettes et créances">
         {(["all", "active", "settled", "written-off"] as const).map((f) => (
           <button
             key={f}

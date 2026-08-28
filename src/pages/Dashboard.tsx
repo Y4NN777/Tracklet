@@ -280,7 +280,7 @@ function QuickActions({ realm }: { realm: Realm }) {
     realm === "business" ? { to: "/sales", label: "Enregistrer une vente", icon: Store } : { to: "/goals", label: "Voir les objectifs", icon: CircleDollarSign },
   ];
   return (
-    <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Actions rapides">
+    <nav className="scrollbar-hidden flex gap-2 overflow-x-auto pb-1" aria-label="Actions rapides">
       {actions.map(({ to, label, icon: Icon }, index) => (
         <Link key={to} to={to} className={`inline-flex min-h-12 shrink-0 items-center gap-2 rounded-2xl px-4 text-sm font-semibold transition-colors ${index === 0 ? "bg-primary text-on-primary hover:bg-primary-light" : "border border-border bg-card text-on-surface hover:bg-card-muted"}`}>
           <Icon aria-hidden="true" className="h-4 w-4" />
