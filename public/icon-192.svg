@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="24" fill="#185FA5"/>
-  <text x="96" y="126" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="96" fill="white">T</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 32 32">
+  <rect width="32" height="32" fill="#465024"/>
+  <path d="M16 16.5V25" fill="none" stroke="#D6A752" stroke-linecap="round" stroke-width="4.5"/>
+  <path d="M8 6.5v4.25A6.25 6.25 0 0 0 14.25 17H16" fill="none" stroke="#E8DCC7" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"/>
+  <path d="M24 6.5v4.25A6.25 6.25 0 0 1 17.75 17H16" fill="none" stroke="#D98E69" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"/>
 </svg>

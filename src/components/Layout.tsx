@@ -17,6 +17,7 @@ import {
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import type { Realm } from "../types";
 import { AgentPanel } from "./AgentPanel";
+import { BrandMark } from "./BrandMark";
 
 const navGroups = [
   {
@@ -150,7 +151,7 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
       >
         <div className="flex min-h-20 items-center justify-between gap-3 border-b border-border-light px-5">
           <Link to="/dashboard" className="flex min-h-12 items-center gap-3 rounded-2xl" aria-label="Tracklet — vue d’ensemble">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary text-sm font-bold text-on-primary">T</span>
+            <BrandMark className="h-11 w-11 shrink-0" />
             <span>
               <span className="block text-lg font-bold tracking-[-0.04em]">Tracklet</span>
               <span className="block text-xs text-on-surface-muted">Local · FCFA</span>
@@ -238,8 +239,8 @@ export function Layout({ realm, onRealmChange }: LayoutProps) {
               </p>
             </div>
           </div>
-          <Link to="/dashboard" className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-sm font-bold text-on-primary" aria-label="Vue d’ensemble">
-            T
+          <Link to="/dashboard" className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl" aria-label="Vue d’ensemble">
+            <BrandMark className="h-11 w-11" />
           </Link>
         </header>
 

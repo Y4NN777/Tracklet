@@ -58,6 +58,16 @@ The interface is designed for francophone micro-entrepreneurs who may use a mid-
 - **Motion:** one 300–500ms arrival transition. Reduced-motion preferences remove it.
 - **Signature motif:** personal and business money remain visibly separate before their values converge in the cash-position view.
 
+## Brand mark
+
+The Tracklet mark turns the signature motif into one compact symbol: a sand Personal path and a terracotta Activity path meet at an ochre cash-position stem. The moss field keeps it recognizable against both product surfaces and operating-system backgrounds.
+
+- Never replace the mark with a letterform or a generic coin, chart, or wallet glyph.
+- Keep the three paths and their colors intact; monochrome is reserved for system-generated themed icons.
+- Use the mark with the Tracklet wordmark whenever space allows. The mark may stand alone in favicons, launchers, and compact mobile headers.
+- Preserve at least one path-width of clear space around the mark.
+- At 32px and below, remove texture and secondary decoration; the paths are the identity.
+
 ## UX principles
 
 ### Minimize time to value
