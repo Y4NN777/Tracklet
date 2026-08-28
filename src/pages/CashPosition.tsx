@@ -38,7 +38,7 @@ export function CashPosition({ realm }: CashPositionProps) {
   if (!position || balances.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Trésorerie</h1>
+        <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Trésorerie</h1>
         <EmptyState
           title="Aucune donnée de trésorerie"
           message="Créez une poche puis ajoutez des opérations."
@@ -49,25 +49,25 @@ export function CashPosition({ realm }: CashPositionProps) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-on-surface">Trésorerie</h1>
+      <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Trésorerie</h1>
 
       {/* Main position card */}
-      <div className="rounded-xl border border-border-light bg-gradient-to-br from-primary to-primary-light p-5 text-on-primary">
+      <div className="rounded-[1.5rem] border border-border-light bg-primary p-5 text-on-primary">
         <p className="text-sm font-medium opacity-80">Disponible estimé</p>
         <p className="mt-1 text-3xl font-bold">
           {position.available.toLocaleString()} FCFA
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-xs">
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full bg-green-300" />
+            <span className="inline-block h-2 w-2 rounded-full bg-success-container" />
             Solde : {position.totalBalance.toLocaleString()} FCFA
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full bg-amber-300" />
+            <span className="inline-block h-2 w-2 rounded-full bg-warning-container" />
             À payer : −{position.committed.toLocaleString()} FCFA
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full bg-blue-300" />
+            <span className="inline-block h-2 w-2 rounded-full bg-info-container" />
             À recevoir : +{position.toReceive.toLocaleString()} FCFA
           </span>
         </div>
@@ -97,7 +97,7 @@ export function CashPosition({ realm }: CashPositionProps) {
 
       {/* Debt detail */}
       {debts && debts.activeCount > 0 && (
-        <div className="rounded-xl border border-border-light bg-white p-4">
+        <div className="rounded-[1.5rem] border border-border-light bg-card p-4">
           <p className="text-sm font-semibold text-on-surface">Dettes actives</p>
           <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
             <div>
@@ -125,7 +125,7 @@ export function CashPosition({ realm }: CashPositionProps) {
 
       {/* Per-pocket breakdown */}
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-on-surface">
+        <h2 className="mb-3 text-xl font-bold tracking-[-0.035em] text-on-surface">
           Solde par poche
         </h2>
         <div className="space-y-2">
@@ -136,9 +136,9 @@ export function CashPosition({ realm }: CashPositionProps) {
             return (
               <div
                 key={pb.pocket.id}
-                className="rounded-xl border border-border-light bg-white px-4 py-3"
+                className="rounded-[1.5rem] border border-border-light bg-card px-4 py-3"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-medium text-on-surface">
                       {pb.pocket.name}
@@ -177,7 +177,7 @@ export function CashPosition({ realm }: CashPositionProps) {
       </section>
 
       {/* Reconciliation formula */}
-      <details className="rounded-xl border border-border-light bg-white">
+      <details className="rounded-[1.5rem] border border-border-light bg-card">
         <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors">
           Comment ce montant est-il calculé ?
         </summary>
@@ -204,7 +204,7 @@ function StatCard({
   description: string;
 }) {
   return (
-    <div className="rounded-xl border border-border-light bg-white p-4">
+    <div className="rounded-[1.5rem] border border-border-light bg-card p-4">
       <p className="text-xs text-on-surface-muted">{label}</p>
       <p className={`mt-1 text-xl font-bold ${color}`}>{value}</p>
       <p className="mt-0.5 text-[10px] text-on-surface-muted">{description}</p>

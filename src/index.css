@@ -9,25 +9,31 @@
 }
 
 @theme {
-  --color-primary: #185FA5;
-  --color-primary-light: #378ADD;
-  --color-primary-container: #E6F1FB;
-  --color-on-primary: #FFFFFF;
+  --color-primary: #465024;
+  --color-primary-light: #30351F;
+  --color-primary-container: #D4B895;
+  --color-on-primary: #E8DCC7;
 
-  --color-surface: #FAFBFC;
-  --color-surface-alt: #F0F2F5;
-  --color-on-surface: #1A1C1E;
-  --color-on-surface-muted: #6B7280;
+  --color-surface: #D4B895;
+  --color-surface-alt: #C7AA83;
+  --color-card: #E8DCC7;
+  --color-card-muted: #D4B895;
+  --color-on-surface: #30351F;
+  --color-on-surface-muted: #504B38;
 
-  --color-success: #16A34A;
-  --color-warning: #D97706;
-  --color-danger: #DC2626;
-  --color-info: #2563EB;
+  --color-success: #37562F;
+  --color-success-container: #A9B8A0;
+  --color-warning: #57330F;
+  --color-warning-container: #D6A752;
+  --color-danger: #6F2D1C;
+  --color-danger-container: #D98E69;
+  --color-info: #465024;
+  --color-info-container: #B7C0A8;
 
-  --color-border: #D1D5DB;
-  --color-border-light: #E5E7EB;
+  --color-border: #8B755E;
+  --color-border-light: #B69B79;
 
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Epilogue Variable", Epilogue, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --animate-slide-up: slide-up 0.3s ease-out;
@@ -65,14 +71,107 @@
 body {
   margin: 0;
   font-family: var(--font-sans);
+  color: #30351f;
+  background: #d4b895;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scrollbar-color: #8b755e transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: #8b755e;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #465024;
+  background-clip: padding-box;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
 }
 
 #root {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+}
+
+::selection {
+  color: #e8dcc7;
+  background: #465024;
+}
+
+.product-organic {
+  color: #30351f;
+  background-color: #d4b895;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='product-noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23product-noise)' opacity='.018'/%3E%3C/svg%3E");
+}
+
+.product-organic :focus-visible,
+.landing-organic :focus-visible {
+  outline: 3px solid #e8dcc7;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px #30351f;
+}
+
+.product-organic input,
+.product-organic select,
+.product-organic textarea {
+  min-height: 44px;
+  color: #30351f;
+  background-color: #e8dcc7;
+}
+
+.product-organic input::placeholder,
+.product-organic textarea::placeholder {
+  color: #686047;
+  opacity: 1;
+}
+
+.product-organic button,
+.product-organic a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.product-organic button {
+  min-height: 44px;
+}
+
+.product-content > * {
+  animation: product-arrive 320ms ease-out both;
+}
+
+@keyframes product-arrive {
+  from {
+    opacity: 0.94;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .landing-organic {
@@ -90,12 +189,6 @@ body {
   opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.35'/%3E%3C/svg%3E");
   mix-blend-mode: multiply;
-}
-
-.landing-organic :focus-visible {
-  outline: 3px solid #e8dcc7;
-  outline-offset: 3px;
-  box-shadow: 0 0 0 6px #30351f;
 }
 
 .organic-breathe {
@@ -119,7 +212,8 @@ body {
   }
 
   .landing-organic *,
-  .organic-breathe {
+  .organic-breathe,
+  .product-organic * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;

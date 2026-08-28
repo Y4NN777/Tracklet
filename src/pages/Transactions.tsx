@@ -8,6 +8,7 @@ import { Modal } from "../components/Modal";
 import { EmptyState } from "../components/EmptyState";
 import { useToast } from "../components/Toast";
 import { format } from "date-fns";
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Plus } from "lucide-react";
 
 interface TransactionsProps {
   realm: Realm;
@@ -90,25 +91,26 @@ export function Transactions({ realm }: TransactionsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-on-surface">Opérations</h1>
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+        <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Opérations</h1>
         <button
           type="button"
           onClick={() => setShowAdd(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
+          className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
-          + Nouvelle opération
+          <Plus aria-hidden="true" className="mr-1 inline h-4 w-4" />
+          Nouvelle opération
         </button>
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-2">
+      <div className="scrollbar-hidden flex gap-2 overflow-x-auto pb-1" aria-label="Filtrer les opérations">
         {(["all", "expense", "income", "transfer"] as const).map((f) => (
           <button
             key={f}
             type="button"
             onClick={() => setFilter(f)}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
+            className={`rounded-2xl px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
               filter === f
                 ? "bg-primary-container text-primary"
                 : "text-on-surface-muted hover:bg-surface-alt"
@@ -131,14 +133,17 @@ export function Transactions({ realm }: TransactionsProps) {
           {filtered.map((txn) => {
             const cat = catMap.get(txn.categoryId);
             const pocket = pockets.find((p) => p.id === txn.pocketId);
+            const TransactionIcon = txn.type === "income" ? ArrowDownLeft : txn.type === "expense" ? ArrowUpRight : ArrowLeftRight;
             return (
               <div
                 key={txn.id}
-                className="flex items-center justify-between rounded-lg border border-border-light bg-white px-4 py-3"
+                className="flex items-center justify-between rounded-2xl border border-border-light bg-card px-4 py-3"
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-sm">
-                    {cat?.icon ?? "💳"}
+                  <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                    txn.type === "income" ? "bg-success-container text-success" : txn.type === "expense" ? "bg-danger-container text-danger" : "bg-info-container text-info"
+                  }`}>
+                    <TransactionIcon aria-hidden="true" className="h-5 w-5" />
                   </span>
                   <div>
                     <p className="text-sm font-medium text-on-surface">
@@ -160,7 +165,7 @@ export function Transactions({ realm }: TransactionsProps) {
                         : "text-info"
                   }`}
                 >
-                  {txn.type === "income" ? "+" : txn.type === "expense" ? "−" : txn.transferDirection === "in" ? "←" : "→"}
+                  {txn.type === "income" || (txn.type === "transfer" && txn.transferDirection === "in") ? "+" : "−"}
                   {txn.amount.toLocaleString()} FCFA
                 </span>
               </div>
@@ -178,7 +183,7 @@ export function Transactions({ realm }: TransactionsProps) {
                 key={t}
                 type="button"
                 onClick={() => setForm({ ...form, type: t, categoryId: "" })}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium capitalize transition-colors ${
+                className={`flex-1 rounded-2xl px-3 py-2 text-sm font-medium capitalize transition-colors ${
                   form.type === t
                     ? "bg-primary text-on-primary"
                     : "border border-border-light text-on-surface-muted hover:bg-surface-alt"
@@ -193,7 +198,7 @@ export function Transactions({ realm }: TransactionsProps) {
             <select
               value={form.pocketId}
               onChange={(e) => setForm({ ...form, pocketId: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+              className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
               required
             >
               <option value="">Choisir une poche</option>
@@ -208,7 +213,7 @@ export function Transactions({ realm }: TransactionsProps) {
               <select
                 value={form.destinationPocketId}
                 onChange={(e) => setForm({ ...form, destinationPocketId: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+                className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
                 required
               >
                 <option value="">Choisir une destination</option>
@@ -224,7 +229,7 @@ export function Transactions({ realm }: TransactionsProps) {
               type="number"
               value={form.amount}
               onChange={(e) => setForm({ ...form, amount: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+              className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
               placeholder="0"
               min="1"
               required
@@ -236,7 +241,7 @@ export function Transactions({ realm }: TransactionsProps) {
               type="text"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+              className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
               placeholder="À quoi correspond cette opération ?"
               required
             />
@@ -246,14 +251,14 @@ export function Transactions({ realm }: TransactionsProps) {
             <select
               value={form.categoryId}
               onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+              className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             >
               <option value="">Choisir une catégorie</option>
               {categories
                 .filter((c) => c.type === form.type || form.type === "transfer")
                 .map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.icon} {c.name}
+                    {c.name}
                   </option>
                 ))}
             </select>
@@ -264,7 +269,7 @@ export function Transactions({ realm }: TransactionsProps) {
               type="date"
               value={form.date}
               onChange={(e) => setForm({ ...form, date: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+              className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
               required
             />
           </div>
@@ -272,14 +277,14 @@ export function Transactions({ realm }: TransactionsProps) {
             <button
               type="button"
               onClick={() => setShowAdd(false)}
-              className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
+              className="rounded-2xl border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={saving || !form.amount || !form.description || !form.pocketId || (form.type === "transfer" && !form.destinationPocketId)}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
+              className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
             >
               {saving ? "Enregistrement…" : "Enregistrer"}
             </button>

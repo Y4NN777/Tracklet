@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { BrandMark } from "../components/BrandMark";
 
 const outcomes = [
   {
@@ -105,7 +106,7 @@ export function Landing() {
       <header className="sticky top-0 z-50 border-b border-[#465024]/25 bg-[#E8DCC7]">
         <div className="mx-auto flex min-h-18 max-w-7xl items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
           <Link to="/" className="flex min-h-11 items-center gap-3" aria-label="Tracklet — accueil">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#465024] font-bold text-[#E8DCC7]">T</span>
+            <BrandMark className="h-10 w-10 shrink-0" />
             <span className="text-lg font-bold tracking-[-0.04em]">Tracklet</span>
           </Link>
 

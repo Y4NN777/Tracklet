@@ -16,17 +16,17 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
   render() {
     if (!this.state.error) return this.props.children;
     return (
-      <main className="flex min-h-svh items-center justify-center bg-surface p-6">
-        <div className="max-w-md rounded-2xl border border-danger/20 bg-white p-6 text-center shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-danger">Erreur locale</p>
-          <h1 className="mt-2 text-xl font-semibold text-on-surface">Tracklet n’a pas pu afficher cette page</h1>
+      <main className="product-organic flex min-h-svh items-center justify-center bg-surface p-6">
+        <div className="max-w-md rounded-[2rem] border border-danger bg-card p-6 text-center shadow-sm">
+          <p className="text-sm font-semibold text-danger">Erreur locale</p>
+          <h1 className="mt-2 text-xl font-bold tracking-[-0.035em] text-on-surface">Tracklet n’a pas pu afficher cette page</h1>
           <p className="mt-2 text-sm text-on-surface-muted">
             Vos données restent sur l’appareil. Rechargez l’application ou restaurez une sauvegarde depuis les réglages.
           </p>
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="mt-5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary"
+            className="mt-5 min-h-12 rounded-2xl bg-primary px-4 text-sm font-semibold text-on-primary"
           >
             Recharger
           </button>

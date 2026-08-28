@@ -21,6 +21,7 @@ import {
 } from "../domain/report";
 import { EmptyState } from "../components/EmptyState";
 import { format, parseISO } from "date-fns";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 
 interface ReportsProps {
   realm: Realm;
@@ -109,16 +110,16 @@ export function Reports({ realm }: ReportsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-on-surface">Rapports</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+        <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Rapports</h1>
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => {
               const csv = transactionsToCSV(filteredTxns);
               downloadCSV(csv, `tracklet-transactions-${filters.startDate}-${filters.endDate}.csv`);
             }}
-            className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
+            className="rounded-2xl border border-border-light px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
             Exporter les opérations
           </button>
@@ -128,7 +129,7 @@ export function Reports({ realm }: ReportsProps) {
               const csv = salesToCSV(filteredSales);
               downloadCSV(csv, `tracklet-sales-${filters.startDate}-${filters.endDate}.csv`);
             }}
-            className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
+            className="rounded-2xl border border-border-light px-3 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
             Exporter les ventes
           </button>
@@ -143,7 +144,7 @@ export function Reports({ realm }: ReportsProps) {
             type="date"
             value={filters.startDate}
             onChange={(e) => setFilters((f) => ({ ...f, startDate: e.target.value }))}
-            className="rounded-lg border border-border-light px-3 py-1.5 text-sm outline-none focus:border-primary"
+            className="rounded-2xl border border-border-light px-3 py-1.5 text-sm outline-none focus:border-primary"
           />
         </div>
         <div>
@@ -152,7 +153,7 @@ export function Reports({ realm }: ReportsProps) {
             type="date"
             value={filters.endDate}
             onChange={(e) => setFilters((f) => ({ ...f, endDate: e.target.value }))}
-            className="rounded-lg border border-border-light px-3 py-1.5 text-sm outline-none focus:border-primary"
+            className="rounded-2xl border border-border-light px-3 py-1.5 text-sm outline-none focus:border-primary"
           />
         </div>
         <div className="flex gap-1">
@@ -173,7 +174,7 @@ export function Reports({ realm }: ReportsProps) {
                   endDate: format(end, "yyyy-MM-dd"),
                 });
               }}
-              className="rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
+              className="rounded-2xl border border-border-light px-2.5 py-1.5 text-xs font-medium text-on-surface hover:bg-surface-alt transition-colors"
             >
               {preset.label}
             </button>
@@ -208,10 +209,10 @@ export function Reports({ realm }: ReportsProps) {
       {/* Monthly trends */}
       {monthlyTrends.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-on-surface">
+          <h2 className="mb-3 text-xl font-bold tracking-[-0.035em] text-on-surface">
             Évolution mensuelle
           </h2>
-          <div className="rounded-xl border border-border-light bg-white p-4">
+          <div className="rounded-[1.5rem] border border-border-light bg-card p-4">
             <div className="flex items-end gap-2" style={{ height: 160 }}>
               {monthlyTrends.map((month) => {
                 const maxVal = Math.max(
@@ -245,10 +246,10 @@ export function Reports({ realm }: ReportsProps) {
             </div>
             <div className="mt-2 flex justify-center gap-4 text-xs text-on-surface-muted">
               <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-success" /> Entrées
+                <span className="inline-block h-2.5 w-2.5 rounded-full bg-success" /> Entrées
               </span>
               <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-danger/40" /> Dépenses
+                <span className="inline-block h-2.5 w-2.5 rounded-full bg-danger/40" /> Dépenses
               </span>
             </div>
           </div>
@@ -258,14 +259,14 @@ export function Reports({ realm }: ReportsProps) {
       {/* Category breakdown */}
       {breakdown.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-on-surface">
+          <h2 className="mb-3 text-xl font-bold tracking-[-0.035em] text-on-surface">
             Dépenses par catégorie
           </h2>
           <div className="space-y-2">
             {breakdown.map((cat) => (
               <div
                 key={cat.categoryId}
-                className="rounded-lg border border-border-light bg-white px-4 py-2.5"
+                className="rounded-2xl border border-border-light bg-card px-4 py-2.5"
               >
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
@@ -305,11 +306,11 @@ export function Reports({ realm }: ReportsProps) {
       {/* Profitability month-over-month */}
       {profitReport && profitReport.currentMonth.revenue > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-on-surface">
+          <h2 className="mb-3 text-xl font-bold tracking-[-0.035em] text-on-surface">
             Résultat mois par mois
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-border-light bg-white p-4">
+            <div className="rounded-[1.5rem] border border-border-light bg-card p-4">
               <p className="text-xs text-on-surface-muted">Mois en cours</p>
               <div className="mt-2 space-y-1.5">
                 <Row label="Ventes" value={`+${profitReport.currentMonth.revenue.toLocaleString()} FCFA`} valueClass="text-success" />
@@ -318,7 +319,7 @@ export function Reports({ realm }: ReportsProps) {
                 <p className="mt-1 text-xs text-on-surface-muted">Marge : {profitReport.currentMonth.margin}%</p>
               </div>
             </div>
-            <div className="rounded-xl border border-border-light bg-white p-4">
+            <div className="rounded-[1.5rem] border border-border-light bg-card p-4">
               <p className="text-xs text-on-surface-muted">Mois précédent</p>
               <div className="mt-2 space-y-1.5">
                 <Row label="Ventes" value={`+${profitReport.previousMonth.revenue.toLocaleString()} FCFA`} valueClass="text-success" />
@@ -330,7 +331,7 @@ export function Reports({ realm }: ReportsProps) {
                 <span className={`font-medium ${
                   profitReport.trend === "up" ? "text-success" : profitReport.trend === "down" ? "text-danger" : "text-on-surface-muted"
                 }`}>
-                  {profitReport.trend === "up" ? "▲" : profitReport.trend === "down" ? "▼" : "◆"} Évolution :{" "}
+                  {profitReport.trend === "up" ? <TrendingUp aria-hidden="true" className="mr-1 inline h-4 w-4" /> : profitReport.trend === "down" ? <TrendingDown aria-hidden="true" className="mr-1 inline h-4 w-4" /> : <Minus aria-hidden="true" className="mr-1 inline h-4 w-4" />} Évolution :{" "}
                   {profitReport.trendPercentage > 0 ? "+" : ""}{profitReport.trendPercentage}%
                 </span>
               </div>
@@ -342,19 +343,19 @@ export function Reports({ realm }: ReportsProps) {
       {/* Insights */}
       {insights.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-on-surface">Conseils</h2>
+          <h2 className="mb-3 text-xl font-bold tracking-[-0.035em] text-on-surface">Conseils</h2>
           <div className="space-y-2">
             {insights.map((insight) => {
               const colors: Record<string, string> = {
-                info: "border-blue-200 bg-blue-50",
-                warning: "border-amber-200 bg-amber-50",
-                success: "border-green-200 bg-green-50",
-                tip: "border-purple-200 bg-purple-50",
+                info: "border-info bg-info-container",
+                warning: "border-warning bg-warning-container",
+                success: "border-success bg-success-container",
+                tip: "border-primary bg-primary-container",
               };
               return (
                 <div
                   key={insight.id}
-                  className={`rounded-lg border px-4 py-3 ${colors[insight.type]}`}
+                  className={`rounded-2xl border px-4 py-3 ${colors[insight.type]}`}
                 >
                   <p className="text-sm font-medium text-on-surface">{insight.title}</p>
                   <p className="mt-0.5 text-xs text-on-surface-muted">{insight.message}</p>
@@ -385,7 +386,7 @@ function SummaryCard({
   color: string;
 }) {
   return (
-    <div className="rounded-xl border border-border-light bg-white p-4">
+    <div className="rounded-[1.5rem] border border-border-light bg-card p-4">
       <p className="text-xs text-on-surface-muted">{label}</p>
       <p className={`mt-1 text-lg font-bold ${color}`}>{value}</p>
     </div>

@@ -3,6 +3,7 @@ import { createBackup, downloadBackup, parseBackup, restoreBackup } from "../db/
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { useToast } from "../components/Toast";
 import type { TrackletBackup } from "../types";
+import { HardDrive } from "lucide-react";
 
 export function Settings() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,14 +52,14 @@ export function Settings() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Appareil</p>
-        <h1 className="mt-1 text-2xl font-semibold text-on-surface">Données et sécurité</h1>
+        <p className="flex items-center gap-2 text-sm font-semibold text-primary"><HardDrive aria-hidden="true" className="h-4 w-4" /> Appareil actuel</p>
+        <h1 className="mt-1 text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Données et sécurité</h1>
         <p className="mt-1 text-sm text-on-surface-muted">
           Vos données restent sur cet appareil. Créez régulièrement une sauvegarde privée.
         </p>
       </div>
 
-      <section className="rounded-2xl border border-border-light bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-border-light bg-card p-5 shadow-sm">
         <h2 className="font-semibold text-on-surface">Sauvegarde complète</h2>
         <p className="mt-1 text-sm text-on-surface-muted">
           Le fichier contient vos poches, opérations, ventes, dettes et objectifs. Gardez-le dans un endroit sûr.
@@ -68,7 +69,7 @@ export function Settings() {
             type="button"
             onClick={handleExport}
             disabled={working}
-            className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-light disabled:opacity-50"
+            className="rounded-[1.5rem] bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-light disabled:opacity-50"
           >
             Télécharger une sauvegarde
           </button>
@@ -76,7 +77,7 @@ export function Settings() {
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={working}
-            className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-alt disabled:opacity-50"
+            className="rounded-[1.5rem] border border-border px-4 py-2.5 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-alt disabled:opacity-50"
           >
             Restaurer un fichier
           </button>
@@ -90,7 +91,7 @@ export function Settings() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border-light bg-white p-5">
+      <section className="rounded-2xl border border-border-light bg-card p-5">
         <h2 className="font-semibold text-on-surface">À propos</h2>
         <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
           <dt className="text-on-surface-muted">Version</dt>

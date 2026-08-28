@@ -1,238 +1,277 @@
-import { useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import {
+  BarChart3,
+  BriefcaseBusiness,
+  CircleDollarSign,
+  HandCoins,
+  House,
+  Menu,
+  PiggyBank,
+  ReceiptText,
+  Settings,
+  Store,
+  UserRound,
+  WalletCards,
+  X,
+} from "lucide-react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import type { Realm } from "../types";
 import { AgentPanel } from "./AgentPanel";
+import { BrandMark } from "./BrandMark";
 
-const navItems = [
-  { to: "/dashboard", label: "Accueil", icon: IconDashboard },
-  { to: "/pockets", label: "Poches", icon: IconPockets },
-  { to: "/transactions", label: "Opérations", icon: IconTransactions },
-  { to: "/debts", label: "Dettes", icon: IconDebts },
-  { to: "/goals", label: "Objectifs", icon: IconGoals },
-  { to: "/sales", label: "Ventes", icon: IconSales, businessOnly: true },
-  { to: "/reports", label: "Rapports", icon: IconReports },
-  { to: "/cash-position", label: "Trésorerie", icon: IconCashPosition },
-  { to: "/settings", label: "Réglages", icon: IconSettings },
+const navGroups = [
+  {
+    label: "Au quotidien",
+    items: [
+      { to: "/dashboard", label: "Vue d’ensemble", shortLabel: "Accueil", icon: House },
+      { to: "/pockets", label: "Poches", shortLabel: "Poches", icon: WalletCards },
+      { to: "/transactions", label: "Opérations", shortLabel: "Opérations", icon: ReceiptText },
+      { to: "/sales", label: "Ventes", shortLabel: "Ventes", icon: Store, businessOnly: true },
+    ],
+  },
+  {
+    label: "À suivre",
+    items: [
+      { to: "/cash-position", label: "Trésorerie", shortLabel: "Trésorerie", icon: CircleDollarSign },
+      { to: "/debts", label: "Dettes et créances", shortLabel: "Dettes", icon: HandCoins },
+      { to: "/goals", label: "Objectifs", shortLabel: "Objectifs", icon: PiggyBank },
+      { to: "/reports", label: "Rapports", shortLabel: "Rapports", icon: BarChart3 },
+      { to: "/settings", label: "Données et sécurité", shortLabel: "Réglages", icon: Settings },
+    ],
+  },
 ];
 
 interface LayoutProps {
   realm: Realm;
-  onRealmChange: (r: Realm) => void;
+  onRealmChange: (realm: Realm) => void;
 }
 
 export function Layout({ realm, onRealmChange }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const currentPage = location.pathname.replace("/", "") || "dashboard";
-  const visibleNavItems = navItems.filter((item) => !item.businessOnly || realm === "business");
-  const mobileNavItems = visibleNavItems.filter((item) =>
-    ["/dashboard", "/transactions", realm === "business" ? "/sales" : "/pockets", "/cash-position"].includes(item.to),
-  );
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const firstNavItem = useRef<HTMLAnchorElement>(null);
+  const sidebar = useRef<HTMLElement>(null);
+  const visibleGroups = navGroups.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !item.businessOnly || realm === "business"),
+  }));
+  const visibleItems = visibleGroups.flatMap((group) => group.items);
+  const currentItem = visibleItems.find((item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`));
+  const mobilePaths = ["/dashboard", "/transactions", realm === "business" ? "/sales" : "/pockets", "/cash-position"];
+  const mobileNavItems = mobilePaths.map((path) => visibleItems.find((item) => item.to === path)).filter(Boolean);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const syncSidebarAvailability = () => {
+      if (sidebar.current) sidebar.current.inert = !desktop.matches && !sidebarOpen;
+    };
+
+    syncSidebarAvailability();
+    desktop.addEventListener("change", syncSidebarAvailability);
+    return () => desktop.removeEventListener("change", syncSidebarAvailability);
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    firstNavItem.current?.focus();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const manageDrawerKeyboard = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSidebarOpen(false);
+        window.requestAnimationFrame(() => menuButton.current?.focus());
+        return;
+      }
+      if (event.key !== "Tab" || !sidebar.current) return;
+
+      const focusable = Array.from(
+        sidebar.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      } else if (!sidebar.current.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", manageDrawerKeyboard);
+    return () => {
+      document.removeEventListener("keydown", manageDrawerKeyboard);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [sidebarOpen]);
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+    window.requestAnimationFrame(() => menuButton.current?.focus());
+  };
 
   return (
-    <div className="flex min-h-svh bg-surface">
-      {/* Mobile overlay */}
+    <div className="product-organic flex min-h-svh bg-surface text-on-surface">
+      <a
+        href="#product-main"
+        className="fixed left-3 top-3 z-[70] -translate-y-24 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary focus:translate-y-0"
+      >
+        Aller au contenu
+      </a>
+
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
+        <button
+          type="button"
+          tabIndex={-1}
+          className="fixed inset-0 z-30 bg-[#30351F]/55 lg:hidden"
+          onClick={closeSidebar}
+          aria-label="Fermer le menu"
         />
       )}
 
-      {/* Sidebar (desktop) + mobile drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border-light bg-white transition-transform duration-200 lg:static lg:translate-x-0 ${
+        ref={sidebar}
+        id="product-navigation"
+        className={`fixed inset-y-0 left-0 z-40 flex w-[18rem] flex-col border-r border-border-light bg-card transition-transform duration-300 lg:sticky lg:top-0 lg:h-svh lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        aria-label="Navigation du produit"
       >
-        {/* Logo */}
-        <div className="flex h-16 items-center gap-3 border-b border-border-light px-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-on-primary">
-            T
-          </div>
-          <span className="text-lg font-semibold text-on-surface">Tracklet</span>
+        <div className="flex min-h-20 items-center justify-between gap-3 border-b border-border-light px-5">
+          <Link to="/dashboard" className="flex min-h-12 items-center gap-3 rounded-2xl" aria-label="Tracklet — vue d’ensemble">
+            <BrandMark className="h-11 w-11 shrink-0" />
+            <span>
+              <span className="block text-lg font-bold tracking-[-0.04em]">Tracklet</span>
+              <span className="block text-xs text-on-surface-muted">Local · FCFA</span>
+            </span>
+          </Link>
+          <button type="button" onClick={closeSidebar} className="grid h-11 w-11 place-items-center rounded-2xl hover:bg-surface lg:hidden" aria-label="Fermer le menu">
+            <X aria-hidden="true" className="h-5 w-5" />
+          </button>
         </div>
 
-        {/* Nav items */}
-        <nav className="flex-1 space-y-0.5 px-3 py-4">
-          {visibleNavItems.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === "/dashboard"}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary-container text-primary"
-                    : "text-on-surface-muted hover:bg-surface-alt hover:text-on-surface"
-                }`
-              }
-            >
-              <Icon />
-              {label}
-            </NavLink>
+        <div className="border-b border-border-light px-4 py-5">
+          <p className="mb-2 px-1 text-xs font-semibold text-on-surface-muted">Espace financier</p>
+          <div className="grid grid-cols-2 gap-2 rounded-[1.25rem] bg-card-muted p-1.5" aria-label="Choisir un espace financier">
+            {(["personal", "business"] as const).map((nextRealm) => {
+              const Icon = nextRealm === "personal" ? UserRound : BriefcaseBusiness;
+              const active = realm === nextRealm;
+              return (
+                <button
+                  key={nextRealm}
+                  type="button"
+                  onClick={() => onRealmChange(nextRealm)}
+                  className={`flex min-h-11 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-semibold transition-colors ${
+                    active ? "bg-primary text-on-primary" : "text-on-surface-muted hover:bg-card"
+                  }`}
+                  aria-pressed={active}
+                >
+                  <Icon aria-hidden="true" className="h-4 w-4" />
+                  {nextRealm === "personal" ? "Personnel" : "Activité"}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
+          {visibleGroups.map((group, groupIndex) => (
+            <div key={group.label} className={groupIndex === 0 ? "" : "mt-6"}>
+              <p className="mb-2 px-3 text-xs font-semibold text-on-surface-muted">{group.label}</p>
+              <div className="space-y-1">
+                {group.items.map(({ to, label, icon: Icon }, itemIndex) => (
+                  <NavLink
+                    key={to}
+                    ref={groupIndex === 0 && itemIndex === 0 ? firstNavItem : undefined}
+                    to={to}
+                    end={to === "/dashboard"}
+                    className={({ isActive }) =>
+                      `flex min-h-12 items-center gap-3 rounded-2xl px-3 text-sm font-semibold transition-colors ${
+                        isActive ? "bg-primary text-on-primary" : "text-on-surface-muted hover:bg-card-muted hover:text-on-surface"
+                      }`
+                    }
+                  >
+                    <Icon aria-hidden="true" className="h-5 w-5 shrink-0" />
+                    {label}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
-        {/* Realm toggle */}
-        <div className="border-t border-border-light px-4 py-4">
-          <p className="mb-2 text-xs font-medium text-on-surface-muted">Espace financier</p>
-          <div className="flex overflow-hidden rounded-lg border border-border-light text-sm">
-            {(["personal", "business"] as const).map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => onRealmChange(r)}
-                className={`flex-1 px-3 py-1.5 font-medium capitalize transition-colors ${
-                  realm === r
-                    ? "bg-primary text-on-primary"
-                    : "bg-white text-on-surface-muted hover:bg-surface-alt"
-                }`}
-              >
-                {r === "personal" ? "Personnel" : "Activité"}
-              </button>
-            ))}
-          </div>
+        <div className="border-t border-border-light px-5 py-4 text-xs leading-relaxed text-on-surface-muted">
+          Vos chiffres restent sur cet appareil.
         </div>
       </aside>
 
-      {/* Main area */}
-      <div className="flex flex-1 flex-col">
-        {/* Top header (mobile) */}
-        <header className="flex h-14 items-center gap-3 border-b border-border-light bg-white px-4 lg:hidden">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="rounded-lg p-1.5 text-on-surface-muted hover:bg-surface-alt"
-            aria-label="Ouvrir le menu"
-          >
-            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
-              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </button>
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-xs font-bold text-on-primary">
-            T
+      <div className="min-w-0 flex flex-1 flex-col">
+        <header className="sticky top-0 z-20 flex min-h-18 items-center justify-between gap-3 border-b border-border-light bg-card px-4 lg:hidden">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              ref={menuButton}
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-border-light hover:bg-card-muted"
+              aria-label="Ouvrir le menu"
+              aria-expanded={sidebarOpen}
+              aria-controls="product-navigation"
+            >
+              <Menu aria-hidden="true" className="h-5 w-5" />
+            </button>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold">{currentItem?.label ?? "Tracklet"}</p>
+              <p className="flex items-center gap-1 text-xs text-on-surface-muted">
+                {realm === "personal" ? <UserRound aria-hidden="true" className="h-3.5 w-3.5" /> : <BriefcaseBusiness aria-hidden="true" className="h-3.5 w-3.5" />}
+                {realm === "personal" ? "Espace personnel" : "Espace activité"}
+              </p>
+            </div>
           </div>
-          <span className="text-sm font-semibold text-on-surface">Tracklet</span>
+          <Link to="/dashboard" className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl" aria-label="Vue d’ensemble">
+            <BrandMark className="h-11 w-11" />
+          </Link>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto p-4 pb-20 sm:p-6 lg:pb-6">
+        <main id="product-main" tabIndex={-1} className="product-content mx-auto w-full max-w-[88rem] flex-1 p-4 pb-28 sm:p-6 sm:pb-28 lg:p-8">
           <Outlet />
         </main>
 
-        <AgentPanel page={currentPage} realm={realm} />
+        <AgentPanel page={currentItem?.to.slice(1) ?? "dashboard"} realm={realm} />
 
-        {/* Bottom nav (mobile) */}
-        <nav className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-border-light bg-white lg:hidden">
-          {mobileNavItems.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === "/dashboard"}
-              className={({ isActive }) =>
-                `flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors ${
-                  isActive
-                    ? "text-primary"
-                    : "text-on-surface-muted"
-                }`
-              }
-            >
-              <Icon />
-              {label}
-            </NavLink>
-          ))}
+        <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-border-light bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:hidden" aria-label="Navigation rapide">
+          {mobileNavItems.map((item) => {
+            if (!item) return null;
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === "/dashboard"}
+                className={({ isActive }) =>
+                  `flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[0.68rem] font-semibold transition-colors ${
+                    isActive ? "bg-primary-container text-primary" : "text-on-surface-muted"
+                  }`
+                }
+              >
+                <Icon aria-hidden="true" className="h-5 w-5" />
+                <span className="max-w-full truncate">{item.shortLabel}</span>
+              </NavLink>
+            );
+          })}
         </nav>
       </div>
     </div>
-  );
-}
-
-/* ─── Simple SVG Icons ─── */
-
-function IconDashboard() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect x="2" y="2" width="7" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="11" y="2" width="7" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="2" y="12" width="7" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="11" y="9" width="7" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function IconPockets() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect x="3" y="4" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M3 9h14" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="10" cy="13" r="1.5" fill="currentColor" />
-    </svg>
-  );
-}
-
-function IconTransactions() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M14 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M18 7H6M6 13l-4 4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M2 17h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconDebts() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M10 6v8M7 9h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconReports() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M4 16V4a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1z" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M10 16V8a1 1 0 011-1h4a1 1 0 011 1v8a1 1 0 01-1 1h-4a1 1 0 01-1-1z" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function IconGoals() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-    </svg>
-  );
-}
-
-function IconSales() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M3 10h3l2-5 4 10 2-5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconCashPosition() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect x="2" y="5" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="10" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M2 7.5h16" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function IconSettings() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
   );
 }
