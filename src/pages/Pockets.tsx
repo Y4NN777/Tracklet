@@ -6,6 +6,7 @@ import { createPocket } from "../db/repositories/pocket";
 import { Modal } from "../components/Modal";
 import { EmptyState } from "../components/EmptyState";
 import { useToast } from "../components/Toast";
+import { Plus } from "lucide-react";
 
 interface PocketsProps {
   realm: Realm;
@@ -41,7 +42,7 @@ export function Pockets({ realm }: PocketsProps) {
   if (!loading && balances.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Poches</h1>
+        <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Poches</h1>
         <EmptyState
           title="Aucune poche"
           message="Créez votre première poche : espèces, Orange Money ou Moov Money."
@@ -61,9 +62,9 @@ export function Pockets({ realm }: PocketsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-2xl font-semibold text-on-surface">Poches</h1>
+          <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Poches</h1>
           <p className="text-sm text-on-surface-muted">
             Solde total : {total.toLocaleString()} FCFA
           </p>
@@ -71,9 +72,10 @@ export function Pockets({ realm }: PocketsProps) {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
+          className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
-          + Nouvelle poche
+          <Plus aria-hidden="true" className="mr-1 inline h-4 w-4" />
+          Nouvelle poche
         </button>
       </div>
 
@@ -82,7 +84,7 @@ export function Pockets({ realm }: PocketsProps) {
           <Link
             key={b.pocket.id}
             to={`/pockets/${b.pocket.id}`}
-            className="block rounded-xl border border-border-light bg-white p-4 transition-shadow hover:shadow-md"
+            className="block rounded-[1.5rem] border border-border-light bg-card p-4 transition-shadow hover:shadow-md"
           >
             <h3 className="font-semibold text-on-surface">{b.pocket.name}</h3>
             {b.pocket.description && (
@@ -149,7 +151,7 @@ function CreateModal({
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm text-on-surface outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm text-on-surface outline-none focus:border-primary"
             placeholder="Ex. Espèces, Orange Money"
             required
           />
@@ -161,7 +163,7 @@ function CreateModal({
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm text-on-surface outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm text-on-surface outline-none focus:border-primary"
             placeholder="Description facultative"
             rows={2}
           />
@@ -170,14 +172,14 @@ function CreateModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
+            className="rounded-2xl border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.name.trim()}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
+            className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
             {saving ? "Création…" : "Créer"}
           </button>

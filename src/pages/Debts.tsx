@@ -7,6 +7,7 @@ import { EmptyState } from "../components/EmptyState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { useToast } from "../components/Toast";
 import { format } from "date-fns";
+import { Plus } from "lucide-react";
 
 interface DebtsProps {
   realm: Realm;
@@ -101,7 +102,7 @@ export function Debts({ realm }: DebtsProps) {
   if (!loading && debts.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Dettes et créances</h1>
+        <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Dettes et créances</h1>
         <EmptyState
           title="Aucune dette enregistrée"
           message="Notez l’argent prêté ou emprunté."
@@ -121,9 +122,9 @@ export function Debts({ realm }: DebtsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-2xl font-semibold text-on-surface">Dettes et créances</h1>
+          <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Dettes et créances</h1>
           <p className="text-sm text-on-surface-muted">
             Prêté : {totalLent.toLocaleString()} FCFA · Emprunté :{" "}
             {totalBorrowed.toLocaleString()} FCFA
@@ -132,20 +133,21 @@ export function Debts({ realm }: DebtsProps) {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
+          className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
-          + Ajouter
+          <Plus aria-hidden="true" className="mr-1 inline h-4 w-4" />
+          Ajouter
         </button>
       </div>
 
       {/* Filter */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Filtrer les dettes et créances">
         {(["all", "active", "settled", "written-off"] as const).map((f) => (
           <button
             key={f}
             type="button"
             onClick={() => setFilter(f)}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
+            className={`rounded-2xl px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
               filter === f
                 ? "bg-primary-container text-primary"
                 : "text-on-surface-muted hover:bg-surface-alt"
@@ -203,13 +205,13 @@ function DebtCard({
   onDelete: () => void;
 }) {
   const statusColors: Record<string, string> = {
-    active: "bg-amber-100 text-amber-800",
-    settled: "bg-green-100 text-green-800",
-    "written-off": "bg-gray-100 text-gray-500",
+    active: "bg-warning-container text-warning",
+    settled: "bg-success-container text-success",
+    "written-off": "bg-card-muted text-on-surface-muted",
   };
 
   return (
-    <div className="rounded-xl border border-border-light bg-white p-4">
+    <div className="rounded-[1.5rem] border border-border-light bg-card p-4">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
           <span className="mt-1 text-lg">
@@ -248,21 +250,21 @@ function DebtCard({
               <button
                 type="button"
                 onClick={onSettle}
-                className="rounded-md bg-success/10 px-2 py-0.5 text-xs font-medium text-success hover:bg-success/20 transition-colors"
+                className="rounded-2xl bg-success/10 px-2 py-0.5 text-xs font-medium text-success hover:bg-success/20 transition-colors"
               >
                 Régler
               </button>
               <button
                 type="button"
                 onClick={onWriteOff}
-                className="rounded-md border border-border-light px-2 py-0.5 text-xs text-on-surface-muted hover:bg-surface-alt transition-colors"
+                className="rounded-2xl border border-border-light px-2 py-0.5 text-xs text-on-surface-muted hover:bg-surface-alt transition-colors"
               >
                 Sans suite
               </button>
               <button
                 type="button"
                 onClick={onDelete}
-                className="rounded-md px-2 py-0.5 text-xs text-danger hover:bg-danger/10 transition-colors"
+                className="rounded-2xl px-2 py-0.5 text-xs text-danger hover:bg-danger/10 transition-colors"
               >
                 Supprimer
               </button>
@@ -310,7 +312,7 @@ function CreateModal({
               key={d}
               type="button"
               onClick={() => setForm({ ...form, direction: d })}
-              className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium capitalize transition-colors ${
+              className={`flex-1 rounded-2xl px-3 py-2 text-sm font-medium capitalize transition-colors ${
                 form.direction === d
                   ? "bg-primary text-on-primary"
                   : "border border-border-light text-on-surface-muted hover:bg-surface-alt"
@@ -326,7 +328,7 @@ function CreateModal({
             type="text"
             value={form.person}
             onChange={(e) => setForm({ ...form, person: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="Nom de la personne"
             required
           />
@@ -337,7 +339,7 @@ function CreateModal({
             type="number"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="0"
             min="1"
             required
@@ -348,7 +350,7 @@ function CreateModal({
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="À quoi correspond cette somme ?"
             rows={2}
           />
@@ -359,7 +361,7 @@ function CreateModal({
             type="date"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             required
           />
         </div>
@@ -367,14 +369,14 @@ function CreateModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
+            className="rounded-2xl border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.person || !form.amount}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
+            className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
             {saving ? "Enregistrement…" : "Enregistrer"}
           </button>

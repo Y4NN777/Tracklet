@@ -8,6 +8,7 @@ import { Modal } from "../components/Modal";
 import { EmptyState } from "../components/EmptyState";
 import { useToast } from "../components/Toast";
 import { format } from "date-fns";
+import { Plus, Trash2 } from "lucide-react";
 
 type AggMode = "day" | "week" | "month";
 
@@ -99,7 +100,7 @@ export function Sales({ realm }: SalesProps) {
   if (realm === "personal") {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Ventes</h1>
+        <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Ventes</h1>
         <EmptyState title="Réservé à l’activité" message="Passez dans l’espace Activité pour enregistrer vos ventes." />
       </div>
     );
@@ -108,7 +109,7 @@ export function Sales({ realm }: SalesProps) {
   if (!loading && sales.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Ventes</h1>
+        <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Ventes</h1>
         <EmptyState
           title="Aucune vente"
           message="Enregistrez votre première vente pour suivre votre chiffre d’affaires."
@@ -133,9 +134,9 @@ export function Sales({ realm }: SalesProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-2xl font-semibold text-on-surface">Ventes</h1>
+          <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Ventes</h1>
           <p className="text-sm text-on-surface-muted">
             Chiffre d’affaires total : {totalRevenue.toLocaleString()} FCFA
           </p>
@@ -143,9 +144,10 @@ export function Sales({ realm }: SalesProps) {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
+          className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
-          + Enregistrer une vente
+          <Plus aria-hidden="true" className="mr-1 inline h-4 w-4" />
+          Enregistrer une vente
         </button>
       </div>
 
@@ -156,15 +158,15 @@ export function Sales({ realm }: SalesProps) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Rechercher une vente…"
-          className="w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary sm:max-w-xs"
+          className="w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary sm:max-w-xs"
         />
-        <div className="flex gap-1 rounded-lg border border-border-light p-0.5">
+        <div className="flex gap-1 rounded-2xl border border-border-light p-0.5">
           {(["day", "week", "month"] as const).map((mode) => (
             <button
               key={mode}
               type="button"
               onClick={() => setAggMode(mode)}
-              className={`rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors ${
+              className={`rounded-2xl px-3 py-1 text-xs font-medium capitalize transition-colors ${
                 aggMode === mode
                   ? "bg-primary text-on-primary"
                   : "text-on-surface-muted hover:text-on-surface"
@@ -184,7 +186,7 @@ export function Sales({ realm }: SalesProps) {
           aggregations.map((agg) => (
             <div
               key={agg.period}
-              className="rounded-xl border border-border-light bg-white"
+              className="rounded-[1.5rem] border border-border-light bg-card"
             >
               <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
                 <span className="text-sm font-semibold text-on-surface">
@@ -224,10 +226,10 @@ export function Sales({ realm }: SalesProps) {
                       <button
                         type="button"
                         onClick={() => handleDelete(sale.id, sale.product)}
-                        className="rounded-md px-1.5 py-0.5 text-xs text-danger opacity-60 hover:opacity-100 transition-opacity"
+                        className="grid h-11 w-11 place-items-center rounded-2xl text-danger opacity-70 transition-opacity hover:bg-danger-container hover:opacity-100"
                         aria-label="Supprimer la vente"
                       >
-                        ✕
+                        <Trash2 aria-hidden="true" className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -290,7 +292,7 @@ function SaleModal({
             type="text"
             value={form.product}
             onChange={(e) => setForm({ ...form, product: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="Ex. Gâteaux, couture, photo"
             required
           />
@@ -302,7 +304,7 @@ function SaleModal({
               type="number"
               value={form.quantity}
               onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+              className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
               min="1"
               required
             />
@@ -313,14 +315,14 @@ function SaleModal({
               type="number"
               value={form.unitPrice}
               onChange={(e) => setForm({ ...form, unitPrice: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+              className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
               placeholder="0"
               min="1"
               required
             />
           </div>
         </div>
-        <div className="rounded-lg bg-surface-alt px-3 py-2 text-sm">
+        <div className="rounded-2xl bg-surface-alt px-3 py-2 text-sm">
           <span className="text-on-surface-muted">Total : </span>
           <span className="font-bold text-success">
             +{computedTotal.toLocaleString()} FCFA
@@ -331,7 +333,7 @@ function SaleModal({
           <select
             value={form.pocketId}
             onChange={(e) => setForm({ ...form, pocketId: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             required
           >
             <option value="">Choisir une poche</option>
@@ -346,7 +348,7 @@ function SaleModal({
             type="date"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             required
           />
         </div>
@@ -356,7 +358,7 @@ function SaleModal({
             type="text"
             value={form.tags}
             onChange={(e) => setForm({ ...form, tags: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="pâtisserie, commande"
           />
         </div>
@@ -364,14 +366,14 @@ function SaleModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
+            className="rounded-2xl border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.product || !form.unitPrice || !form.pocketId}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
+            className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
             {saving ? "Enregistrement…" : "Enregistrer"}
           </button>

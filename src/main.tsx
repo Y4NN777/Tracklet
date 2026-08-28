@@ -7,14 +7,14 @@ import "./index.css";
 
 function StartupError() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 p-6 text-white">
-      <section className="max-w-md rounded-2xl border border-red-500/30 bg-slate-900 p-6 text-center shadow-xl">
-        <h1 className="text-xl font-semibold">Tracklet ne peut pas démarrer</h1>
-        <p className="mt-3 text-sm text-slate-300">
+    <main className="product-organic flex min-h-screen items-center justify-center bg-surface p-6 text-on-surface">
+      <section className="max-w-md rounded-[2rem] border border-danger bg-card p-6 text-center shadow-xl">
+        <h1 className="text-xl font-bold tracking-[-0.035em]">Tracklet ne peut pas démarrer</h1>
+        <p className="mt-3 text-sm leading-relaxed text-on-surface-muted">
           Le stockage local est indisponible. Vérifiez les autorisations du navigateur puis rechargez la page.
         </p>
         <button
-          className="mt-5 rounded-lg bg-red-500 px-4 py-2 font-medium text-white hover:bg-red-400"
+          className="mt-5 min-h-12 rounded-2xl bg-danger px-4 font-semibold text-on-primary hover:bg-[#6F2D1C]"
           type="button"
           onClick={() => window.location.reload()}
         >

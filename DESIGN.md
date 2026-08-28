@@ -1,342 +1,208 @@
 ---
 name: Tracklet
-description: Financial copilot for young entrepreneurs in French-speaking West Africa
+description: Local-first financial copilot for francophone micro-entrepreneurs
 version: alpha
 
 colors:
-  primary: "#185FA5"
-  primary-light: "#378ADD"
-  primary-container: "#E6F1FB"
-  on-primary: "#FFFFFF"
-  on-primary-container: "#0C447C"
-
-  surface: "#FFFFFF"
-  surface-variant: "#F7F9FF"
-  surface-muted: "#F0F4FF"
-  on-surface: "#111111"
-  on-surface-secondary: "#666666"
-  on-surface-muted: "#999999"
-
-  success: "#1D9E75"
-  success-container: "#E1F5EE"
-  on-success-container: "#085041"
-
-  danger: "#E24B4A"
-  danger-container: "#FCEBEB"
-  on-danger-container: "#791F1F"
-
-  warning: "#BA7517"
-  warning-container: "#FAEEDA"
-  on-warning-container: "#633806"
-
-  border: "#E0E8F8"
-  border-strong: "#B5D4F4"
+  primary: "#465024"
+  primary-hover: "#30351F"
+  primary-container: "#D4B895"
+  on-primary: "#E8DCC7"
+  surface: "#D4B895"
+  card: "#E8DCC7"
+  surface-alt: "#C7AA83"
+  on-surface: "#30351F"
+  on-surface-muted: "#504B38"
+  success: "#37562F"
+  success-container: "#A9B8A0"
+  danger: "#6F2D1C"
+  danger-container: "#D98E69"
+  warning: "#57330F"
+  warning-container: "#D6A752"
+  info: "#465024"
+  info-container: "#B7C0A8"
+  border: "#8B755E"
+  border-light: "#B69B79"
 
 typography:
-  h1:
-    fontFamily: Inter
-    fontSize: 2rem
-    fontWeight: 700
-    lineHeight: 1.2
-  h2:
-    fontFamily: Inter
-    fontSize: 1.5rem
-    fontWeight: 600
-    lineHeight: 1.3
-  h3:
-    fontFamily: Inter
-    fontSize: 1.125rem
-    fontWeight: 600
-    lineHeight: 1.4
-  body-lg:
-    fontFamily: Inter
-    fontSize: 1rem
-    fontWeight: 400
-    lineHeight: 1.6
-  body-md:
-    fontFamily: Inter
-    fontSize: 0.875rem
-    fontWeight: 400
-    lineHeight: 1.5
-  body-sm:
-    fontFamily: Inter
-    fontSize: 0.75rem
-    fontWeight: 400
-    lineHeight: 1.4
-  label:
-    fontFamily: Inter
-    fontSize: 0.6875rem
-    fontWeight: 500
-    lineHeight: 1.3
-    letterSpacing: 0.04em
-  amount:
-    fontFamily: Inter
-    fontSize: 1.625rem
-    fontWeight: 500
-    lineHeight: 1.1
-  amount-lg:
-    fontFamily: Inter
-    fontSize: 2rem
-    fontWeight: 600
-    lineHeight: 1.1
+  family: "Epilogue Variable"
+  display-weight: 700
+  body-weight: 400
+  label-weight: 600
 
 rounded:
-  xs: 8px
-  sm: 12px
-  md: 16px
-  lg: 20px
-  xl: 28px
-  full: 9999px
-
-spacing:
-  xs: 4px
-  sm: 8px
-  md: 12px
-  lg: 16px
-  xl: 20px
-  2xl: 24px
-  3xl: 32px
-
-components:
-  balance-card:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.lg}"
-    padding: 18px 20px
-
-  pocket-card:
-    backgroundColor: "{colors.surface-variant}"
-    textColor: "{colors.on-surface}"
-    rounded: "{rounded.sm}"
-    padding: 12px
-    borderColor: "{colors.border}"
-
-  realm-tab-active:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.xs}"
-    padding: 7px 16px
-
-  realm-tab-inactive:
-    backgroundColor: transparent
-    textColor: "{colors.on-surface-muted}"
-    rounded: "{rounded.xs}"
-    padding: 7px 16px
-
-  realm-tab-container:
-    backgroundColor: "{colors.surface-muted}"
-    rounded: "{rounded.xs}"
-    padding: 3px
-
-  action-button:
-    backgroundColor: "{colors.surface-muted}"
-    textColor: "{colors.primary}"
-    rounded: "{rounded.sm}"
-    size: 44px
-
-  insight-card:
-    backgroundColor: "{colors.surface-muted}"
-    textColor: "{colors.on-surface-secondary}"
-    rounded: "{rounded.sm}"
-    padding: 12px 14px
-    borderLeft: 3px solid {colors.primary}
-
-  bottom-nav:
-    backgroundColor: "{colors.surface}"
-    borderTop: 0.5px solid {colors.border}
-    padding: 12px 16px 8px
-
-  nav-icon-active:
-    textColor: "{colors.primary}"
-
-  nav-icon-inactive:
-    textColor: "{colors.border-strong}"
-
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.full}"
-    padding: 12px 24px
-    typography: "{typography.body-md}"
-
-  button-primary-hover:
-    backgroundColor: "{colors.primary-light}"
-
-  button-secondary:
-    backgroundColor: "{colors.primary-container}"
-    textColor: "{colors.on-primary-container}"
-    rounded: "{rounded.full}"
-    padding: 12px 24px
-
-  badge-success:
-    backgroundColor: "{colors.success-container}"
-    textColor: "{colors.on-success-container}"
-    rounded: "{rounded.full}"
-    padding: 4px 10px
-    typography: "{typography.label}"
-
-  badge-danger:
-    backgroundColor: "{colors.danger-container}"
-    textColor: "{colors.on-danger-container}"
-    rounded: "{rounded.full}"
-    padding: 4px 10px
-    typography: "{typography.label}"
-
-  badge-warning:
-    backgroundColor: "{colors.warning-container}"
-    textColor: "{colors.on-warning-container}"
-    rounded: "{rounded.full}"
-    padding: 4px 10px
-    typography: "{typography.label}"
-
-  section-label:
-    textColor: "{colors.on-surface-muted}"
-    typography: "{typography.label}"
-    padding: 0 20px 8px
-
-  divider:
-    backgroundColor: "{colors.border}"
-    height: 0.5px
+  control: 16px
+  compact-surface: 20px
+  card: 24px
+  feature-surface: 32px
 ---
 
 # Tracklet Design System
 
-## Overview
+## Product direction
 
-Tracklet is a financial copilot for young micro-entrepreneurs in French-speaking West Africa. The design must inspire **trust, clarity, and accessibility** — without ever intimidating a user with no financial background.
+Tracklet uses one Organic design system across the public landing and the operational product. The visual language is warm and grounded because the product handles everyday cash, not abstract financial markets. It must feel trustworthy without resembling a generic blue fintech dashboard.
 
-The aesthetic draws from modern fintech apps (Revolut, Chime) adapted to the local context: light mode by default, confident royal blue as the trust-and-authority color, bold typography readable on small Android screens, generous rounded cards.
+The interface is designed for francophone micro-entrepreneurs who may use a mid-range Android phone, have intermittent connectivity, and manage household and business money on the same device.
 
-**Guiding principle**: every screen must answer a question in under 2 seconds without the user having to search. Key financial information (balance, margin, debts) is always front and center.
+**Core product promise:** help the user answer what is available, what the activity earns, and what still has to move.
 
-## Public landing direction
+## Visual anchor
 
-The public landing page uses an organic visual system distinct from conventional blue fintech marketing. Its purpose is explanation and orientation, not financial data entry.
+- **Anchor:** Organic.
+- **Surfaces:** sand (`#E8DCC7`) and oat (`#D4B895`). Pure white, pure black, cold grey, and blue fintech palettes are excluded.
+- **Accents:** deep moss, sage, clay, ochre, and terracotta.
+- **Typography:** Epilogue Variable, bundled and precached for offline use.
+- **Structure:** 16–32px radii, generous reading space, and clear left-aligned hierarchy.
+- **Texture:** SVG grain at 1–3%; it never conveys information.
+- **Motion:** one 300–500ms arrival transition. Reduced-motion preferences remove it.
+- **Signature motif:** personal and business money remain visibly separate before their values converge in the cash-position view.
 
-- **Surface:** sand (`#E8DCC7`) and oat (`#D4B895`). Pure white and cold grey are excluded.
-- **Palette:** deep moss (`#465024`) for accessible text and controls, sage (`#8B9D83`), clay (`#B08B6E`), ochre (`#C08E3A`), terracotta (`#C66B3D`), and soft terracotta (`#D98E69`) for large surfaces.
-- **Typography:** Epilogue Variable, bundled with the application for offline use.
-- **Structure:** rounded 16–32px containers, generous reading space, large left-aligned headings, and one primary action repeated consistently.
-- **Texture and motion:** 2.5% SVG grain plus a single 500ms hero arrival; reduced-motion preferences disable it.
-- **Restrictions:** no blue fintech palette, chapter numbering, bento wall, fabricated balances, customer counts, or testimonials.
-- **Signature motif:** personal and business money follow separate curved streams before converging into the cash-position explanation.
+## UX principles
 
-The landing organizes content around three user outcomes and progressively disclosed questions. All controls meet at least a 44px touch target, focus remains visible, and the mobile navigation exposes every section. Once the user opens `/#/dashboard`, the operational interface returns to the mobile-first tokens documented below.
+### Minimize time to value
 
-## Colors
+The empty dashboard narrows activation to two steps:
 
-The palette is built around a single strong royal blue (`#185FA5`) as the primary color — a universal fintech trust color, readable on white backgrounds, strong in mobile contexts.
+1. Create the first pocket.
+2. Record the next real movement.
 
-- **Primary (`#185FA5`)** : Royal blue — all primary actions, balance cards, active tabs, CTA buttons, insight accents.
-- **Primary Light (`#378ADD`)** : Hover/active variant for primary.
-- **Primary Container (`#E6F1FB`)** : Pale blue tint — muted surface backgrounds, action buttons, realm tab container.
-- **Surface (`#FFFFFF`)** : Main background. Light mode only.
-- **Surface Variant (`#F7F9FF`)** : Secondary cards (pocket cards, etc.).
-- **Surface Muted (`#F0F4FF`)** : Backgrounds for non-primary interactive elements.
-- **Success (`#1D9E75`)** : Money inflows, receivables collected, goals achieved.
-- **Danger (`#E24B4A`)** : Debts, alerts, negative balance.
-- **Warning (`#BA7517`)** : Reminders, overdue receivables, budget exceeded.
-- **Border (`#E0E8F8`)** : Hairlines between elements. Always 0.5px.
+Do not require an account, tutorial carousel, preference survey, or fabricated sample data before the user can act.
 
-Never use red for anything other than real financial danger — red creates unnecessary anxiety. Overdue debt reminders use warning (amber), not danger.
+### Retention through utility
+
+Retention comes from reliable recurring value, not streaks, urgency, unread badges, or artificial rewards.
+
+- Keep frequent actions in a stable position.
+- Show contextual guidance only when it is supported by local data.
+- Make cash position and recent activity easy to revisit.
+- Preserve honest empty states instead of filling screens with fake balances.
+- Use success feedback after completed actions and specific recovery instructions after errors.
+
+### Recognition over recall
+
+- Navigation is grouped as **Au quotidien** and **À suivre**.
+- The current **Personnel** or **Activité** context remains visible.
+- Desktop uses a persistent navigation panel; compact layouts use four stable bottom destinations plus a complete drawer.
+- Page titles, primary actions, filters, summaries, and lists follow the same order across routes.
+
+### Progressive disclosure
+
+The dashboard shows decisions first and details second. Explanations, filters, backup limits, and calculation formulas remain available without competing with the primary task.
+
+## Color semantics
+
+- **Primary / deep moss:** navigation, primary actions, and the single cash-position hero.
+- **Success:** income, positive result, recovered receivables, achieved goals.
+- **Danger:** destructive actions, negative result, and real financial risk only.
+- **Warning:** active commitments and items requiring attention.
+- **Info:** neutral financial guidance.
+
+Color never carries meaning alone. Labels, signs, and icons remain present. Normal text maintains at least 4.5:1 contrast; interactive graphics and focus indicators maintain at least 3:1.
 
 ## Typography
 
-Single typeface: **Inter**. Readable on all mid-range Android screens, free, available on Google Fonts.
+Epilogue Variable is used across landing and product. It is warm, compact, and remains readable on mobile.
 
-Financial amounts (`amount`, `amount-lg`) get special treatment: weight 500-600, generous size. An amount must be readable at a glance without effort.
+- Page title: 30–36px, weight 700, tight tracking.
+- Section title: 20px, weight 700.
+- Body: 14–16px with relaxed line height.
+- Financial amount: 20–74px depending on hierarchy; always tabular in meaning and never truncated without another way to read it.
+- Avoid decorative uppercase labels and letter-spaced filler text.
+- Do not go below 11px for meaningful interface copy.
 
-Section labels (`label`) are uppercase with letter-spacing — clear visual separation between sections without relying on dividers.
+## Surfaces and shapes
 
-Never go below 11px on mobile. Prefer reducing content over reducing font size.
+- Product canvas: oat.
+- Cards, dialogs, drawers, headers, and navigation: sand.
+- Secondary grouping: oat or clay-derived surface.
+- Primary cash-position surface: deep moss with sand text.
+- Controls: minimum 16px radius and 44px target height.
+- Cards: 20–24px radius.
+- Feature and dialog surfaces: 32px radius.
+- Shadows are reserved for overlays and floating guidance; page hierarchy relies on color and borders.
+- Gradients are not used.
 
-## Layout
+## Product shell
 
-Mobile-first. Reference viewport 390px (standard mid-range Android).
+### Desktop
 
-Standard screen structure:
-1. Status bar (system)
-2. Header (greeting + action icon) — 56px
-3. Balance card (hero metric) — variable height, min 90px
-4. Realm tabs (Personal / Business) — 40px
-5. Content sections (scrollable)
-6. Bottom navigation — 64px fixed
+- Persistent 288px navigation panel.
+- Realm switch appears before route navigation.
+- Routes are grouped by recurring task rather than implementation domain.
+- Main content is capped at 1408px and keeps readable line lengths.
 
-Every primary action must be reachable in **max 2 taps** from the home screen.
+### Mobile
 
-Vertical scrolling only. No hidden horizontal scroll.
+- Header identifies the current page and financial realm.
+- Bottom navigation contains four stable destinations.
+- The drawer exposes every route and manages focus on open/close.
+- Safe-area padding prevents navigation from colliding with device chrome.
+- Fixed guidance and toast surfaces sit above the bottom navigation.
 
-Global horizontal padding: 16px each side.
-Section gap: 16px.
-Card gap within a section: 8px.
+## Shared components
 
-## Elevation & Depth
+### Primary action
 
-No shadows. Visual hierarchy is created purely by background color:
-- `surface` (#FFF) → main content
-- `surface-variant` (#F7F9FF) → pocket cards, secondary elements
-- `surface-muted` (#F0F4FF) → action buttons, tab containers, insight cards
-- `primary` (#185FA5) → balance card hero (only element with strong colored background)
+Deep moss background, sand text, 16px radius, and at least 44px height. Use one primary action per local task area. Repeated buttons may exist when they lead to the same task from different responsive positions.
 
-No gradients. No blur. Flat only.
+### Cards and lists
 
-## Shapes
+Use cards for a coherent decision or object, not for every label/value pair. Related list rows share one containing surface and dividers when possible.
 
-Generous border radius — rounded shapes reduce anxiety and make the app feel accessible.
+### Forms
 
-- Inline components (badges, pills, tabs) : `rounded.xs` (8px) or `rounded.full`
-- Pocket cards, action buttons, insight cards : `rounded.sm` (12px)
-- Balance card, modal cards : `rounded.lg` (20px) to `rounded.xl` (28px)
+- Inputs use the sand surface, visible border, explicit label, and at least 44px height.
+- Keep the user’s entered data after validation failures.
+- Error messages explain what failed and how to fix it.
+- Saving states use direct labels such as `Enregistrement…`.
+- Long forms remain in dialogs for this alpha; inline editing is out of scope.
 
-No right angles except for dividers and borders.
+### Dialogs
 
-## Components
+- Bottom sheet on compact screens and centered modal on larger screens.
+- Focus moves into the dialog, remains trapped, and returns to the trigger.
+- Escape and outside click close non-destructive dialogs.
+- Destructive actions use an alert dialog with explicit consequence copy.
 
-### Balance Card
-The most important component in the app. `primary` background, white text. Displayed as hero on the home screen.
-Structure: muted label at top → main amount (amount-lg) → sub-labels (receivables / committed) in body-sm.
-Always full width with `margin: 12px 16px`.
+### Empty states
 
-### Realm Tabs
-Personal / Business switcher always visible below the balance card.
-Container: `surface-muted`, border-radius `rounded.xs`, padding 3px.
-Active tab: `primary` background, white text.
-Inactive tab: transparent background, `on-surface-muted` text.
+Every empty state explains why the screen is empty and offers the next useful action. The first-run dashboard is a guided activation surface; later empty states stay compact.
 
-### Pocket Cards
-3-column grid for Cash / Orange Money / Moov Money.
-Background `surface-variant`, border `border` 0.5px, radius `rounded.sm`.
-Icon at top (18px), muted label, amount in body-md bold.
+### Toasts and status
 
-### Quick Actions
-Grid of 4 horizontal actions (Income, Expense, Transfer, Debts).
-Each action: icon button 44x44 (`surface-muted`, `primary` icon) + centered `body-sm` label.
-Spacing: `justify-content: space-around`.
+- Success, information, and error messages include a Lucide icon and text.
+- Error announcements use `role="alert"`; other messages use `role="status"`.
+- Notifications can be dismissed manually and never rely only on color.
 
-### Insight Card
-Background `surface-muted`, border-left 3px solid `primary`.
-Text `on-surface-secondary`, body-sm, line-height 1.5.
-Amounts and names in `primary`, font-weight 500.
-Dismissable. Only one insight visible at a time.
+### Contextual guidance
 
-### Bottom Navigation
-5 items: Home, Analytics, Goals, Agent (premium), Settings.
-Icons 20px. Active: `primary`. Inactive: `border-strong`.
-Active indicator: 4px `primary` dot below the icon.
+`Repères utiles` uses only the current device’s data. It has no red attention badge and does not imply urgency. Dismissing a tip is always available.
 
-## Do's and Don'ts
+## Content rules
 
 **Do**
-- Always show the total balance first
-- Use simple, direct French labels (no jargon)
-- Format amounts with spaces: `47 500 FCFA` (not `47,500`)
-- Keep insights short — max 2 lines
-- Use success/danger/warning consistently and semantically
 
-**Don't**
-- Never use gradients or decorative shadows
-- Never show two balance cards on the same screen
-- Never go below 11px font size
-- Never use red for anything other than a critical financial situation
-- Never hide important information behind horizontal scroll
-- Never use the word "accounting" in the UI — prefer "tracking", "management", "cash flow"
+- Use direct French labels and FCFA units.
+- Name the current realm whenever a switch could change the interpretation of data.
+- Explain local storage and unencrypted backups precisely.
+- Keep the next action visible.
+
+**Do not**
+
+- Fabricate balances, customers, testimonials, or progress.
+- Use accounting jargon when everyday language is more accurate.
+- Use Unicode glyphs as interface icons; use Lucide.
+- Use streaks, artificial deadlines, celebratory confetti, or manipulative notifications for retention.
+- Hide essential routes behind horizontal scrolling.
+
+## Accessibility and release gates
+
+- WCAG 2.2 AA contrast for text and essential graphics.
+- Visible two-tone focus ring across light and dark surfaces.
+- 44px product controls and at least 24px WCAG minimum targets.
+- Keyboard access for navigation, drawers, dialogs, filters, and forms.
+- Focus is not obscured by fixed bottom navigation or guidance.
+- Layout reflows at 320px and at 400% zoom without two-dimensional page scrolling.
+- `prefers-reduced-motion` removes route and hero transitions.
+- Production QA covers empty and populated data, both realms, offline start, backup/restore messaging, direct hash routes, desktop, and mobile.

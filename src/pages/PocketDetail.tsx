@@ -10,6 +10,7 @@ import { EmptyState } from "../components/EmptyState";
 import { useToast } from "../components/Toast";
 import type { PocketBalance } from "../domain/pocket";
 import { format } from "date-fns";
+import { Plus } from "lucide-react";
 
 interface PocketDetailProps {
   realm: Realm;
@@ -56,7 +57,7 @@ export function PocketDetail({ realm }: PocketDetailProps) {
         </Link>
         <div className="mt-2 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-on-surface">
+            <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">
               {data.pocket.name}
             </h1>
             {data.pocket.description && (
@@ -68,15 +69,16 @@ export function PocketDetail({ realm }: PocketDetailProps) {
           <button
             type="button"
             onClick={() => setShowAdd(true)}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
+            className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
           >
-            + Ajouter une opération
+            <Plus aria-hidden="true" className="mr-1 inline h-4 w-4" />
+            Ajouter une opération
           </button>
         </div>
       </div>
 
       {/* Balance card */}
-      <div className="rounded-xl border border-border-light bg-white p-6">
+      <div className="rounded-[1.5rem] border border-border-light bg-card p-6">
         <p className="text-xs text-on-surface-muted">Solde actuel</p>
         <p className="mt-1 text-3xl font-bold text-on-surface">
           {data.balance.toLocaleString()} FCFA
@@ -93,7 +95,7 @@ export function PocketDetail({ realm }: PocketDetailProps) {
 
       {/* Transactions */}
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-on-surface">
+        <h2 className="mb-3 text-xl font-bold tracking-[-0.035em] text-on-surface">
           Opérations
         </h2>
         {txns.length === 0 ? (
@@ -110,7 +112,7 @@ export function PocketDetail({ realm }: PocketDetailProps) {
             {txns.map((t) => (
               <div
                 key={t.id}
-                className="flex items-center justify-between rounded-lg border border-border-light px-4 py-3"
+                className="flex items-center justify-between rounded-2xl border border-border-light px-4 py-3"
               >
                 <div>
                   <p className="text-sm font-medium text-on-surface">
@@ -218,7 +220,7 @@ function AddTransactionModal({
               key={t}
               type="button"
               onClick={() => setForm({ ...form, type: t, categoryId: "" })}
-              className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium capitalize transition-colors ${
+              className={`flex-1 rounded-2xl px-3 py-2 text-sm font-medium capitalize transition-colors ${
                 form.type === t
                   ? "bg-primary text-on-primary"
                   : "border border-border-light text-on-surface-muted hover:bg-surface-alt"
@@ -234,7 +236,7 @@ function AddTransactionModal({
             type="number"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="0"
             min="1"
             required
@@ -246,7 +248,7 @@ function AddTransactionModal({
             type="text"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="À quoi correspond cette opération ?"
             required
           />
@@ -256,7 +258,7 @@ function AddTransactionModal({
           <select
             value={form.categoryId}
             onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
           >
             <option value="">Choisir une catégorie</option>
             {filteredCats.map((c) => (
@@ -272,7 +274,7 @@ function AddTransactionModal({
             type="date"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             required
           />
         </div>
@@ -282,7 +284,7 @@ function AddTransactionModal({
             type="text"
             value={form.tags}
             onChange={(e) => setForm({ ...form, tags: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="stock, semaine"
           />
         </div>
@@ -290,14 +292,14 @@ function AddTransactionModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
+            className="rounded-2xl border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.amount || !form.description}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
+            className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
             {saving ? "Enregistrement…" : "Ajouter"}
           </button>

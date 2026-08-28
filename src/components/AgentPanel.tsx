@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { AgentTip } from "../domain/agent";
 import { generateTips, markTipShown } from "../domain/agent";
 import { getCashPosition } from "../domain/cash-position";
@@ -16,6 +16,8 @@ import {
   Wallet,
   TrendingUp,
   FileText,
+  ArrowRight,
+  X,
 } from "lucide-react";
 
 interface AgentPanelProps {
@@ -31,6 +33,7 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
   const [tips, setTips] = useState<AgentTip[]>([]);
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,20 +63,32 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
     return () => { cancelled = true; };
   }, [page, realm]);
 
+  useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
+
   const dismiss = useCallback((id: string) => {
     setDismissed((prev) => new Set(prev).add(id));
     setTips((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const iconMap: Record<string, React.ReactNode> = {
-    AlertTriangle: <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" />,
-    BarChart3: <BarChart3 size={18} className="text-blue-500 shrink-0 mt-0.5" />,
-    Target: <Target size={18} className="text-purple-500 shrink-0 mt-0.5" />,
-    Lightbulb: <Lightbulb size={18} className="text-amber-400 shrink-0 mt-0.5" />,
+    AlertTriangle: <AlertTriangle size={18} className="text-warning shrink-0 mt-0.5" />,
+    BarChart3: <BarChart3 size={18} className="text-info shrink-0 mt-0.5" />,
+    Target: <Target size={18} className="text-danger shrink-0 mt-0.5" />,
+    Lightbulb: <Lightbulb size={18} className="text-warning shrink-0 mt-0.5" />,
     Hand: <Hand size={18} className="text-primary shrink-0 mt-0.5" />,
-    Wallet: <Wallet size={18} className="text-green-500 shrink-0 mt-0.5" />,
-    TrendingUp: <TrendingUp size={18} className="text-blue-500 shrink-0 mt-0.5" />,
-    FileText: <FileText size={18} className="text-gray-500 shrink-0 mt-0.5" />,
+    Wallet: <Wallet size={18} className="text-success shrink-0 mt-0.5" />,
+    TrendingUp: <TrendingUp size={18} className="text-success shrink-0 mt-0.5" />,
+    FileText: <FileText size={18} className="text-on-surface-muted shrink-0 mt-0.5" />,
   };
 
   const hasTips = tips.length > 0;
@@ -82,50 +97,29 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
     <>
       {/* Floating button */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(!open)}
-        className={`fixed bottom-20 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all lg:bottom-6 ${
+        className={`fixed bottom-24 right-4 z-30 flex min-h-12 items-center justify-center gap-2 rounded-2xl border px-3 shadow-lg transition-colors lg:bottom-6 lg:right-6 ${
           hasTips
             ? "bg-primary text-on-primary hover:bg-primary-light"
-            : "bg-white text-on-surface-muted border border-border-light"
+            : "border-border-light bg-card text-on-surface-muted hover:bg-card-muted"
         }`}
         aria-label={open ? "Fermer les conseils" : hasTips ? `${tips.length} conseil${tips.length > 1 ? "s" : ""}` : "Aucun conseil"}
+        aria-expanded={open}
+        aria-controls="tracklet-guidance-panel"
       >
-        {hasTips && !open && (
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white">
-            {tips.length}
-          </span>
-        )}
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 22 22"
-          fill="none"
-          className={open ? "rotate-45" : ""}
-          style={{ transition: "transform 0.2s" }}
-        >
-          {open ? (
-            <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          ) : (
-            <>
-              <path
-                d="M11 2a7 7 0 00-7 7c0 2.2 1 3.8 2.5 5 .8.6 1.5 1.2 1.5 2v1a1 1 0 001 1h4a1 1 0 001-1v-1c0-.8.7-1.4 1.5-2C17 12.8 18 11.2 18 9a7 7 0 00-7-7z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-              <path d="M11 15v.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </>
-          )}
-        </svg>
+        {open ? <X aria-hidden="true" className="h-5 w-5" /> : <Lightbulb aria-hidden="true" className="h-5 w-5" />}
+        <span className="hidden text-sm font-semibold sm:inline">Repères{hasTips ? ` · ${tips.length}` : ""}</span>
       </button>
 
       {/* Tips panel */}
       {open && (
-        <div className="fixed bottom-36 right-4 z-50 w-80 max-w-[calc(100vw-2rem)] lg:bottom-20">
-          <div className="rounded-xl border border-border-light bg-white shadow-xl">
-            <div className="border-b border-border-light px-4 py-3">
-              <p className="text-sm font-semibold text-on-surface">Conseils Tracklet</p>
-              <p className="text-xs text-on-surface-muted">Des repères simples basés sur vos chiffres</p>
+        <div id="tracklet-guidance-panel" className="fixed bottom-40 right-4 z-30 w-[22rem] max-w-[calc(100vw-2rem)] lg:bottom-20 lg:right-6">
+          <div className="overflow-hidden rounded-[2rem] border border-border-light bg-card shadow-xl">
+            <div className="border-b border-border-light px-5 py-4">
+              <p className="text-base font-bold tracking-[-0.025em] text-on-surface">Repères utiles</p>
+              <p className="mt-1 text-xs leading-relaxed text-on-surface-muted">Uniquement à partir des données de cet appareil.</p>
             </div>
 
             <div className="max-h-80 space-y-0 overflow-y-auto">
@@ -139,7 +133,7 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
                 tips.map((tip) => (
                   <div
                     key={tip.id}
-                    className="border-b border-border-light last:border-b-0 px-4 py-3"
+                    className="border-b border-border-light px-5 py-4 last:border-b-0"
                   >
                     <div className="flex items-start gap-3">
                       <span className="mt-0.5 shrink-0">{iconMap[tip.icon] ?? null}</span>
@@ -149,22 +143,21 @@ export function AgentPanel({ page, realm }: AgentPanelProps) {
                         {tip.action && (
                           <Link
                             to={tip.action.to}
-                            className="mt-1.5 inline-block text-xs font-medium text-primary hover:underline"
+                            className="mt-2 inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-primary underline decoration-primary/35 underline-offset-4 hover:decoration-primary"
                             onClick={() => dismiss(tip.id)}
                           >
-                            {tip.action.label} →
+                            {tip.action.label}
+                            <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
                           </Link>
                         )}
                       </div>
                       <button
                         type="button"
                         onClick={() => dismiss(tip.id)}
-                        className="shrink-0 rounded p-0.5 text-on-surface-muted hover:text-on-surface"
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-on-surface-muted hover:bg-card-muted hover:text-on-surface"
                         aria-label="Masquer le conseil"
                       >
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                          <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                        </svg>
+                        <X aria-hidden="true" className="h-4 w-4" />
                       </button>
                     </div>
                   </div>

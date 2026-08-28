@@ -83,7 +83,7 @@ export function Goals({ realm }: GoalsProps) {
   if (!loading && goals.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-on-surface">Objectifs</h1>
+        <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Objectifs</h1>
         <EmptyState
           title="Aucun objectif"
           message="Fixez un montant à atteindre et suivez votre progression."
@@ -105,9 +105,9 @@ export function Goals({ realm }: GoalsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-2xl font-semibold text-on-surface">Objectifs</h1>
+          <h1 className="text-3xl font-bold tracking-[-0.05em] text-on-surface sm:text-4xl">Objectifs</h1>
           <p className="text-sm text-on-surface-muted">
             {goals.filter((g) => g.savedAmount >= g.targetAmount).length} sur{" "}
             {goals.length} terminé{goals.length > 1 ? "s" : ""}
@@ -116,7 +116,7 @@ export function Goals({ realm }: GoalsProps) {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
+          className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light transition-colors"
         >
           + Nouvel objectif
         </button>
@@ -128,7 +128,7 @@ export function Goals({ realm }: GoalsProps) {
           return (
             <div
               key={goal.id}
-              className={`rounded-xl border bg-white p-5 transition-shadow hover:shadow-md ${
+              className={`rounded-[1.5rem] border bg-card p-5 transition-shadow hover:shadow-md ${
                 progress.isCompleted ? "border-success/30" : "border-border-light"
               }`}
             >
@@ -145,7 +145,7 @@ export function Goals({ realm }: GoalsProps) {
                   <button
                     type="button"
                     onClick={() => setDeleteGoalId(goal.id)}
-                    className="rounded-md px-2 py-0.5 text-xs text-danger hover:bg-danger/10 transition-colors"
+                    className="rounded-2xl px-2 py-0.5 text-xs text-danger hover:bg-danger/10 transition-colors"
                   >
                     Supprimer
                   </button>
@@ -192,7 +192,7 @@ export function Goals({ realm }: GoalsProps) {
                         key={amount}
                         type="button"
                         onClick={() => handleContribute(goal.id, amount)}
-                        className="flex-1 rounded-md border border-border-light py-1 text-xs font-medium text-on-surface-muted hover:bg-surface-alt hover:text-on-surface transition-colors"
+                        className="flex-1 rounded-2xl border border-border-light py-1 text-xs font-medium text-on-surface-muted hover:bg-surface-alt hover:text-on-surface transition-colors"
                       >
                         +{amount.toLocaleString()}
                       </button>
@@ -261,7 +261,7 @@ function GoalModal({
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="Ex. Nouveau four"
             required
           />
@@ -272,7 +272,7 @@ function GoalModal({
             type="number"
             value={form.targetAmount}
             onChange={(e) => setForm({ ...form, targetAmount: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="0"
             min="1"
             required
@@ -284,7 +284,7 @@ function GoalModal({
             type="number"
             value={form.savedAmount}
             onChange={(e) => setForm({ ...form, savedAmount: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
             placeholder="0"
             min="0"
           />
@@ -294,7 +294,7 @@ function GoalModal({
           <select
             value={form.sourcePocketId}
             onChange={(e) => setForm({ ...form, sourcePocketId: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
+            className="mt-1 w-full rounded-2xl border border-border-light px-3 py-2 text-sm outline-none focus:border-primary"
           >
             <option value="">Aucune poche</option>
             {pockets.map((p) => (
@@ -306,14 +306,14 @@ function GoalModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
+            className="rounded-2xl border border-border-light px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-alt transition-colors"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={saving || !form.name || !form.targetAmount}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
+            className="rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
           >
             {saving ? "Création…" : "Créer l’objectif"}
           </button>
